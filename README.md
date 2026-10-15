@@ -13,6 +13,7 @@ xdg-open /home/albas/brickbreakerai/index.html
 - **Fare / dokunma** veya **← → / A D**: raket hareketi
 - **Boşluk / tıklama / dokunma**: topu fırlat; menü, duraklatma ve oyun sonu ekranlarında ilerlet
 - **P / Esc**: duraklat (sekme değişince otomatik duraklar)
+- **⚙️ Ayarlar** (ses çubuğunda): efekt ses seviyesi, ekran sarsıntısı (Açık/Azaltılmış/Kapalı — `prefers-reduced-motion` açıksa varsayılan Azaltılmış), zorluk (Kolay ×0.85 hız +5 can / Normal / Zor ×1.15 hız +2 can; yalnızca yeni oyunda uygulanır). Tümü kalıcı.
 
 ## Mekanikler
 

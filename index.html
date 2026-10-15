@@ -64,6 +64,39 @@
   #audiohint { font-size: 12px; color: #8892b0; }
   #mediavol { accent-color: #4cc9f0; width: 100px; }
   #mediastatus { font-size: 12px; color: #8892b0; }
+  #settingspanel {
+    margin-top: 8px;
+    width: 800px;
+    max-width: 95vw;
+    box-sizing: border-box;
+    background: #16213e;
+    border: 1px solid #2a3a5e;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: monospace;
+    color: #e0e0e0;
+  }
+  #settingspanel[hidden] { display: none; }
+  .setrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .setrow .label { width: 150px; font-size: 14px; }
+  #settingspanel button {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border: 1px solid #2a3a5e;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: monospace;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  #settingspanel button:hover { border-color: #4cc9f0; }
+  #settingspanel button.active { background: #4cc9f0; color: #16213e; border-color: #4cc9f0; }
+  #fxvol { accent-color: #4cc9f0; flex: 1; }
+  #fxvolval { width: 34px; font-size: 13px; text-align: right; }
+  .setnote { font-size: 12px; color: #8892b0; }
   @media (pointer: coarse) {
     #soundbar button, #mediabar button { padding: 10px 14px; }
   }
@@ -87,6 +120,29 @@
   <input type="range" id="mediavol" min="0" max="100" value="70">
   <span id="mediastatus"></span>
 </div>
+<div id="settingspanel" hidden>
+  <div class="setrow">
+    <span class="label">Efekt sesi</span>
+    <input type="range" id="fxvol" min="0" max="100" value="100">
+    <span id="fxvolval">100</span>
+  </div>
+  <div class="setrow">
+    <span class="label">Ekran sarsıntısı</span>
+    <button data-shake="acik">Açık</button>
+    <button data-shake="azaltilmis">Azaltılmış</button>
+    <button data-shake="kapali">Kapalı</button>
+  </div>
+  <div class="setrow">
+    <span class="label">Zorluk</span>
+    <button data-diff="kolay">Kolay</button>
+    <button data-diff="normal">Normal</button>
+    <button data-diff="zor">Zor</button>
+  </div>
+  <div class="setnote">Zorluk yalnızca yeni oyunda uygulanır. Efekt sesi arka plan müziğini etkilemez.</div>
+  <div class="setrow">
+    <button id="closesettings">Paneli kapat</button>
+  </div>
+</div>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
 <script>
@@ -103,6 +159,13 @@ const MAX_SPEED = 640;
 const PADDLE_H = 14, PADDLE_W = 100, PADDLE_WIDE = 160;
 const SLOW_FACTOR = 0.65, SLOW_TIME = 8, WIDE_TIME = 10;
 const MAX_BALLS = 6;
+const FX_GAIN_MAX = 0.55;   // efekt sesi üst sınırı (ses seviyesi ayarıyla çarpılır)
+const SHAKE_SCALE = { acik: 1, azaltilmis: 0.35, kapali: 0 };
+const DIFFICULTY = {
+  kolay:  { speedMul: 0.85, lives: 5 },
+  normal: { speedMul: 1,    lives: 3 },
+  zor:    { speedMul: 1.15, lives: 2 },
+};
 
 const COLS = 10;
 const BRICK = { w: 70, h: 22, gap: 6, top: 70 };
@@ -144,11 +207,34 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rnd = (a, b) => a + Math.random() * (b - a);
 
 // ======================================================================
-// 2. SES MOTORU (Web Audio, sentez — ses dosyası yok)
+// 2. AYARLAR VE SES MOTORU (Web Audio, sentez — ses dosyası yok)
 // ======================================================================
+const settings = {
+  fxVol: 100,
+  shake: matchMedia("(prefers-reduced-motion: reduce)").matches ? "azaltilmis" : "acik",
+  difficulty: "normal",
+};
+try {
+  const s = JSON.parse(localStorage.getItem("bb_settings"));
+  if (s) {
+    if (typeof s.fxVol === "number") settings.fxVol = clamp(s.fxVol, 0, 100);
+    if (SHAKE_SCALE[s.shake]) settings.shake = s.shake;
+    if (DIFFICULTY[s.difficulty]) settings.difficulty = s.difficulty;
+  }
+} catch (e) {}
+function saveSettings() {
+  try { localStorage.setItem("bb_settings", JSON.stringify(settings)); } catch (e) {}
+}
+
 let actx = null, master = null, noiseBuf = null;
 let muted = false;
 try { muted = localStorage.getItem("bb_muted") === "1"; } catch (e) {}
+
+function applyFxVolume() {
+  // Sessize alma ve efekt ses seviyesi master gain'i birlikte belirler;
+  // arka plan medyası (video/müzik) bu gazı atlar, kendi sürgüsünü kullanır.
+  if (master) master.gain.value = muted ? 0 : FX_GAIN_MAX * settings.fxVol / 100;
+}
 
 function getAudio() {
   if (!actx) {
@@ -157,7 +243,7 @@ function getAudio() {
     comp.threshold.value = -18;
     comp.ratio.value = 4;
     master = actx.createGain();
-    master.gain.value = muted ? 0 : 0.55;
+    applyFxVolume();
     master.connect(comp);
     comp.connect(actx.destination);
   }
@@ -333,7 +419,7 @@ muteBtn.addEventListener("click", () => {
   muteBtn.blur();
   muted = !muted;
   try { localStorage.setItem("bb_muted", muted ? "1" : "0"); } catch (e) {}
-  if (master) master.gain.value = muted ? 0 : 0.55;
+  applyFxVolume();
   refreshMuteButton();
 });
 soundBar.appendChild(muteBtn);
@@ -350,6 +436,53 @@ themeBtn.addEventListener("click", () => {
 soundBar.appendChild(themeBtn);
 applyTheme();
 refreshThemeButton();
+
+// --- Ayarlar paneli ---
+const settingsPanel = document.getElementById("settingspanel");
+const fxvol = document.getElementById("fxvol");
+const fxvolval = document.getElementById("fxvolval");
+const settingsBtn = document.createElement("button");
+settingsBtn.textContent = "⚙️ Ayarlar";
+settingsBtn.addEventListener("click", e => {
+  settingsBtn.blur();
+  pauseGame(); // panel açıkken top öksüz kalmasın
+  settingsPanel.hidden = !settingsPanel.hidden;
+});
+soundBar.appendChild(settingsBtn);
+
+function refreshSettingsUI() {
+  fxvol.value = settings.fxVol;
+  fxvolval.textContent = settings.fxVol;
+  for (const b of settingsPanel.querySelectorAll("[data-shake]"))
+    b.classList.toggle("active", b.dataset.shake === settings.shake);
+  for (const b of settingsPanel.querySelectorAll("[data-diff]"))
+    b.classList.toggle("active", b.dataset.diff === settings.difficulty);
+}
+fxvol.addEventListener("input", () => {
+  settings.fxVol = clamp(parseInt(fxvol.value) || 0, 0, 100);
+  fxvolval.textContent = settings.fxVol;
+  applyFxVolume();
+  saveSettings();
+});
+for (const b of settingsPanel.querySelectorAll("[data-shake]"))
+  b.addEventListener("click", () => {
+    b.blur();
+    settings.shake = b.dataset.shake;
+    saveSettings();
+    refreshSettingsUI();
+  });
+for (const b of settingsPanel.querySelectorAll("[data-diff]"))
+  b.addEventListener("click", () => {
+    b.blur();
+    settings.difficulty = b.dataset.diff;
+    saveSettings();
+    refreshSettingsUI();
+  });
+document.getElementById("closesettings").addEventListener("click", e => {
+  e.currentTarget.blur();
+  settingsPanel.hidden = true;
+});
+refreshSettingsUI();
 
 // ======================================================================
 // 3. BÖLÜM HARİTALARI (her satır 10 sütun:
@@ -403,7 +536,7 @@ const state = {
   prevMode: null,
   level: 1, score: 0, lives: 3, combo: 0,
   high: 0, startHigh: 0, newRecord: false,
-  speed: BASE_SPEED, slowUntil: 0, time: 0, shake: 0, clearAt: 0, buildFade: 0, pendingMulti: false,
+  speed: BASE_SPEED, diffSpeed: 1, slowUntil: 0, time: 0, shake: 0, clearAt: 0, buildFade: 0, pendingMulti: false,
 };
 try { state.high = parseInt(localStorage.getItem("bb_highscore")) || 0; } catch (e) {}
 
@@ -426,7 +559,8 @@ function newBall(stuck) {
 }
 
 function levelSpeed(l) {
-  return Math.min(BASE_SPEED * Math.pow(1.07, l - 1), MAX_SPEED);
+  // Zorluk çarpanı yeni oyunda state.diffSpeed'e kilitlenir: oyun ortasında ayar değişince mevcut oyun bozulmaz
+  return Math.min(BASE_SPEED * state.diffSpeed * Math.pow(1.07, l - 1), MAX_SPEED);
 }
 // Hedef büyüklük: bölüm hızı + vuruş başı hızlanma, yavaşlatma çarpanıyla
 function mag() {
@@ -478,9 +612,11 @@ function addScore(n) {
 }
 
 function startGame() {
+  const diff = DIFFICULTY[settings.difficulty];
   state.level = 1;
   state.score = 0;
-  state.lives = 3;
+  state.diffSpeed = diff.speedMul;
+  state.lives = diff.lives;
   state.combo = 0;
   state.startHigh = state.high;
   state.newRecord = false;
@@ -589,7 +725,7 @@ function action() {
 // 6. EFEKTLER (parçacık, parça, çatlak, parlama, sarsıntı)
 // ======================================================================
 function addShake(p) {
-  state.shake = Math.max(state.shake, p);
+  state.shake = Math.max(state.shake, p * SHAKE_SCALE[settings.shake]);
 }
 
 function spawnParticles(x, y, color, count = 12, sw = BRICK.w, sh = BRICK.h) {
