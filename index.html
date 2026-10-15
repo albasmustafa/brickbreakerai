@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Brick Breaker AI</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #stage { position: relative; }
+  #bgvid {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    display: none;
+  }
+  canvas {
+    position: relative;
+    z-index: 1;
+    background: var(--board, rgba(22, 33, 62, 0.8));
+    border-radius: 8px;
+    max-width: 95vw;
+    height: auto;
+    touch-action: none;
+  }
+  #stage.hasbg canvas { background: var(--boardvid, rgba(22, 33, 62, 0.62)); }
+  #soundbar, #mediabar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 800px;
+    max-width: 95vw;
+    font-family: monospace;
+    color: #e0e0e0;
+  }
+  #soundbar { margin-top: 12px; }
+  #mediabar { margin-top: 8px; }
+  #soundbar .label, #mediabar .label { font-size: 14px; margin-right: 4px; }
+  #soundbar button, #mediabar button {
+    background: #16213e;
+    color: #e0e0e0;
+    border: 1px solid #2a3a5e;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: monospace;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #soundbar button:hover, #mediabar button:hover { border-color: #4cc9f0; }
+  #soundbar button.active { background: #4cc9f0; color: #16213e; border-color: #4cc9f0; }
+  #soundbar button.muted { background: #e94560; color: #16213e; border-color: #e94560; }
+  #audiohint { font-size: 12px; color: #8892b0; }
+  #mediavol { accent-color: #4cc9f0; width: 100px; }
+  #mediastatus { font-size: 12px; color: #8892b0; }
+  @media (pointer: coarse) {
+    #soundbar button, #mediabar button { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="bgvid" loop playsinline></video>
+  <canvas id="game" width="800" height="600"></canvas>
+</div>
+<div id="soundbar">
+  <span class="label">Paddle sesi:</span>
+  <span id="audiohint">🔊 sesler için sayfaya bir kez tıkla</span>
+</div>
+<div id="mediabar">
+  <span class="label">Arka plan:</span>
+  <button id="pickvid">🎬 Video</button>
+  <button id="pickmusic">🎵 Müzik</button>
+  <button id="clearmedia" title="Arka planı kapat">✕ Kapat</button>
+  <span class="label">🔊</span>
+  <input type="range" id="mediavol" min="0" max="100" value="70">
+  <span id="mediastatus"></span>
+</div>
+<input type="file" id="vidfile" accept="video/*" hidden>
+<input type="file" id="audfile" accept="audio/*" hidden>
+<script>
+// ======================================================================
+// 1. SABİTLER VE YARDIMCILAR
+// ======================================================================
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
+
+const STEP = 1 / 120;                 // sabit fizik adımı (120 Hz)
+const BASE_SPEED = 340;               // topun bölüm başındaki hızı (px/s)
+const MAX_SPEED = 640;
+const PADDLE_H = 14, PADDLE_W = 100, PADDLE_WIDE = 160;
+const SLOW_FACTOR = 0.65, SLOW_TIME = 8, WIDE_TIME = 10;
+const MAX_BALLS = 6;
+
+const COLS = 10;
+const BRICK = { w: 70, h: 22, gap: 6, top: 70 };
+BRICK.left = (W - (COLS * BRICK.w + (COLS - 1) * BRICK.gap)) / 2;
+
+// --- Temalar: her tema ~14 renk, geri kalan her şey ondan türer ---
+const THEMES = [
+  { name: "Gece",       bg: "#1a1a2e", board: "#16213e", b1: "#4cc9f0", b2: "#f9c74f", b3: "#e94560", un: "#5a6b87", ex: "#ff9f43", pad: "#e0e0e0", ball: "#ffffff", text: "#e0e0e0", dim: "#8892b0", accent: "#4cc9f0", star: "#33507a" },
+  { name: "Gün Batımı", bg: "#2b1b33", board: "#402038", b1: "#ffd166", b2: "#ff8fa3", b3: "#ef476f", un: "#8d6a9f", ex: "#f3722c", pad: "#ffe8d6", ball: "#ffffff", text: "#ffe8d6", dim: "#c9a0b8", accent: "#ff8fa3", star: "#5b3a5e" },
+  { name: "Orman",      bg: "#12291b", board: "#15301f", b1: "#90be6d", b2: "#43aa8b", b3: "#f9c74f", un: "#5f7a61", ex: "#ff6b35", pad: "#e9f5db", ball: "#ffffff", text: "#e9f5db", dim: "#a3b899", accent: "#90be6d", star: "#2c4a38" },
+  { name: "Neon",       bg: "#0a0a14", board: "#101024", b1: "#00f5d4", b2: "#fee440", b3: "#f15bb5", un: "#3a3a5e", ex: "#ff6d00", pad: "#f8f9fa", ball: "#ffffff", text: "#d8d8ff", dim: "#6c6c9e", accent: "#f15bb5", star: "#26264a" },
+  { name: "Gameboy",    bg: "#0f380f", board: "#1b3a1b", b1: "#9bbc0f", b2: "#8bac0f", b3: "#306230", un: "#234f23", ex: "#c4d34c", pad: "#9bbc0f", ball: "#d9e26b", text: "#9bbc0f", dim: "#4a6b2a", accent: "#8bac0f", star: "#1b3a1b" },
+  { name: "Buz",        bg: "#0d1b2a", board: "#1b263b", b1: "#caf0f8", b2: "#90e0ef", b3: "#00b4d8", un: "#577590", ex: "#f8961e", pad: "#e0fbfc", ball: "#ffffff", text: "#e0fbfc", dim: "#8ea9c1", accent: "#90e0ef", star: "#274c77" },
+  { name: "Şeker",      bg: "#2e2141", board: "#3e2750", b1: "#bdb2ff", b2: "#ffd6a5", b3: "#ffadad", un: "#8e7dbe", ex: "#ff5d8f", pad: "#ffffff", ball: "#fff0f5", text: "#ffefef", dim: "#b8a3d9", accent: "#ff5d8f", star: "#4a3565" },
+  { name: "Klasik",     bg: "#000000", board: "#101010", b1: "#cccccc", b2: "#999999", b3: "#666666", un: "#444444", ex: "#ff2222", pad: "#dddddd", ball: "#ffffff", text: "#ffffff", dim: "#888888", accent: "#ff4444", star: "#1f1f1f" },
+];
+let themeIx = 0;
+try { themeIx = parseInt(localStorage.getItem("bb_theme")) % THEMES.length || 0; } catch (e) {}
+const T = () => THEMES[themeIx];
+const hpColor = (hp) => (hp === 3 ? T().b3 : hp === 2 ? T().b2 : T().b1);
+function hexToRgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+}
+function applyTheme() {
+  document.body.style.background = T().bg;
+  const r = document.documentElement.style;
+  r.setProperty("--board", hexToRgba(T().board, 0.8));
+  r.setProperty("--boardvid", hexToRgba(T().board, 0.62));
+  try { localStorage.setItem("bb_theme", themeIx); } catch (e) {}
+}
+function cycleTheme() {
+  themeIx = (themeIx + 1) % THEMES.length;
+  applyTheme();
+  refreshThemeButton();
+}
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+// ======================================================================
+// 2. SES MOTORU (Web Audio, sentez — ses dosyası yok)
+// ======================================================================
+let actx = null, master = null, noiseBuf = null;
+let muted = false;
+try { muted = localStorage.getItem("bb_muted") === "1"; } catch (e) {}
+
+function getAudio() {
+  if (!actx) {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = actx.createDynamicsCompressor();
+    comp.threshold.value = -18;
+    comp.ratio.value = 4;
+    master = actx.createGain();
+    master.gain.value = muted ? 0 : 0.55;
+    master.connect(comp);
+    comp.connect(actx.destination);
+  }
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
+function unlockAudio() {
+  const c = getAudio();
+  const hideHint = () => { if (audioHint) audioHint.style.display = "none"; };
+  // resume() eşzamansızdır: tamamlanınca ipucunu gizle, ilk tıklamada kaybolsun
+  if (c.state === "running") hideHint();
+  else c.resume().then(hideHint).catch(() => {});
+}
+document.addEventListener("pointerdown", unlockAudio);
+document.addEventListener("keydown", unlockAudio);
+
+function tone({ type = "sine", from = 440, to, dur = 0.1, vol = 0.2, delay = 0 }) {
+  const c = getAudio();
+  if (c.state !== "running") return;
+  const t = c.currentTime + delay;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(from, t);
+  if (to) osc.frequency.exponentialRampToValueAtTime(Math.max(to, 1), t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  osc.connect(g);
+  g.connect(master);
+  osc.start(t);
+  osc.stop(t + dur + 0.05);
+}
+
+function noiseBurst({ dur = 0.08, vol = 0.15, freq = 1800, type = "bandpass", delay = 0 }) {
+  const c = getAudio();
+  if (c.state !== "running") return;
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const t = c.currentTime + delay;
+  const src = c.createBufferSource();
+  src.buffer = noiseBuf;
+  const f = c.createBiquadFilter();
+  f.type = type;
+  f.frequency.value = freq;
+  f.Q.value = 0.8;
+  const g = c.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(f);
+  f.connect(g);
+  g.connect(master);
+  src.start(t);
+  src.stop(t + dur + 0.05);
+}
+
+// --- Olay sesleri: her yüzeyin kendi karakteri var ---
+function wallSound() {          // yan duvar: tok "düt"
+  tone({ type: "square", from: 300, to: 190, dur: 0.06, vol: 0.14 });
+  noiseBurst({ dur: 0.03, vol: 0.05, freq: 900 });
+}
+function ceilingSound() {       // tavan: parlak "tink"
+  tone({ type: "triangle", from: rnd(950, 1150), to: 700, dur: 0.09, vol: 0.13 });
+}
+function brickSound(combo) {    // tuğla kırma: combo ile incelen pop + hışırtı
+  const semis = Math.min(combo - 1, 16);
+  const f = 330 * Math.pow(2, semis / 12);
+  tone({ type: "triangle", from: f, to: f * 0.8, dur: 0.12, vol: 0.22 });
+  noiseBurst({ dur: 0.05, vol: 0.12, freq: 1800 });
+}
+function clackSound() {         // dayanıklı tuğlaya isabet
+  tone({ type: "square", from: 260, to: 220, dur: 0.05, vol: 0.12 });
+}
+function clankSound() {         // kırılmayan tuğla: metalik
+  tone({ type: "square", from: 150, to: 130, dur: 0.07, vol: 0.14 });
+  noiseBurst({ dur: 0.04, vol: 0.1, freq: 3200, type: "highpass" });
+}
+function boomSound() {          // patlayan tuğla
+  noiseBurst({ dur: 0.3, vol: 0.35, freq: 400, type: "lowpass" });
+  tone({ type: "sine", from: 120, to: 40, dur: 0.3, vol: 0.3 });
+}
+function loseSound() {
+  tone({ type: "sawtooth", from: 280, to: 70, dur: 0.5, vol: 0.25 });
+  tone({ type: "sine", from: 140, to: 50, dur: 0.5, vol: 0.18 });
+}
+function powerSound() {
+  [523, 659, 784, 1046].forEach((f, i) => tone({ type: "sine", from: f, dur: 0.12, vol: 0.14, delay: i * 0.07 }));
+}
+function multiSound() {
+  [660, 880, 1174].forEach((f, i) => tone({ type: "square", from: f, dur: 0.07, vol: 0.11, delay: i * 0.05 }));
+}
+function slowSound() {
+  tone({ type: "sine", from: 800, to: 220, dur: 0.45, vol: 0.16 });
+}
+function levelSound() {
+  [392, 494, 587, 784].forEach((f, i) => tone({ type: "triangle", from: f, dur: 0.15, vol: 0.15, delay: i * 0.09 }));
+}
+function gameOverSound() {
+  [392, 311, 233, 175].forEach((f, i) => tone({ type: "sawtooth", from: f, to: f * 0.9, dur: 0.3, vol: 0.16, delay: i * 0.22 }));
+}
+function launchSound() {
+  tone({ type: "sine", from: 440, to: 660, dur: 0.08, vol: 0.15 });
+}
+
+// --- Raket sesleri (kullanıcı seçimli, her vuruşta farklı tonda) ---
+const paddleSounds = {
+  pop()   { tone({ type: "sine", from: rnd(450, 750), to: 150, dur: 0.09, vol: 0.3 }); },
+  bip()   { tone({ type: "square", from: rnd(340, 560), dur: 0.08, vol: 0.12 }); },
+  lazer() { tone({ type: "sawtooth", from: rnd(1000, 1600), to: 90, dur: 0.18, vol: 0.15 }); },
+  tik()   { tone({ type: "square", from: rnd(800, 1400), dur: 0.03, vol: 0.18 }); },
+  bas()   { tone({ type: "sine", from: rnd(140, 240), to: 45, dur: 0.16, vol: 0.4 }); },
+  zil()   {
+    const f = rnd(650, 1050);
+    tone({ type: "sine", from: f, dur: 0.35, vol: 0.18 });
+    tone({ type: "sine", from: f * 1.5, dur: 0.3, vol: 0.09 });
+  },
+  boing() {
+    const p = rnd(0.85, 1.2);
+    tone({ type: "sine", from: 150 * p, to: 420 * p, dur: 0.06, vol: 0.25 });
+    tone({ type: "sine", from: 420 * p, to: 110 * p, dur: 0.16, vol: 0.25, delay: 0.06 });
+  },
+  pluck() {
+    const notes = [523, 587, 659, 784, 880];
+    tone({ type: "triangle", from: notes[(Math.random() * notes.length) | 0] * (Math.random() < 0.5 ? 1 : 2), dur: 0.12, vol: 0.25 });
+  },
+  "8bit"() {
+    const p = rnd(0.9, 1.15);
+    tone({ type: "square", from: 660 * p, dur: 0.05, vol: 0.12 });
+    tone({ type: "square", from: 990 * p, dur: 0.07, vol: 0.12, delay: 0.05 });
+  },
+};
+let selectedSound = "random";
+try { selectedSound = localStorage.getItem("paddleSound") || "random"; } catch (e) {}
+function playPaddleSound() {
+  const names = Object.keys(paddleSounds);
+  const key = selectedSound === "random" ? names[(Math.random() * names.length) | 0] : selectedSound;
+  paddleSounds[key]();
+}
+
+// --- Ses seçim çubuğu + sessize alma ---
+const audioHint = document.getElementById("audiohint");
+const soundBar = document.getElementById("soundbar");
+function refreshSoundButtons() {
+  for (const btn of soundBar.querySelectorAll("button[data-sound]")) {
+    btn.classList.toggle("active", btn.dataset.sound === selectedSound);
+  }
+}
+for (const [key, label] of Object.entries({ random: "🎲 Rastgele", pop: "Pop", bip: "Bip", lazer: "Lazer", tik: "Tık", bas: "Bas", zil: "Zil", boing: "Boing", pluck: "Pluck", "8bit": "8-bit" })) {
+  const btn = document.createElement("button");
+  btn.textContent = label;
+  btn.dataset.sound = key;
+  btn.addEventListener("click", () => {
+    btn.blur(); // odaklı düğme boşlukla yeniden tetiklenmesin
+    selectedSound = key;
+    try { localStorage.setItem("paddleSound", key); } catch (e) {}
+    refreshSoundButtons();
+    playPaddleSound(); // önizleme
+    pauseGame();       // oyuncu menüyle uğraşırken top öksüz kalmasın
+  });
+  soundBar.appendChild(btn);
+}
+refreshSoundButtons();
+
+// Sessize alma: tüm oyun sesleri (arka plan medyası ayrı sürgüyle kontrol edilir)
+const muteBtn = document.createElement("button");
+function refreshMuteButton() {
+  muteBtn.textContent = muted ? "🔇 Sesler kapalı" : "🔊 Sesler açık";
+  muteBtn.classList.toggle("muted", muted);
+}
+muteBtn.addEventListener("click", () => {
+  muteBtn.blur();
+  muted = !muted;
+  try { localStorage.setItem("bb_muted", muted ? "1" : "0"); } catch (e) {}
+  if (master) master.gain.value = muted ? 0 : 0.55;
+  refreshMuteButton();
+});
+soundBar.appendChild(muteBtn);
+refreshMuteButton();
+
+// Tema düğmesi: tıkla veya T ile sıradaki temaya geç
+const themeBtn = document.createElement("button");
+function refreshThemeButton() { themeBtn.textContent = "🎨 " + T().name; }
+themeBtn.addEventListener("click", () => {
+  themeBtn.blur();
+  pauseGame();
+  cycleTheme();
+});
+soundBar.appendChild(themeBtn);
+applyTheme();
+refreshThemeButton();
+
+// ======================================================================
+// 3. BÖLÜM HARİTALARI (her satır 10 sütun:
+//    1/2/3 = dayanıklılık, X = kırılmayan, E = patlayan, '.' = boş)
+// ======================================================================
+const LEVELS = [
+  [ // 1: karşılama
+    ".11111111.",
+    "1111111111",
+    "1111111111",
+    "1111111111",
+    ".11111111.",
+  ],
+  [ // 2: şeritler
+    "2222222222",
+    "1111111111",
+    "2222222222",
+    "1111111111",
+    "2222222222",
+  ],
+  [ // 3: piramit, tepede patlayıcılar
+    "....EE....",
+    "...3223...",
+    "..321123..",
+    ".32111123.",
+    "3211111123",
+  ],
+  [ // 4: kale — X duvarları kırılamaz, göbeşte patlayıcılar
+    "XX.3333.XX",
+    "X22222222X",
+    "X2.1EE1.2X",
+    "X2.1111.2X",
+    "X22222222X",
+    "XX.3333.XX",
+  ],
+  [ // 5: dama + kırılmayan bariyer
+    "3.3.3.3.3.",
+    ".2.2E2.2.2",
+    "3.3.3.3.3.",
+    "X.X.X.X.X.",
+    "3.3.3.3.3.",
+    ".2.2.2.2.2",
+  ],
+];
+
+// ======================================================================
+// 4. OYUN DURUMU VE VARLIKLAR
+// ======================================================================
+const state = {
+  mode: "menu",  // menu | serve | playing | levelclear | paused | gameover
+  prevMode: null,
+  level: 1, score: 0, lives: 3, combo: 0,
+  high: 0, startHigh: 0, newRecord: false,
+  speed: BASE_SPEED, slowUntil: 0, time: 0, shake: 0, clearAt: 0, buildFade: 0, pendingMulti: false,
+};
+try { state.high = parseInt(localStorage.getItem("bb_highscore")) || 0; } catch (e) {}
+
+const paddle = {
+  x: W / 2 - PADDLE_W / 2, y: H - 40,
+  w: PADDLE_W, targetW: PADDLE_W,
+  h: PADDLE_H, speed: 600, wideUntil: 0, flash: 0,
+};
+
+let balls = [];       // çoklu top desteği: hepsi aynı anda yaşayabilir
+let bricks = [], powerups = [], particles = [], fragments = [], floaters = [], stars = [];
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 70; i++) stars.push({ x: Math.random() * W, y: Math.random() * H, s: rnd(0.5, 1.8), v: rnd(4, 18) });
+}
+
+function newBall(stuck) {
+  return { x: W / 2, y: H - 60, r: 8, dx: 0, dy: 0, stuck: !!stuck, gone: false, trail: [] };
+}
+
+function levelSpeed(l) {
+  return Math.min(BASE_SPEED * Math.pow(1.07, l - 1), MAX_SPEED);
+}
+// Hedef büyüklük: bölüm hızı + vuruş başı hızlanma, yavaşlatma çarpanıyla
+function mag() {
+  return state.speed * (state.slowUntil > state.time ? SLOW_FACTOR : 1);
+}
+function setSpeed(b, m) {
+  const s = Math.hypot(b.dx, b.dy) || 1;
+  b.dx = b.dx / s * m;
+  b.dy = b.dy / s * m;
+}
+
+// ======================================================================
+// 5. OYUN AKIŞI
+// ======================================================================
+function buildLevel(n) {
+  const map = LEVELS[(n - 1) % LEVELS.length];
+  bricks = [];
+  for (let r = 0; r < map.length; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const ch = map[r][c];
+      if (ch === "." || ch === " ") continue;
+      const brick = {
+        x: BRICK.left + c * (BRICK.w + BRICK.gap),
+        y: BRICK.top + r * (BRICK.h + BRICK.gap),
+        row: r, col: c, dead: false, cracks: null, flash: 0,
+      };
+      if (ch === "X") {
+        brick.unbreakable = true;
+        brick.hp = brick.maxHp = Infinity;
+      } else if (ch === "E") {
+        brick.explosive = true;
+        brick.hp = brick.maxHp = 1;
+      } else {
+        brick.hp = brick.maxHp = clamp(parseInt(ch) || 1, 1, 3);
+      }
+      bricks.push(brick);
+    }
+  }
+  state.buildFade = 0; // tuğlalar satır satır belirsin
+}
+const isLevelDone = () => bricks.every(b => b.dead || b.unbreakable);
+
+function addScore(n) {
+  state.score += n;
+  if (state.score > state.high) {
+    state.high = state.score;
+    try { localStorage.setItem("bb_highscore", state.high); } catch (e) {}
+  }
+}
+
+function startGame() {
+  state.level = 1;
+  state.score = 0;
+  state.lives = 3;
+  state.combo = 0;
+  state.startHigh = state.high;
+  state.newRecord = false;
+  state.speed = levelSpeed(1);
+  state.slowUntil = 0;
+  state.time = 0;
+  state.shake = 0;
+  paddle.x = W / 2 - PADDLE_W / 2;
+  paddle.w = paddle.targetW = PADDLE_W;
+  paddle.wideUntil = 0;
+  state.pendingMulti = false;
+  powerups = []; particles = []; fragments = []; floaters = [];
+  buildLevel(1);
+  serveBall();
+}
+
+function toMenu() {
+  state.mode = "menu";
+  buildLevel(1);
+  powerups = []; particles = []; fragments = []; floaters = [];
+  balls = [newBall(true)];
+}
+
+function serveBall() {
+  state.mode = "serve";
+  balls = [newBall(true)];
+  powerups = []; // düşen kapsüller bölüm/can geçişinde taşınmaz
+}
+
+function launchBall() {
+  for (const b of balls) {
+    if (!b.stuck) continue;
+    b.stuck = false;
+    const ang = rnd(-0.45, 0.45); // dikeyden ±25°
+    b.dx = mag() * Math.sin(ang);
+    b.dy = -mag() * Math.cos(ang);
+  }
+  if (state.pendingMulti) {
+    state.pendingMulti = false;
+    splitBalls(); // yapışıkken yakalanan M kapsülü boşa gitmez
+  }
+  state.mode = "playing";
+  launchSound();
+}
+
+function loseLife() {
+  loseSound();
+  addShake(6);
+  state.combo = 0;
+  state.slowUntil = 0;
+  state.speed = levelSpeed(state.level); // hızlanmayı sıfırla
+  state.lives--;
+  if (state.lives <= 0) {
+    gameOver();
+  } else {
+    serveBall();
+  }
+}
+
+function gameOver() {
+  state.mode = "gameover";
+  state.newRecord = state.score > state.startHigh && state.score > 0;
+  gameOverSound();
+}
+
+function levelCleared() {
+  addScore(500);
+  state.mode = "levelclear";
+  state.clearAt = state.time + 1.8;
+  levelSound();
+}
+
+function nextLevel() {
+  state.level++;
+  state.speed = levelSpeed(state.level);
+  state.slowUntil = 0;
+  buildLevel(state.level);
+  serveBall();
+}
+
+function pauseGame() {
+  if (state.mode !== "playing" && state.mode !== "serve") return;
+  state.prevMode = state.mode;
+  state.mode = "paused";
+}
+function resumeGame() {
+  if (state.mode !== "paused") return;
+  state.mode = state.prevMode || "serve";
+}
+function togglePause() {
+  if (state.mode === "paused") resumeGame();
+  else pauseGame();
+}
+
+function action() {
+  switch (state.mode) {
+    case "menu": startGame(); break;
+    case "serve": launchBall(); break;
+    case "paused": resumeGame(); break;
+    case "gameover": toMenu(); break;
+    case "levelclear": state.clearAt = state.time; break; // beklemeden geç
+  }
+}
+
+// ======================================================================
+// 6. EFEKTLER (parçacık, parça, çatlak, parlama, sarsıntı)
+// ======================================================================
+function addShake(p) {
+  state.shake = Math.max(state.shake, p);
+}
+
+function spawnParticles(x, y, color, count = 12, sw = BRICK.w, sh = BRICK.h) {
+  for (let i = 0; i < count; i++) {
+    if (particles.length > 400) break;
+    const a = rnd(0, Math.PI * 2);
+    const s = rnd(60, 260);
+    particles.push({
+      x: rnd(x, x + sw), y: rnd(y, y + sh),
+      vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60,
+      size: rnd(2, 5), life: rnd(0.35, 0.7), color,
+    });
+  }
+}
+
+function addFloater(x, y, text, color) {
+  if (floaters.length > 30) floaters.shift();
+  floaters.push({ x, y, text, color, life: 0.8 });
+}
+
+function spawnFragments(b, color) {
+  color = color || hpColor(b.maxHp);
+  const px = BRICK.w / 3, py = BRICK.h / 2;
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 2; j++) {
+      fragments.push({
+        x: b.x + i * px, y: b.y + j * py, w: px, h: py,
+        vx: rnd(-90, 90), vy: rnd(-160, -40),
+        rot: 0, vr: rnd(-6, 6), life: 0.8, color,
+      });
+    }
+  }
+}
+
+function makeCracks(b) {
+  const n = (b.maxHp - b.hp) * 2;
+  const cracks = [];
+  let seed = b.row * 73 + b.col * 131 + b.maxHp * 7 + 1;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < n; i++) {
+    const pts = [];
+    let x = rand() * BRICK.w, y = rand() * BRICK.h;
+    pts.push([x, y]);
+    const segs = 2 + ((rand() * 2) | 0);
+    for (let s = 0; s < segs; s++) {
+      x += (rand() - 0.5) * 30;
+      y += (rand() - 0.5) * 16;
+      pts.push([clamp(x, 0, BRICK.w), clamp(y, 0, BRICK.h)]);
+    }
+    cracks.push(pts);
+  }
+  return cracks;
+}
+
+function updateEffects(dt) {
+  for (const p of particles) {
+    p.vy += 900 * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.life -= dt;
+  }
+  particles = particles.filter(p => p.life > 0 && p.y < H + 20);
+
+  for (const f of fragments) {
+    f.vy += 1100 * dt;
+    f.x += f.vx * dt;
+    f.y += f.vy * dt;
+    f.rot += f.vr * dt;
+    f.life -= dt;
+  }
+  fragments = fragments.filter(f => f.life > 0 && f.y < H + 40);
+
+  for (const b of bricks) if (b.flash > 0) b.flash = Math.max(0, b.flash - dt * 7);
+  if (paddle.flash > 0) paddle.flash = Math.max(0, paddle.flash - dt * 6);
+  state.buildFade = Math.min(COLS, state.buildFade + dt * 4); // belirme animasyonu her ekranda ilerler
+
+  // Yıldız alanı süzülür, skor yazıları yükselip kaybolur
+  for (const s of stars) { s.y += s.v * dt; if (s.y > H) { s.y = -2; s.x = Math.random() * W; } }
+  for (const f of floaters) { f.y -= 42 * dt; f.life -= dt; }
+  floaters = floaters.filter(f => f.life > 0);
+
+  state.shake = Math.max(0, state.shake - dt * 18);
+}
+
+// ======================================================================
+// 7. FİZİK VE ÇARPIŞMA
+// ======================================================================
+function hitBrick(b) {
+  b.flash = 1; // her isabette bir anlık parlama
+  if (b.unbreakable) {
+    clankSound();
+    spawnParticles(b.x, b.y, T().un, 4);
+    return;
+  }
+  b.hp--;
+  if (b.hp <= 0) {
+    destroyBrick(b);
+    if (b.explosive) explode(b);
+    if (isLevelDone()) levelCleared();
+  } else {
+    b.cracks = makeCracks(b);
+    clackSound();
+  }
+}
+
+function destroyBrick(b) {
+  b.dead = true;
+  state.combo++;
+  const mult = Math.min(state.combo, 8);
+  const pts = 10 * b.maxHp * mult;
+  addScore(pts);
+  const col = b.explosive ? T().ex : undefined;
+  spawnParticles(b.x, b.y, col);
+  spawnFragments(b, col);
+  addFloater(b.x + BRICK.w / 2, b.y, "+" + pts, T().text);
+  brickSound(state.combo);
+  addShake(2.5);
+  if (Math.random() < 0.12) dropPowerup(b);
+}
+
+// Patlayan tuğla: çevreskileri de kırar, patlayıcılar zincirlenir
+function explode(center) {
+  boomSound();
+  addShake(5);
+  const queue = [center];
+  const seen = new Set([center]);
+  while (queue.length) {
+    const b = queue.shift();
+    for (const o of bricks) {
+      if (o.dead || o.unbreakable || seen.has(o)) continue;
+      const dx = o.col - b.col, dy = o.row - b.row;
+      if (dx * dx + dy * dy > 2) continue;
+      seen.add(o);
+      o.flash = 1;
+      if (o.explosive) { queue.push(o); destroyBrick(o); }
+      else destroyBrick(o);
+    }
+  }
+}
+
+function dropPowerup(b) {
+  const r = Math.random();
+  const type = r < 0.4 ? "W" : r < 0.75 ? "M" : "S"; // geniş / çoklu top / yavaşlatma
+  powerups.push({ x: b.x + BRICK.w / 2 - 23, y: b.y, w: 46, h: 18, vy: 150, type });
+}
+
+function moveBall(b, dt) {
+  if (b.stuck) {
+    b.x = paddle.x + paddle.w / 2;
+    b.y = paddle.y - b.r - 1;
+    return;
+  }
+  setSpeed(b, mag()); // hız hedefe kilitli: yavaşlatma bitince çarpmadan anında geri döner
+
+  // Tünelleme koruması: hareketi top yarıçapının altındaki adımlara böl
+  const dist = Math.hypot(b.dx, b.dy) * dt;
+  const n = Math.max(1, Math.ceil(dist / 6));
+  for (let i = 0; i < n && !b.gone; i++) {
+    b.x += b.dx * dt / n;
+    b.y += b.dy * dt / n;
+
+    // Yan duvarlar
+    if (b.x - b.r < 0) { b.x = b.r; b.dx = Math.abs(b.dx); wallSound(); }
+    else if (b.x + b.r > W) { b.x = W - b.r; b.dx = -Math.abs(b.dx); wallSound(); }
+    // Tavan
+    if (b.y - b.r < 0) { b.y = b.r; b.dy = Math.abs(b.dy); ceilingSound(); }
+
+    // Raket: ortalara yakın dik, uçlara yakın eğik sekme — oyunun "hisi"
+    if (b.dy > 0 &&
+        b.y + b.r >= paddle.y && b.y - b.r <= paddle.y + paddle.h &&
+        b.x >= paddle.x - b.r && b.x <= paddle.x + paddle.w + b.r) {
+      const t = clamp((b.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2), -1, 1);
+      const ang = t * (Math.PI / 3); // uçlarda 60°, ortada 0° (tam dik)
+      // Her raket vuruşunda top biraz hızlanır (üst sınır: bölüm hızının 1.3 katı)
+      state.speed = Math.min(state.speed * 1.015, Math.min(levelSpeed(state.level) * 1.3, MAX_SPEED));
+      const m = mag();
+      b.dx = m * Math.sin(ang);
+      b.dy = -m * Math.cos(ang);
+      b.y = paddle.y - b.r;
+      state.combo = 0;
+      playPaddleSound();
+      paddle.flash = 1;
+      spawnParticles(b.x, paddle.y, T().pad, 6, 24, 8);
+      if (Math.abs(t) > 0.7) addShake(1.2); // sert (kenar) vuruşta mikro sarsıntı
+    }
+
+    // Tuğlalar (adım başına tek tuğla)
+    for (const br of bricks) {
+      if (br.dead) continue;
+      const cx = clamp(b.x, br.x, br.x + BRICK.w);
+      const cy = clamp(b.y, br.y, br.y + BRICK.h);
+      const ddx = b.x - cx, ddy = b.y - cy;
+      if (ddx * ddx + ddy * ddy <= b.r * b.r) {
+        const overlapX = Math.min(b.x + b.r - br.x, br.x + BRICK.w - (b.x - b.r));
+        const overlapY = Math.min(b.y + b.r - br.y, br.y + BRICK.h - (b.y - b.r));
+        if (overlapX < overlapY) {
+          b.dx = b.x < br.x + BRICK.w / 2 ? -Math.abs(b.dx) : Math.abs(b.dx);
+          b.x += b.dx > 0 ? overlapX : -overlapX;
+        } else {
+          b.dy = b.y < br.y + BRICK.h / 2 ? -Math.abs(b.dy) : Math.abs(b.dy);
+          b.y += b.dy > 0 ? overlapY : -overlapY;
+        }
+        hitBrick(br);
+        break;
+      }
+    }
+
+    // Alt: bu top kayboldu
+    if (b.y - b.r > H + 20) {
+      b.gone = true;
+    }
+  }
+
+  if (!b.gone) {
+    b.trail.push({ x: b.x, y: b.y });
+    if (b.trail.length > 10) b.trail.shift();
+  }
+}
+
+function updateBalls(dt) {
+  for (const b of balls) moveBall(b, dt);
+  balls = balls.filter(b => !b.gone);
+  if (state.mode === "playing" && balls.length === 0) loseLife();
+}
+
+// Hareketli her toptan iki kopya çıkarır (±25° döndürülmüş)
+function splitBalls() {
+  const src = balls.filter(b => !b.stuck);
+  for (const s of src) {
+    const base = Math.atan2(s.dy, s.dx);
+    for (const a of [-0.45, 0.45]) {
+      if (balls.length >= MAX_BALLS) return;
+      const nb = newBall(false);
+      nb.x = s.x; nb.y = s.y;
+      nb.dx = Math.cos(base + a) * mag();
+      nb.dy = Math.sin(base + a) * mag();
+      balls.push(nb);
+    }
+  }
+}
+
+function updatePowerups(dt) {
+  for (const p of powerups) p.y += p.vy * dt;
+  powerups = powerups.filter(p => {
+    if (p.y > H + 30) return false;
+    if (p.y + p.h >= paddle.y && p.y <= paddle.y + paddle.h &&
+        p.x + p.w >= paddle.x && p.x <= paddle.x + paddle.w) {
+      addScore(50);
+      addShake(1.5);
+      if (p.type === "W") {
+        paddle.targetW = PADDLE_WIDE;
+        paddle.wideUntil = state.time + WIDE_TIME;
+        powerSound();
+      } else if (p.type === "M") {
+        if (balls.some(b => !b.stuck)) splitBalls();
+        else state.pendingMulti = true; // top yapışıkken yakalandı: fırlatınca çoğalacak
+        multiSound();
+      } else if (p.type === "S") {
+        state.slowUntil = state.time + SLOW_TIME;
+        for (const b of balls) if (!b.stuck) setSpeed(b, mag());
+        slowSound();
+      }
+      return false;
+    }
+    return true;
+  });
+}
+
+// ======================================================================
+// 8. GÜNCELLEME
+// ======================================================================
+function update(dt) {
+  state.time += dt;
+
+  // Raket: klavye + genişlik animasyonu
+  const dir = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0);
+  paddle.x = clamp(paddle.x + dir * paddle.speed * dt, 0, W - paddle.w);
+  if (state.time > paddle.wideUntil && paddle.targetW !== PADDLE_W) paddle.targetW = PADDLE_W;
+  const newW = paddle.w + (paddle.targetW - paddle.w) * Math.min(1, dt * 8);
+  paddle.x = clamp(paddle.x - (newW - paddle.w) / 2, 0, W - newW);
+  paddle.w = newW;
+
+  if (state.mode === "serve" || state.mode === "playing") updateBalls(dt);
+  if (state.mode === "levelclear" && state.time >= state.clearAt) nextLevel();
+
+  updateEffects(dt);
+  updatePowerups(dt);
+}
+
+// ======================================================================
+// 9. ÇİZİM
+// ======================================================================
+function roundedRect(x, y, w, h, r) {
+  if (ctx.roundRect) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fill();
+  } else {
+    ctx.fillRect(x, y, w, h);
+  }
+}
+
+function drawBricks() {
+  for (const b of bricks) {
+    if (b.dead) continue;
+    // Bölüm başında satır satır belirme animasyonu
+    const a = clamp(state.buildFade - b.row, 0, 1);
+    if (a <= 0) continue;
+    ctx.globalAlpha = a;
+    ctx.fillStyle = b.unbreakable ? T().un : b.explosive ? T().ex : hpColor(b.hp);
+    ctx.fillRect(b.x, b.y, BRICK.w, BRICK.h);
+    if (b.unbreakable) {
+      ctx.strokeStyle = "rgba(0,0,0,0.4)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(b.x + 6, b.y + BRICK.h - 4);
+      ctx.lineTo(b.x + BRICK.w - 6, b.y + 4);
+      ctx.moveTo(b.x + 6, b.y + 4);
+      ctx.lineTo(b.x + BRICK.w - 6, b.y + BRICK.h - 4);
+      ctx.stroke();
+    } else if (b.explosive) {
+      ctx.fillStyle = "rgba(0,0,0,0.5)";
+      ctx.beginPath();
+      ctx.arc(b.x + BRICK.w / 2, b.y + BRICK.h / 2, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (b.cracks) {
+      ctx.strokeStyle = "rgba(0,0,0,0.45)";
+      ctx.lineWidth = 1.5;
+      for (const pts of b.cracks) {
+        ctx.beginPath();
+        ctx.moveTo(b.x + pts[0][0], b.y + pts[0][1]);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(b.x + pts[i][0], b.y + pts[i][1]);
+        ctx.stroke();
+      }
+    }
+    if (b.flash > 0) {
+      ctx.globalAlpha = a * b.flash * 0.85;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(b.x, b.y, BRICK.w, BRICK.h);
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+const POWER_STYLE = { W: "#90be6d", M: "#f38ba0", S: "#4cc9f0" };
+
+function drawStars() {
+  ctx.fillStyle = T().star;
+  for (const s of stars) ctx.fillRect(s.x, s.y, s.s, s.s);
+}
+
+function drawHUD() {
+  ctx.fillStyle = T().text;
+  ctx.font = "18px monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("Skor: " + state.score, 20, 35);
+  ctx.fillStyle = T().dim;
+  ctx.fillText("Rekor: " + state.high, 20, 58);
+  if (state.combo >= 2) {
+    ctx.fillStyle = T().b2;
+    ctx.fillText("COMBO x" + Math.min(state.combo, 8), 150, 35);
+  }
+  if (state.slowUntil > state.time) {
+    ctx.fillStyle = T().b1;
+    ctx.fillText("YAVAŞ", 150, 58);
+  }
+  ctx.fillStyle = T().text;
+  ctx.textAlign = "center";
+  ctx.fillText("Bölüm " + state.level, W / 2, 35);
+  ctx.textAlign = "right";
+  ctx.fillText("Can: " + "♥".repeat(Math.max(0, state.lives)), W - 20, 35);
+}
+
+function overlay(alpha) {
+  ctx.fillStyle = "rgba(10,12,26," + alpha + ")";
+  ctx.fillRect(0, 0, W, H);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  if (state.shake > 0.1) {
+    ctx.translate((Math.random() - 0.5) * 2 * state.shake, (Math.random() - 0.5) * 2 * state.shake);
+  }
+
+  drawStars();
+  drawBricks();
+
+  // Güç kapsülleri
+  for (const p of powerups) {
+    ctx.fillStyle = POWER_STYLE[p.type] || "#90be6d";
+    roundedRect(p.x, p.y, p.w, p.h, 8);
+    ctx.fillStyle = "#16213e";
+    ctx.font = "bold 13px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(p.type, p.x + p.w / 2, p.y + 13);
+  }
+
+  // Parçacıklar
+  for (const p of particles) {
+    ctx.globalAlpha = clamp(p.life * 2.5, 0, 1);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+  }
+  ctx.globalAlpha = 1;
+
+  // Tuğla parçaları
+  for (const f of fragments) {
+    ctx.globalAlpha = clamp(f.life / 0.8, 0, 1);
+    ctx.save();
+    ctx.translate(f.x + f.w / 2, f.y + f.h / 2);
+    ctx.rotate(f.rot);
+    ctx.fillStyle = f.color;
+    ctx.fillRect(-f.w / 2, -f.h / 2, f.w, f.h);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+
+  // Raket + vuruş parlaması
+  ctx.fillStyle = T().pad;
+  roundedRect(paddle.x, paddle.y, paddle.w, paddle.h, 6);
+  if (paddle.flash > 0) {
+    ctx.globalAlpha = paddle.flash * 0.7;
+    ctx.fillStyle = "#ffffff";
+    roundedRect(paddle.x, paddle.y, paddle.w, paddle.h, 6);
+    ctx.globalAlpha = 1;
+  }
+
+  // Toplar + izler
+  for (const b of balls) {
+    for (let i = 0; i < b.trail.length; i++) {
+      const t = b.trail[i];
+      ctx.globalAlpha = (i / b.trail.length) * 0.25;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, b.r * (0.4 + 0.6 * i / b.trail.length), 0, Math.PI * 2);
+      ctx.fillStyle = T().ball;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = T().ball;
+    ctx.fill();
+  }
+
+  // Skor yazıları
+  ctx.font = "bold 14px monospace";
+  ctx.textAlign = "center";
+  for (const f of floaters) {
+    ctx.globalAlpha = clamp(f.life / 0.8, 0, 1);
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.restore(); // sarsıntı alanı sonu
+
+  if (state.mode !== "menu") drawHUD();
+
+  // Durum ekranları
+  ctx.textAlign = "center";
+  if (state.mode === "menu") {
+    overlay(0.6);
+    ctx.fillStyle = T().ex;
+    ctx.font = "bold 46px monospace";
+    ctx.fillText("BRICK BREAKER", W / 2, H / 2 - 110);
+    ctx.fillStyle = T().b1;
+    ctx.fillText("AI", W / 2, H / 2 - 62);
+    ctx.fillStyle = T().text;
+    ctx.font = "20px monospace";
+    ctx.fillText("▶  Yeni oyun için tıkla veya boşluk", W / 2, H / 2 + 10);
+    ctx.fillStyle = T().dim;
+    ctx.font = "16px monospace";
+    ctx.fillText("← → veya fare: raket   •   boşluk: topu fırlat   •   P: duraklat   •   T: tema", W / 2, H / 2 + 45);
+    ctx.fillText("Rekor: " + state.high, W / 2, H / 2 + 80);
+    // Tuğla göstergesi: sayı = kaç vuruş
+    const lx = W / 2 - 215;
+    for (let hp = 1; hp <= 3; hp++) {
+      const x = lx + (hp - 1) * 110;
+      ctx.fillStyle = hpColor(hp);
+      ctx.fillRect(x, H / 2 + 105, 44, 16);
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "12px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(hp + " vuruş", x + 50, H / 2 + 118);
+      ctx.textAlign = "center";
+    }
+    // Özel tuğlalar
+    ctx.fillStyle = T().un;
+    ctx.fillRect(lx + 3 * 110, H / 2 + 105, 44, 16);
+    ctx.fillStyle = T().text;
+    ctx.textAlign = "left";
+    ctx.fillText("kırılmaz", lx + 3 * 110 + 50, H / 2 + 118);
+    ctx.fillStyle = T().ex;
+    ctx.fillRect(lx + 4 * 110, H / 2 + 105, 44, 16);
+    ctx.fillStyle = T().text;
+    ctx.fillText("patlar", lx + 4 * 110 + 50, H / 2 + 118);
+    ctx.textAlign = "center";
+  } else if (state.mode === "serve") {
+    if (Math.floor(state.time * 2) % 2 === 0) {
+      ctx.fillStyle = T().text;
+      ctx.font = "18px monospace";
+      ctx.fillText("topu fırlat: tıkla / boşluk", W / 2, H - 90);
+    }
+  } else if (state.mode === "levelclear") {
+    ctx.fillStyle = T().b1;
+    ctx.font = "bold 34px monospace";
+    ctx.fillText("BÖLÜM " + state.level + " TAMAM!", W / 2, H / 2 - 20);
+    ctx.fillStyle = T().text;
+    ctx.font = "20px monospace";
+    ctx.fillText("+500", W / 2, H / 2 + 15);
+  } else if (state.mode === "paused") {
+    overlay(0.55);
+    ctx.fillStyle = T().text;
+    ctx.font = "bold 36px monospace";
+    ctx.fillText("DURAKLATILDI", W / 2, H / 2 - 10);
+    ctx.font = "18px monospace";
+    ctx.fillText("devam: P veya tıkla", W / 2, H / 2 + 25);
+  } else if (state.mode === "gameover") {
+    overlay(0.65);
+    ctx.fillStyle = T().ex;
+    ctx.font = "bold 44px monospace";
+    ctx.fillText("OYUN BİTTİ", W / 2, H / 2 - 60);
+    ctx.fillStyle = T().text;
+    ctx.font = "22px monospace";
+    ctx.fillText("Skor: " + state.score, W / 2, H / 2 - 15);
+    ctx.fillText("Rekor: " + state.high, W / 2, H / 2 + 15);
+    if (state.newRecord) {
+      ctx.fillStyle = T().b2;
+      ctx.fillText("🏆 YENİ REKOR!", W / 2, H / 2 + 50);
+    }
+    ctx.fillStyle = T().dim;
+    ctx.font = "18px monospace";
+    ctx.fillText("menü için tıkla veya boşluk", W / 2, H / 2 + 90);
+  }
+}
+
+// ======================================================================
+// 10. GİRDİ
+// ======================================================================
+const keys = {};
+
+function pointerAim(clientX) {
+  const rect = canvas.getBoundingClientRect();
+  paddle.x = clamp((clientX - rect.left) * (W / rect.width) - paddle.w / 2, 0, W - paddle.w);
+}
+
+document.addEventListener("keydown", e => {
+  if (["ArrowLeft", "ArrowRight", " "].includes(e.key)) e.preventDefault();
+  keys[e.key.length === 1 ? e.key.toLowerCase() : e.key] = true;
+  if (e.repeat) return;
+  if (e.key === " ") action();
+  if (e.key === "p" || e.key === "P" || e.key === "Escape") togglePause();
+  if (e.key === "t" || e.key === "T") cycleTheme();
+});
+document.addEventListener("keyup", e => {
+  keys[e.key.length === 1 ? e.key.toLowerCase() : e.key] = false;
+});
+
+canvas.addEventListener("mousemove", e => pointerAim(e.clientX));
+canvas.addEventListener("click", action);
+
+// Mobil dokunma: parmak raketi götürür, dokunuş aynı zamanda eylemdir
+canvas.addEventListener("touchstart", e => {
+  e.preventDefault();
+  pointerAim(e.touches[0].clientX);
+  action();
+}, { passive: false });
+canvas.addEventListener("touchmove", e => {
+  e.preventDefault();
+  pointerAim(e.touches[0].clientX);
+}, { passive: false });
+
+// Sekme değişince / pencere odak kaybedince otomatik duraklat
+function autoPause() {
+  pauseGame();
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) autoPause(); });
+window.addEventListener("blur", autoPause);
+
+// ======================================================================
+// 11. ARKA PLAN MEDYASI (kullanıcının video ve müziği)
+// ======================================================================
+const stage = document.getElementById("stage");
+const bgvid = document.getElementById("bgvid");
+const bgmusic = new Audio();
+bgmusic.loop = true;
+const mediavol = document.getElementById("mediavol");
+const mediastatus = document.getElementById("mediastatus");
+let vidURL = null, audURL = null; // video ve müziğin adresleri ayrı tutulur
+
+function setMediaVolume() {
+  const v = mediavol.value / 100;
+  bgvid.volume = v;
+  bgmusic.volume = v;
+}
+mediavol.addEventListener("input", setMediaVolume);
+setMediaVolume();
+
+function mediaStatus(msg) { mediastatus.textContent = msg || ""; }
+
+document.getElementById("pickvid").addEventListener("click", e => {
+  e.currentTarget.blur();
+  pauseGame();
+  document.getElementById("vidfile").click();
+});
+document.getElementById("pickmusic").addEventListener("click", e => {
+  e.currentTarget.blur();
+  pauseGame();
+  document.getElementById("audfile").click();
+});
+document.getElementById("vidfile").addEventListener("change", e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (vidURL) URL.revokeObjectURL(vidURL); // yalnızca eski videonun adresi iptal edilir
+  vidURL = URL.createObjectURL(f);
+  bgvid.src = vidURL;
+  bgvid.style.display = "block";
+  stage.classList.add("hasbg");
+  mediaStatus("");
+  bgvid.play().catch(() => {
+    // Sesli otomatik oynatma engellendiyse sessiz başlat ve haber ver
+    bgvid.muted = true;
+    bgvid.play().then(() => mediaStatus("🔇 Video sessiz başlatıldı"))
+                 .catch(() => mediaStatus("⚠️ Video başlatılamadı — sayfaya bir kez tıkla"));
+  });
+});
+document.getElementById("audfile").addEventListener("change", e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (audURL) URL.revokeObjectURL(audURL); // yalnızca eski müziğin adresi iptal edilir
+  audURL = URL.createObjectURL(f);
+  bgmusic.src = audURL;
+  mediaStatus("");
+  bgmusic.play().catch(() => mediaStatus("⚠️ Müzik başlatılamadı — sayfaya bir kez tıkla"));
+});
+document.getElementById("clearmedia").addEventListener("click", e => {
+  e.currentTarget.blur();
+  pauseGame();
+  bgvid.pause();
+  bgvid.removeAttribute("src");
+  bgvid.load();
+  bgvid.style.display = "none";
+  bgmusic.pause();
+  bgmusic.removeAttribute("src");
+  bgmusic.load();
+  if (vidURL) { URL.revokeObjectURL(vidURL); vidURL = null; }
+  if (audURL) { URL.revokeObjectURL(audURL); audURL = null; }
+  stage.classList.remove("hasbg");
+  mediaStatus("");
+});
+
+// ======================================================================
+// 12. ANA DÖNGÜ (sabit adımlı fizik + değişken kare çizimi)
+// ======================================================================
+buildLevel(1);
+balls = [newBall(true)];
+initStars();
+let last = performance.now(), acc = 0;
+function frame(now) {
+  let dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  if (state.mode === "playing" || state.mode === "serve" || state.mode === "levelclear") {
+    acc += dt;
+    while (acc >= STEP) {
+      update(STEP);
+      acc -= STEP;
+    }
+  } else {
+    acc = 0;
+    // Duraklatma hariç her ekranda efektler yaşamaya devam eder (menüde yıldızlar kayar,
+    // oyun sonunda parçacıklar havada donup kalmaz)
+    if (state.mode !== "paused") updateEffects(dt);
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
+</script>
+</body>
+</html>
