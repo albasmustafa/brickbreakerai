@@ -138,6 +138,11 @@
     <button data-diff="normal">Normal</button>
     <button data-diff="zor">Zor</button>
   </div>
+  <div class="setrow">
+    <span class="label">HP noktacıkları</span>
+    <button data-hpdots="kapali">Kapalı</button>
+    <button data-hpdots="acik">Açık</button>
+  </div>
   <div class="setnote">Zorluk yalnızca yeni oyunda uygulanır. Efekt sesi arka plan müziğini etkilemez.</div>
   <div class="setrow">
     <button id="closesettings">Paneli kapat</button>
@@ -166,6 +171,7 @@ const DIFFICULTY = {
   normal: { speedMul: 1,    lives: 3 },
   zor:    { speedMul: 1.15, lives: 2 },
 };
+const HP_DOT = { size: 5, gap: 4, pad: 6, lumThreshold: 0.18, dark: "#12182b", light: "#f5f7fa" };
 
 const COLS = 10;
 const BRICK = { w: 70, h: 22, gap: 6, top: 70 };
@@ -186,6 +192,18 @@ let themeIx = 0;
 try { themeIx = parseInt(localStorage.getItem("bb_theme")) % THEMES.length || 0; } catch (e) {}
 const T = () => THEMES[themeIx];
 const hpColor = (hp) => (hp === 3 ? T().b3 : hp === 2 ? T().b2 : T().b1);
+// WCAG göreli parlaklık: nokta rengi eşiği ve kontrast hesabı bunu kullanır
+function relLum(hex) {
+  const c = i => {
+    const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * c(1) + 0.7152 * c(3) + 0.0722 * c(5);
+}
+// Tuğla dolgusuna göre nokta rengi: göreli parlaklığı 0.18'i aşan dolguya koyu nokta
+function dotColorFor(brickHex) {
+  return relLum(brickHex) > HP_DOT.lumThreshold ? HP_DOT.dark : HP_DOT.light;
+}
 function hexToRgba(hex, a) {
   const n = parseInt(hex.slice(1), 16);
   return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
@@ -213,6 +231,7 @@ const settings = {
   fxVol: 100,
   shake: matchMedia("(prefers-reduced-motion: reduce)").matches ? "azaltilmis" : "acik",
   difficulty: "normal",
+  hpDots: false,
 };
 try {
   const s = JSON.parse(localStorage.getItem("bb_settings"));
@@ -220,6 +239,7 @@ try {
     if (typeof s.fxVol === "number") settings.fxVol = clamp(s.fxVol, 0, 100);
     if (SHAKE_SCALE[s.shake]) settings.shake = s.shake;
     if (DIFFICULTY[s.difficulty]) settings.difficulty = s.difficulty;
+    if (typeof s.hpDots === "boolean") settings.hpDots = s.hpDots;
   }
 } catch (e) {}
 function saveSettings() {
@@ -457,6 +477,8 @@ function refreshSettingsUI() {
     b.classList.toggle("active", b.dataset.shake === settings.shake);
   for (const b of settingsPanel.querySelectorAll("[data-diff]"))
     b.classList.toggle("active", b.dataset.diff === settings.difficulty);
+  for (const b of settingsPanel.querySelectorAll("[data-hpdots]"))
+    b.classList.toggle("active", (b.dataset.hpdots === "acik") === settings.hpDots);
 }
 fxvol.addEventListener("input", () => {
   settings.fxVol = clamp(parseInt(fxvol.value) || 0, 0, 100);
@@ -475,6 +497,13 @@ for (const b of settingsPanel.querySelectorAll("[data-diff]"))
   b.addEventListener("click", () => {
     b.blur();
     settings.difficulty = b.dataset.diff;
+    saveSettings();
+    refreshSettingsUI();
+  });
+for (const b of settingsPanel.querySelectorAll("[data-hpdots]"))
+  b.addEventListener("click", () => {
+    b.blur();
+    settings.hpDots = b.dataset.hpdots === "acik";
     saveSettings();
     refreshSettingsUI();
   });
@@ -1059,6 +1088,24 @@ function drawBricks() {
         ctx.beginPath();
         ctx.moveTo(b.x + pts[0][0], b.y + pts[0][1]);
         for (let i = 1; i < pts.length; i++) ctx.lineTo(b.x + pts[i][0], b.y + pts[i][1]);
+        ctx.stroke();
+      }
+    }
+    // HP noktacıkları: kalan dayanıklılık kadar, sağ üstten sola dizilir (çatlakların üstüne)
+    if (settings.hpDots && !b.unbreakable && !b.explosive) {
+      const fill = hpColor(b.hp);
+      const dc = dotColorFor(fill);
+      ctx.fillStyle = dc;
+      ctx.strokeStyle = dc === HP_DOT.dark ? HP_DOT.light : HP_DOT.dark;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < b.hp; i++) {
+        ctx.beginPath();
+        ctx.arc(
+          b.x + BRICK.w - HP_DOT.pad - HP_DOT.size / 2 - i * (HP_DOT.size + HP_DOT.gap),
+          b.y + HP_DOT.pad + HP_DOT.size / 2,
+          HP_DOT.size / 2, 0, Math.PI * 2
+        );
+        ctx.fill();
         ctx.stroke();
       }
     }
