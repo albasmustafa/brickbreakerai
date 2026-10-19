@@ -49,7 +49,7 @@ canvas {
 
 /* Araç çubuğu ve medya çubuğu */
 #toolbar, #mediabar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; width: 800px; max-width: calc(100vw - 32px); }
-#toolbar { width: 900px; }      /* 8 düğme tek satıra sığsın */
+#toolbar { width: max-content; max-width: calc(100vw - 32px); }   /* 9 düğme tek satıra sığsın */
 #toolbar button { padding: 8px 14px; border-radius: 10px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #mediabar { background: var(--panel-soft); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
 #audiohint, #mediastatus { font-size: 12px; color: var(--uidim); }
@@ -117,6 +117,14 @@ canvas {
 .ach-icon { font-size: 22px; }
 .ach div { display: flex; flex-direction: column; gap: 1px; font-size: 12px; }
 .ach div span { font-size: 11px; color: var(--uidim); }
+
+/* Meydan okuma: günlük kart + bölüm ızgarası */
+#level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; }
+#level-grid button { min-height: 42px; font-size: 14px; font-weight: bold; }
+#level-grid button:not(:disabled):hover { transform: translateY(-2px); }
+#daily-card { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: var(--panel2); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; font-size: 12px; }
+#daily-card strong { font-size: 14px; color: var(--accent); }
+#daily-card span { color: var(--uidim); }
 #toasts { position: absolute; z-index: 5; top: 44px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; width: max-content; max-width: 90%; pointer-events: none; }
 .toast {
   display: flex; flex-direction: column; gap: 2px; padding: 8px 16px; text-align: center; font-size: 13px;
@@ -229,6 +237,15 @@ canvas {
   <div id="cr-ach"></div>
   <div class="setnote">Kariyer bu cihazda saklanır. Sayaçlar her oyunda (klasik ve kapışma) canlı artar, başarımlar açıldığı anda tuvalin üstünde duyurulur.</div>
   <div class="setrow"><button id="cr-reset">Kariyeri sıfırla</button></div>
+</section>
+<section id="challengepanel" class="panel" role="dialog" aria-label="Meydan okuma" hidden>
+  <div class="sethead">Günlük meydan okuma</div>
+  <div id="daily-card"></div>
+  <div class="setrow"><button id="daily-start">☀️ Bugünün koşusunu başlat</button></div>
+  <div class="setnote">Günde tek deneme · 1 can · Kabus lanetleri · +%15 hız. Deneme başladığı an kullanılmış sayılır.</div>
+  <div class="sethead">Bölüm seçimi (pratik)</div>
+  <div id="level-grid"></div>
+  <div class="setnote">Pratik koşularda rekor, liderlik tablosu, kariyer ve başarımlar sayılmaz. Bölümler, klasik oyunda ulaştığın en ileri bölüme kadar açılır.</div>
 </section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
@@ -888,10 +905,11 @@ function clearEffects() {
 }
 function addScore(n) {
   state.score += n;
-  if (state.score > state.high) store.set("bb_highscore", (state.high = state.score));
+  if (!run.practice && state.score > state.high) store.set("bb_highscore", (state.high = state.score));
 }
 
 function startGame() {
+  if (run.daily && typeof finishDaily === "function") finishDaily();
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
   Object.assign(state, { level: 1, score: 0, diffSpeed: diff.speedMul, lives: diff.lives, combo: 0, startHigh: state.high,
@@ -906,6 +924,10 @@ function startGame() {
   callout("BÖLÜM 1", T().accent);
 }
 function toMenu() {
+  if (run.daily && typeof finishDaily === "function") finishDaily();
+  run.daily = false;
+  run.dailyFinished = false;
+  run.practice = false;
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
@@ -957,10 +979,12 @@ function loseLife() {
 }
 function gameOver() {
   state.mode = "gameover";
-  state.newRecord = state.score > state.startHigh && state.score > 0;
+  state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
+  else if (run.practice) state.lbRank = 0;
   else { state.lbRank = recordScore("klasik", { score: state.score, level: state.level }); careerGameEnd(); }
+  if (run.daily && typeof finishDaily === "function") finishDaily();
 }
 function levelCleared() {
   if (state.mode !== "playing") return;    // aynı karede iki kez tetiklenmesin
@@ -1128,7 +1152,7 @@ const POWERS = {
   C: { label: "LANET",  color: "#5a189a", w: 5, bad: true, sound: "bad", fx: () => curseFromCapsule() },
 };
 // Can doluyken +CAN, lanetler kapalıyken LANET düşmez
-const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && settings.hazards === "kapali");
+const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && hazardLevel() === "kapali");
 function pickPower(goodOnly) {
   const entries = Object.entries(POWERS).filter(([k, p]) => !(goodOnly && (p.bad || k === "Q")) && powerAllowed(k));
   let r = Math.random() * entries.reduce((s, [, p]) => s + p.w, 0);
@@ -1166,7 +1190,9 @@ function destroyBrick(b) {
   if (b.dead) return;
   b.dead = true;
   state.combo++;
+  run.bricks++;
   track("bricks");
+  run.bestCombo = Math.max(run.bestCombo, state.combo);
   trackBest("bestCombo", state.combo);
   const pts = Math.round(10 * b.maxHp * Math.min(state.combo, 8) * (b.gold ? 10 : 1) * (isFever() ? 2 : 1) * curseBonus());
   addScore(pts);
@@ -1435,6 +1461,7 @@ function updatePowerups(dt) {
     if (p.y > H + 30) return false;
     if (p.y + p.h >= paddle.y && p.y <= paddle.y + paddle.h && p.x + p.w >= paddle.x && p.x <= paddle.x + paddle.w) {
       addShake(1.5);
+      run.powers++;
       track("powers");
       applyPower(p.type);
       return false;
@@ -1571,6 +1598,7 @@ function killBoss() {
   addScore(bonus);
   addFloater(cx, cy, "+" + bonus, "#ffd166");
   callout(bo.name + " YENİLDİ!", "#ffd166");
+  run.bosses++;
   track("bosses");
   battleCharge(12);
   checkLevelDone();
@@ -1634,11 +1662,11 @@ let obstacles = [];
 const curseOn = k => (state.curses[k] || 0) > state.time;
 const activeCurses = () => Object.keys(state.curses).filter(curseOn);
 const curseBonus = () => (activeCurses().length ? 1.5 : 1);
-const curseDur = k => CURSES[k].dur * (settings.hazards === "kabus" ? 1.25 : 1);
+const curseDur = k => CURSES[k].dur * (hazardLevel() === "kabus" ? 1.25 : 1);
 const lowestBrick = () => Math.max(0, ...bricks.filter(b => !b.dead).map(b => (b.ty ?? b.y) + BRICK.h));
 
 function scheduleNextCurse(first) {
-  const hz = HAZARD[settings.hazards];
+  const hz = HAZARD[hazardLevel()];
   if (!hz || battle.active) { state.curseAt = Infinity; return; }   // kapışmada lanetler rakiplerden gelir
   const lvlMul = Math.max(0.55, 1 - (state.level - 1) * 0.04);       // bölüm ilerledikçe sıklaşır
   state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * rnd(0.7, 1.3));
@@ -1647,7 +1675,7 @@ function pickCurse() {
   const active = activeCurses(), used = new Set(active.map(k => CURSES[k].group).filter(Boolean));
   const ids = Object.keys(CURSES).filter(id => {
     const c = CURSES[id];
-    return !active.includes(id) && !(settings.hazards !== "kabus" && c.group && used.has(c.group)) && (!c.ok || c.ok());
+    return !active.includes(id) && !(hazardLevel() !== "kabus" && c.group && used.has(c.group)) && (!c.ok || c.ok());
   });
   return ids.length ? pick(ids) : null;
 }
@@ -1679,7 +1707,7 @@ function updateCurses(dt) {
     state.pendingCurse = null;
     startCurse(pc.id);
   } else if (!pc && state.time >= state.curseAt) {
-    const hz = HAZARD[settings.hazards];
+    const hz = HAZARD[hazardLevel()];
     if (hz && activeCurses().length < hz.max) warnCurse(pickCurse());
     scheduleNextCurse(false);
   }
@@ -2507,14 +2535,18 @@ function drawScreens() {
     drawBattleResults();
   } else if (m === "gameover") {
     overlay(0.45);
-    drawCard(W / 2, H / 2 + 20, 480, 300);
-    titleText("OYUN BİTTİ", W / 2, H / 2 - 70, 44, T().ex, "#ff4d6d");
-    text("Skor: " + state.score, W / 2, H / 2 - 20, "bold 24px monospace", T().text);
-    text("Rekor: " + state.high, W / 2, H / 2 + 10, "18px monospace", T().dim);
-    if (state.newRecord) { ctx.globalAlpha = pulse; text("🏆 YENİ REKOR!", W / 2, H / 2 + 46, "bold 22px monospace", T().b2); ctx.globalAlpha = 1; }
-    text("Atlatılan lanet: " + state.cursesSurvived, W / 2, H / 2 + 80, "16px monospace", CURSE_COLOR);
-    if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 106, "bold 15px monospace", T().b2);
-    text("menü için tıkla veya boşluk", W / 2, H / 2 + 136, "15px monospace", T().dim);
+    drawCard(W / 2, H / 2, 520, 400);
+    titleText("OYUN BİTTİ", W / 2, H / 2 - 148, 44, T().ex, "#ff4d6d");
+    text("Skor: " + state.score, W / 2, H / 2 - 96, "bold 24px monospace", T().text);
+    if (state.newRecord) { ctx.globalAlpha = pulse; text("🏆 YENİ REKOR!", W / 2, H / 2 - 62, "bold 22px monospace", T().b2); ctx.globalAlpha = 1; }
+    else text("Rekor: " + state.high, W / 2, H / 2 - 62, "18px monospace", T().dim);
+    text("Bölüm " + state.level + " · Süre " + fmtTime(Math.round(state.time)), W / 2, H / 2 - 28, "15px monospace", T().text);
+    text("Tuğla " + run.bricks + " · En iyi combo ×" + run.bestCombo, W / 2, H / 2, "15px monospace", T().text);
+    text("Kapsül " + run.powers + " · Lanet " + state.cursesSurvived + " · Boss " + run.bosses, W / 2, H / 2 + 28, "14px monospace", CURSE_COLOR);
+    if (run.daily && typeof daily !== "undefined") text("GÜNLÜK · en iyi " + daily.best + " · seri " + daily.streak, W / 2, H / 2 + 62, "bold 15px monospace", T().b2);
+    else if (run.practice) text("PRATİK — rekor ve kariyer sayılmadı", W / 2, H / 2 + 62, "14px monospace", T().dim);
+    if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 96, "bold 15px monospace", T().b2);
+    text("menü için tıkla veya boşluk", W / 2, H / 2 + 158, "15px monospace", T().dim);
   }
 }
 function drawCallout() {
@@ -3213,14 +3245,16 @@ function nextToast() {
 }
 
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
-const run = { lifeLost: 0, ended: false };     // o anki oyunun (klasik ya da kapışma) bilgisi
-const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false });
+const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 };
+const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 });
 function track(key, n = 1) {
+  if (run.practice) return;
   career.stats[key] += n;
   checkAchievements();
 }
-const trackBest = (key, v) => { if (v > career.stats[key]) { career.stats[key] = v; checkAchievements(); } };
+const trackBest = (key, v) => { if (!run.practice && v > career.stats[key]) { career.stats[key] = v; checkAchievements(); } };
 function checkAchievements(m) {
+  if (run.practice) return;
   for (const a of ACHIEVEMENTS) if (!career.ach[a.id] && a.test(career.stats, m)) {
     career.ach[a.id] = Date.now();
     toast(a.icon + " Başarım: " + a.name, a.desc);
@@ -3230,12 +3264,13 @@ function checkAchievements(m) {
 }
 // Bir oyun bitti (klasik oyun sonu ya da kapışma sonu): süre ve bölüm bir kez işlenir
 function endRun() {
-  if (run.ended) return;
+  if (run.practice || run.ended) return;
   run.ended = true;
   career.stats.time += Math.round(state.time);
   trackBest("bestLevel", state.level);
 }
 function careerGameEnd() {
+  if (run.practice) return;
   endRun();
   track("games");
   saveCareer();
@@ -3362,6 +3397,130 @@ onClick("cr-reset", e => {
   renderCareer();
 });
 if (career.pending) careerAbandon();           // önceki oturumda yarım kalan dereceli maç
+
+// ======================================================================
+// js/challenge.js
+// ======================================================================
+// 20. MEYDAN OKUMA: bölüm seçimi, pratik koşular ve günlük meydan okuma
+// ======================================================================
+const challengePanel = $("challengepanel");
+const levelGrid = $("level-grid");
+const dailyCard = $("daily-card");
+const dailyStartBtn = $("daily-start");
+
+// --- Günlük meydan okuma: yerel tarih, tek deneme, seri ---
+const dayPad = n => String(n).padStart(2, "0");
+const dayString = d => d.getFullYear() + "-" + dayPad(d.getMonth() + 1) + "-" + dayPad(d.getDate());
+const localDate = () => dayString(new Date());
+// Öğlen 12'yi kullan: yaz saati geçişlerinde gün kaymasın
+const yesterdayOf = today => {
+  const d = new Date(today + "T12:00:00");
+  d.setDate(d.getDate() - 1);
+  return dayString(d);
+};
+const streakAfter = (last, streak, today) => (last === today ? streak : last === yesterdayOf(today) ? streak + 1 : 1);
+
+const daily = { date: "", used: false, score: 0, best: 0, streak: 0, last: "" };
+(() => {
+  const v = store.get("bb_daily", null);
+  if (!v || typeof v !== "object") return;
+  const validDay = s => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
+  const num = n => Number.isFinite(+n) && +n > 0 ? Math.floor(+n) : 0;
+  if (validDay(v.date)) daily.date = v.date;
+  if (validDay(v.last)) daily.last = v.last;
+  daily.used = !!v.used;
+  daily.score = num(v.score);
+  daily.best = num(v.best);
+  daily.streak = num(v.streak);
+})();
+const saveDaily = () => store.set("bb_daily", daily);
+const dailyUsed = () => daily.date === localDate() && daily.used;
+const hazardLevel = () => (run.daily ? "kabus" : settings.hazards);
+const currentStreak = () => {
+  const today = localDate();
+  return daily.last === today || daily.last === yesterdayOf(today) ? daily.streak : 0;
+};
+
+function startDaily() {
+  const today = localDate();
+  if (daily.date === today && daily.used) return false;
+  if (run.daily) finishDaily();
+  closePanels();
+  if (battle.active) closeBattle();
+  daily.streak = streakAfter(daily.last, daily.streak, today);
+  daily.last = today;
+  daily.date = today;
+  daily.used = true;
+  daily.score = 0;
+  saveDaily();
+  startGame();
+  run.daily = true;
+  state.lives = 1;
+  state.diffSpeed = 1.15;
+  state.speed = levelSpeed(1);
+  callout("☀️ GÜNLÜK MEYDAN OKUMA", "#ffd166");
+  return true;
+}
+
+function finishDaily() {
+  if (!run.daily || run.dailyFinished) return;
+  run.dailyFinished = true;
+  daily.score = state.score;
+  daily.best = Math.max(daily.best, daily.score);
+  daily.used = true;
+  saveDaily();
+  renderChallenge();
+}
+
+// Klasik oyunda ulaşılan en ileri bölüm; 1 her zaman açık
+function unlockedLevel() {
+  return clamp(Math.max(1, Math.round(career.stats.bestLevel) || 0), 1, LEVELS.length);
+}
+
+// Pratik koşu: rekor, liderlik tablosu, kariyer sayaçları ve başarımlar sayılmaz
+function startPractice(level) {
+  level = Math.round(level);
+  if (!(level >= 1 && level <= unlockedLevel())) return false;
+  closePanels();
+  if (battle.active) closeBattle();
+  startGame();
+  run.practice = true;
+  if (level > 1) { state.level = level - 1; nextLevel(); }
+  return true;
+}
+
+function renderChallenge() {
+  const max = unlockedLevel();
+  levelGrid.replaceChildren(...LEVELS.map((def, i) => {
+    const n = i + 1, locked = n > max, boss = !Array.isArray(def);
+    return el("button", {
+      className: n === max ? "active" : "",
+      textContent: (boss ? "☠ " : "") + n,
+      title: locked ? "Önce klasik oyunda " + n + ". bölüme ulaş" : "Bölüm " + n + " pratiği",
+      disabled: locked,
+      onclick: () => startPractice(n),
+    });
+  }));
+  const used = dailyUsed();
+  const todayLabel = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+  dailyCard.replaceChildren(
+    el("strong", { textContent: used ? "Bugünkü deneme kullanıldı" : "Bugünün koşusu hazır" }),
+    el("span", { textContent: todayLabel + " · 1 can · Kabus lanetleri · +%15 hız" }),
+    el("span", { textContent: "En iyi " + daily.best + " · Seri " + currentStreak() + " gün" }),
+  );
+  dailyStartBtn.disabled = used;
+  dailyStartBtn.textContent = used ? "☀️ Bugünkü deneme kullanıldı" : "☀️ Bugünün koşusunu başlat";
+}
+
+setupPanel(challengePanel, "🎯 Meydan Okuma");
+const challengeBtn = el("button", {
+  textContent: "🎯 Meydan",
+  title: "Bölüm seçimi, pratik ve günlük meydan okuma",
+  onclick: () => togglePanel(challengePanel, renderChallenge),
+});
+toolbar.insertBefore(challengeBtn, careerBtn);
+onClick("daily-start", startDaily);
+renderChallenge();
 
 // ======================================================================
 // js/versus.js

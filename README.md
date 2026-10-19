@@ -1,6 +1,6 @@
 # Brick Breaker AI
 
-Tek dosya, sıfır bağımlılık — tarayıcıda aç, oyna. İstersen kendi video ve müziğini arka plana koy.
+Tek dosya, sıfır bağımlılık — tarayıcıda aç, oyna. İstersen kendi video ve müziğini arka plana koy. Lanetler, boss'lar, günlük meydan okuma, bölüm seçimi ve koşu özeti dahil.
 
 ## Çalıştırma
 
@@ -16,7 +16,7 @@ Bu dosya, modüllere ayrılmış proje sürümünden derlenir: `/run/media/albas
 - **Boşluk / tıklama / dokunma**: topu fırlat (YAPIŞ kapsülünde yakalanan topu bırak); menü, duraklatma ve oyun sonu ekranlarında ilerlet
 - **P / Esc**: duraklat (sekme değişince otomatik duraklar); bir panel açıksa **Esc** paneli kapatır
 - **T**: sıradaki tema · **R**: sonsuz rastgele tema · **F**: tam ekran (🖥️ düğmesi de)
-- **Araç çubuğu** (tuvalin altında): 🔊 sesler · 🎨 tema · 🎲 rastgele tema · 🖌️ tema stüdyosu · ⚔ rekabet · 🏅 kariyer · ⚙️ ayarlar · 🖥️ tam ekran. Paneller ekranın ortasında açılır, aynı anda tek panel açık kalır; ✕, Esc ya da dışarı tıklamak kapatır, panel açıkken oyun arkada duraklar.
+- **Araç çubuğu** (tuvalin altında): 🔊 sesler · 🎨 tema · 🎲 rastgele tema · 🖌️ tema stüdyosu · ⚔ rekabet · 🎯 meydan · 🏅 kariyer · ⚙️ ayarlar · 🖥️ tam ekran. Paneller ekranın ortasında açılır, aynı anda tek panel açık kalır; ✕, Esc ya da dışarı tıklamak kapatır, panel açıkken oyun arkada duraklar.
 - **⚙️ Ayarlar**: efekt ses seviyesi, raket sesi, ekran sarsıntısı (Açık/Azaltılmış/Kapalı — `prefers-reduced-motion` açıksa varsayılan Azaltılmış), zorluk (Kolay ×0.85 hız +5 can / Normal / Zor ×1.15 hız +2 can; yalnızca yeni oyunda uygulanır), HP noktacıkları (tuğlada kalan can noktası; WCAG göreli parlaklığına göre temaya kontrastlı renk). Tümü kalıcı.
 
 ## Mekanikler
@@ -132,6 +132,15 @@ Araç çubuğundaki **🏅 Kariyer** (ya da Rekabet panelindeki **📊 Kariyer v
 | 💎 | Elmas Lig | Elmas lige yüksel |
 | 🔥 | Efsane Lig | Efsane lige yüksel |
 
+## Meydan okuma (🎯 paneli)
+
+Araç çubuğundaki **🎯 Meydan** düğmesi iki şeyi bir arada açar:
+
+- **Günlük meydan okuma:** her gün **tek deneme**. Koşu **1 can**, **Kabus** lanet yoğunluğu ve **+%15 top hızı** ile başlar. Deneme başladığı anda kullanılmış sayılır; sayfayı yenilemek yeni deneme açmaz. Bugünkü skor, günlük en iyi ve üst üste oynanan gün serisi `bb_daily` içinde saklanır. Seri, dün de oynandıysa artar; bir gün atlanırsa 1'e döner.
+- **Bölüm seçimi (pratik):** klasik oyunda ulaştığın en ileri bölüme kadar (1 her zaman açık) bölüm seçebilirsin. Seçilen bölüm **pratik koşu** olarak başlar; rekor, liderlik tablosu, kariyer sayaçları ve başarımlar sayılmaz.
+
+**Koşu özeti:** oyun sonu ekranı skorun yanında bölüm, süre, kırılan tuğla, en iyi combo, toplanan kapsül, atlatılan lanet ve yenilen boss sayılarını gösterir. Günlük koşuda ayrıca günlük en iyi ve seri; pratik koşuda “PRATİK” etiketi görünür.
+
 ## Sesler
 
 Web Audio ile sentezlenir; her yüzeyin kendi sesi vardır: yan duvar (tok), tavan (tink), tuğla kırma (combo ile incelen pop), dayanıklı tuğla (clack), kırılmaz tuğla (metalik clank), patlama (güm), kapsüller, kayıp, bölüm/oyun sonu melodileri. Kaos sürümüyle: tampon (boing), falso (vızıltı), portal, SMASH, yıldırım, lazer, altın, kötü kapsül, kalkan, kara delik uğultusu ve fırlatma, ÇILGIN MOD arpeji, boss kükremesi/isabet/mermi, sersemleme. Rekabetle: geri sayım, saldırı, başarım melodisi.
@@ -208,8 +217,12 @@ Bu `index.html`, proje sürümünün (`/run/media/albas/albas/brickbreaker-web`)
 
 ```
 cd /run/media/albas/albas/brickbreaker-web
-npm test                                                           # 17 özellik testi (başsız Chromium)
-node tools/build.mjs --out /run/media/albas/albas/brickbreakerai/index.html
+npm test                                                           # 20 özellik testi (başsız Chromium)
+npm run release                                                    # test + derleme + bu dosyayı güncelle
 ```
 
-Modüller (sırayla): `core` (sabitler, renk/çizim/DOM yardımcıları) · `themes` · `settings` (ayar tablosu; ayarlar paneli bundan üretilir) · `audio` (ses motoru + ses tablosu) · `levels` · `state` · `flow` (oyun akışı) · `effects` · `physics` (kapsül tablosu, tuğlalar, duvarlar, top, lazer, kara delik, boss) · `curses` (lanetler) · `update` · `render` (sprite'lar, HUD, ekranlar) · `music` (medya + müzik senkronu) · `ui` (araç çubuğu, paneller, tema stüdyosu, girdi) · `career` (dereceli lig, sayaçlar, maç geçmişi, başarımlar) · `versus` (botlar, dereceli maç, WebRTC, liderlik tablosu) · `main` (ana döngü).
+`npm run release`, `dist/index.html` ile `dist/brickbreaker.min.html` dosyalarını üretir ve
+okunaklı tek dosyayı buraya kopyalar. GitHub Actions her `main` push'unda ve pull request'te
+testleri, derlemeyi ve tek dosya testini çalıştırır.
+
+Modüller (sırayla): `core` (sabitler, renk/çizim/DOM yardımcıları) · `themes` · `settings` (ayar tablosu; ayarlar paneli bundan üretilir) · `audio` (ses motoru + ses tablosu) · `levels` · `state` · `flow` (oyun akışı) · `effects` · `physics` (kapsül tablosu, tuğlalar, duvarlar, top, lazer, kara delik, boss) · `curses` (lanetler) · `update` · `render` (sprite'lar, HUD, ekranlar) · `music` (medya + müzik senkronu) · `ui` (araç çubuğu, paneller, tema stüdyosu, girdi) · `career` (dereceli lig, sayaçlar, maç geçmişi, başarımlar) · `challenge` (günlük meydan okuma, bölüm seçimi) · `versus` (botlar, dereceli maç, WebRTC, liderlik tablosu) · `main` (ana döngü).
