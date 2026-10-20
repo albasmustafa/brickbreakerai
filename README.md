@@ -38,6 +38,16 @@ Bu dosya, modüllere ayrılmış proje sürümünden derlenir: `/run/media/albas
 - **Efektler:** her isabette tuğla bir an parlar; kırılmada parçacık + dönen parçalar; kenar vuruşu/patlama/kayıp ekranı sarsar; top izi.
 - **Rekor:** `localStorage` (`bb_highscore`), oyun sonunda "YENİ REKOR" işareti.
 
+## Tutundurma paketi (2026-10)
+
+- **Lanet Paktı:** 1. ve her 5. bölümün başında 3 risk/ödül paktı; koşu boyunca sürer, istersen seçmezsin.
+- **Son Top Bahsi:** Son can gidince bir kez 1 canla devam + lanet bedeli.
+- **Dramaturg:** Her bölüme isteğe bağlı görev (tuğla kır, combo yap, boss'u 30 sn'de yen…); zor anda nefes, uzun sessizlikte gösteri.
+- **Koleksiyon:** 20 lanet + 8 tuğla + 2 boss kartı; 1/5/15 eşiklerinde seviye, lanet kartı süreyi kısaltır.
+- **Hayalet Koşu:** En iyi klasik koşunun hayaleti yeni koşuda tempo tutar; `BBG1:` koduyla paylaşılır.
+- **Haftalık Kaos Tohumu:** Her hafta aynı tohumla deterministik koşu; `BBW1:` sonuç kodu.
+- **Şarkıdan Bölüm:** BPM/bas/tiz analiziyle 3 bölüm (+ boss); `BBS1:` koduyla paylaşılır.
+
 ## Lanetler (engeller)
 
 Oyun sırasında rastgele aralıklarla bir **lanet** gelir: ekranın ortasında 1.2 sn önceden "⚠ AD" diye duyurulur, sonra başlar; HUD'da kalan süresiyle mor etiket olarak durur. Lanet aktifken kırılan her tuğla **×1.5 puan** verir. Oyun sonunda **atlatılan lanet** sayısı gösterilir. Can kaybında ve bölüm geçişinde tüm lanetler silinir, her can/bölüm başında kısa bir nefes payı vardır; bölüm ilerledikçe sıklaşırlar.
@@ -100,7 +110,7 @@ En çok 4 insan (oda sahibi merkezdedir, botları da o çalıştırır). Skorlar
 Araç çubuğundaki **🏅 Kariyer** (ya da Rekabet panelindeki **📊 Kariyer ve başarımlar**) açar. Hepsi bu cihazda saklanır (`bb_career`); **Kariyeri sıfırla** (iki tıkla onaylı) puanı, sayaçları, geçmişi ve başarımları siler.
 
 - **Rütbe kartı:** lig, LP, sonraki lige ilerleme çubuğu, yerleştirme durumu, zirve puan.
-- **18 sayaç:** klasik oyun, kırılan tuğla, en iyi combo, en uzak bölüm, yenilen boss, ÇILGIN MOD, atlatılan lanet, yakalanan kapsül, oynama süresi, kapışma, galibiyet (yüzdesiyle), podyum (ilk 3), en uzun galibiyet serisi (şu anki seriyle), dereceli maç ve galibiyet, çevrim içi maç, gönderilen saldırı, kalkanla engellenen saldırı. Sayaçlar oyun sırasında canlı artar; klasik oyunlar da kapışmalar da sayılır.
+- **19 sayaç:** klasik oyun, kırılan tuğla, en iyi combo, en uzak bölüm, yenilen boss, ÇILGIN MOD, atlatılan lanet, yakalanan kapsül, oynama süresi, kapışma, galibiyet (yüzdesiyle), podyum (ilk 3), en uzun galibiyet serisi (şu anki seriyle), dereceli maç ve galibiyet, çevrim içi maç, gönderilen saldırı, kalkanla engellenen saldırı, dramaturg görevi. Sayaçlar oyun sırasında canlı artar; klasik oyunlar da kapışmalar da sayılır.
 - **Son maçlar:** son 20 kapışma: tarih, mod (🏅 dereceli / 🤖 botlar / 🌐 çevrim içi), sıra (🏆 kazandın, 🏳 yarıda kaldı), skor, LP değişimi.
 - **Başarımlar:** 25 başarım. Açıldığı anda tuvalin üstünde bildirim çıkar (tam ekranda da), kısa bir melodi çalar; birden çok başarım açılırsa bildirimler sırayla gelir. Kilitli başarımlar panelde soluk görünür, açılanın üstüne gelince açıldığı tarih yazar.
 
@@ -217,7 +227,7 @@ Bu `index.html`, proje sürümünün (`/run/media/albas/albas/brickbreaker-web`)
 
 ```
 cd /run/media/albas/albas/brickbreaker-web
-npm test                                                           # 20 özellik testi (başsız Chromium)
+npm test                                                           # 27 özellik testi (başsız Chromium)
 npm run release                                                    # test + derleme + bu dosyayı güncelle
 ```
 
