@@ -48,6 +48,17 @@ Bu dosya, modüllere ayrılmış proje sürümünden derlenir: `/run/media/albas
 - **Final:** duvarın son %3'ü kalınca kalan pikseller kendiliğinden tutuşur (**FİNAL ZİNCİRİ!**), son kırıntıları kovalamak gerekmez. Duvar bitince **"Congratulations / You win!"** kartı açılır, **3 yıldız** sırayla zıplayarak dolar (+3000 puan, en yüksek top sayısı).
 - **Nereden oynanır:** klasik oyunda 11. bölümden sonra gelir. **🎯 Meydan → 🌀 Tünel Fırtınası'nı oyna** ile her zaman pratik olarak açılır.
 
+## Diller (25)
+
+Oyun **25 dilde** oynanır: Türkçe, English, Deutsch, Français, Español, Italiano, Português (Brasil), Русский, Українська, Polski, Nederlands, Svenska, Ελληνικά, Čeština, Română, Magyar, Azərbaycanca, العربية, فارسی, हिन्दी, Bahasa Indonesia, Tiếng Việt, 简体中文, 日本語, 한국어.
+
+- **Dil seçimi:** ⚙️ Ayarlar panelinin en üstündeki **🌐 Dil · Language** listesinden. Seçince sayfa o dilde yeniden açılır (oyun kayıtların, ayarların, kariyerin aynen kalır).
+- **İlk açılış:** daha önce dil seçilmediyse tarayıcının dili kullanılır; listede yoksa İngilizce açılır.
+- **Her şey çevrilidir:** menüler, paneller, tuval yazıları (HUD, duyurular, oyun sonu, Tünel Fırtınası'nın kazanma kartı), kapsül ve lanet adları, başarımlar, koleksiyon kartları, ipuçları. Uzun çeviriler kartlara ve kapsüllere sığacak şekilde küçülür.
+- **Sağdan sola:** Arapça ve Farsçada arayüz sağdan sola akar; Farsçada sayılar Fars rakamlarıyla yazılır.
+- **Rastgele tema ve şarkı adları** her dilde o dilin kelime sırasıyla kurulur (ör. Türkçe "Sisli Okyanus" → İngilizce "Misty Ocean", Fransızca "Océan de brume", Japonca "霧の海").
+- **Çevrim içi kapışma:** maç akışındaki olaylar her oyuncuya kendi dilinde gösterilir; farklı dillerdeki oyuncular aynı odada oynayabilir.
+
 ## Tutundurma paketi (2026-10)
 
 - **Lanet Paktı:** 1. ve her 5. bölümün başında 3 risk/ödül paktı; koşu boyunca sürer, istersen seçmezsin.
