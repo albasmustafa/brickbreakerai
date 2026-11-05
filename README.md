@@ -30,13 +30,23 @@ Bu dosya, modüllere ayrılmış proje sürümünden derlenir: `/run/media/albas
 - **Tuğla türleri:** 1–3 vuruş (mavi/sarı/kırmızı, hasar aldıkça çatlaklar), **X** kırılmaz (gri, bölüm bitirmek için kırılması gerekmez), **E** patlayıcı (turuncu; kırılınca çevresindeki tuğlaları da patlatır, zincirlenir), **Z** elektrik (mor, 2 vuruş; her vuruşta en yakın 3 tuğlaya yıldırım, yıldırım yiyen elektrikli tuğla bir kez daha zincirler), **$** altın (2 vuruş; ×10 puan, altın yağmuru, kesin iyi kapsül), **+** çoğaltan (yeşil; kırılınca aşağı doğru yeni top). Satırın 11. karakteri `>` ise o sıra sağa sola kayar.
 - **Combo:** rakete dokunmadan üst üste kırılan her tuğla çarpanı büyütür (x8) ve kırılma sesi perde perde incelir. Skor = 10 × dayanıklılık × çarpan. 5/8/15/20/30 combo'da ekranda dev yazı çıkar.
 - **ÇILGIN MOD:** 10 combo'da 6 sn boyunca tüm toplar ateş topu olur, puanlar ×2, tahta gökkuşağına döner.
-- **Bölümler:** 11 harita `LEVELS` dizisinde (satır = sıra, karakter = tuğla türü); 5. ve 10. bölüm boss, 11. bölüm *Siber Labirent*. Sonrası döngü, bölüm başına top hızı +%7, her turda boss canı +%50.
+- **Bölümler:** 12 bölüm `LEVELS` dizisinde (11 harita: satır = sıra, karakter = tuğla türü); 5. ve 10. bölüm boss, 11. bölüm *Siber Labirent*, 12. bölüm **Tünel Fırtınası** (aşağıda). Sonrası döngü, bölüm başına top hızı +%7, her turda boss canı +%50.
 - **Boss:** *Tuğla Kral* (40 can) ve *Demir İmparator* (70 can). Sağa sola gezer, gözleriyle topu izler, rakete nişanlı mermi atar (değerse raket 2.5 sn sersemler ve küçülür). Canı yarıya inince öfkelenir: hızlanır, üçlü yelpaze atar, altına yeni tuğlalar diker. Her 6 isabette iyi kapsül düşürür. Ölünce ağır çekim patlama + 5000 puan.
 - **Güç kapsülleri** (tuğla kırılınca %16 ihtimal): **GENİŞ** raket 10 sn · **ÇOKLU** her toptan 2 kopya (en çok 8 top) · **YAVAŞ** 8 sn · **ATEŞ** 6 sn top kırılabilir tuğlaları sekmeden deler · **LAZER** 8 sn raketten otomatik lazer (boss mermilerini de vurur) · **YAPIŞ** 10 sn top rakete yapışır, tıkla bırak (2.5 sn sonra kendisi kalkar) · **DEV** 10 sn kocaman top, 2 hasar · **KALKAN** alt kenarda 3 kurtarış · **DELİK** 7 sn topları büken kara delik; çok yaklaşan topu fırlatır, sonunda çöküp çevresindeki tuğlaları yutar · **+CAN** (en çok 9) · **KAOS?** rastgele herhangi biri.
 - **Kötü kapsüller** (kırmızı, kesikli çerçeve): **TERS** 6 sn kontroller ters · **MİNİ** 8 sn küçük raket · **HIZ** 6 sn top ×1.3 · **LANET** hemen bir lanet çağırır. Yakalamak cesaret ister: +250 puan.
 - **Ağır çekim:** son tuğla kırılınca ve boss ölünce zaman yavaşlar, ekran hafif yakınlaşır; büyük patlamalarda an donması.
 - **Efektler:** her isabette tuğla bir an parlar; kırılmada parçacık + dönen parçalar; kenar vuruşu/patlama/kayıp ekranı sarsar; top izi.
 - **Rekor:** `localStorage` (`bb_highscore`), oyun sonunda "YENİ REKOR" işareti.
+
+## Tünel Fırtınası (12. bölüm)
+
+- **Piksel duvar:** sahanın üst yarısı yaklaşık **3000 küçük mavi piksel tuğladan** oluşan tek bir duvardır. Her tuğla tek vuruşta kırılır. Duvar bölüm başında yukarıdan aşağı belirir.
+- **Çelik tüneller:** duvarın içinden **kırılmaz gri çelik** iki tünel geçer: solda **L**, sağda **sarmal**. Girişleri duvarın altına açılır, içlerindeki oklar akış yönünü gösterir.
+- **Tünele gir, içeriden oy:** tünele giren top boru gibi hızlanarak çıkışa taşınır ve duvarın içine fırlar. Tünelden çıkan top kırdığı her tuğlada **zincir reaksiyon** başlatır: komşu pikseller tutuşup dalga dalga kırılır, çelik dalgayı durdurur. İlk zincir en büyüğüdür (**ZİNCİR REAKSİYON!**).
+- **Küpler:** her tünel çıkışında üst üste iki küp durur: **sarı +3** ve **turuncu x3**. Top küpe değince küp düşer; **raketle yakala**. **+3** raketten üç yeni top fırlatır, **x3** sahadaki her topu üçe katlar (en çok **300 top**). Yakalanan ya da kaçan küp birkaç saniye sonra çıkışta yeniden belirir.
+- **Top fırtınası:** 30 topu geçince **🌪 TOP FIRTINASI!** başlar, ekran mavi nabızla atar. 300'e ulaşınca **MAKSİMUM** duyurulur. Sol altta top sayacı görünür.
+- **Final:** duvarın son %3'ü kalınca kalan pikseller kendiliğinden tutuşur (**FİNAL ZİNCİRİ!**), son kırıntıları kovalamak gerekmez. Duvar bitince **"Congratulations / You win!"** kartı açılır, **3 yıldız** sırayla zıplayarak dolar (+3000 puan, en yüksek top sayısı).
+- **Nereden oynanır:** klasik oyunda 11. bölümden sonra gelir. **🎯 Meydan → 🌀 Tünel Fırtınası'nı oyna** ile her zaman pratik olarak açılır.
 
 ## Tutundurma paketi (2026-10)
 
@@ -148,6 +158,7 @@ Araç çubuğundaki **🎯 Meydan** düğmesi iki şeyi bir arada açar:
 
 - **Günlük meydan okuma:** her gün **tek deneme**. Koşu **1 can**, **Kabus** lanet yoğunluğu ve **+%15 top hızı** ile başlar. Deneme başladığı anda kullanılmış sayılır; sayfayı yenilemek yeni deneme açmaz. Bugünkü skor, günlük en iyi ve üst üste oynanan gün serisi `bb_daily` içinde saklanır. Seri, dün de oynandıysa artar; bir gün atlanırsa 1'e döner.
 - **Bölüm seçimi (pratik):** klasik oyunda ulaştığın en ileri bölüme kadar (1 her zaman açık) bölüm seçebilirsin. Seçilen bölüm **pratik koşu** olarak başlar; rekor, liderlik tablosu, kariyer sayaçları ve başarımlar sayılmaz.
+- **🌀 Tünel Fırtınası:** 12. bölüm kilitli olsa bile bu düğmeyle her zaman pratik olarak oynanır.
 
 **Koşu özeti:** oyun sonu ekranı skorun yanında bölüm, süre, kırılan tuğla, en iyi combo, toplanan kapsül, atlatılan lanet ve yenilen boss sayılarını gösterir. Günlük koşuda ayrıca günlük en iyi ve seri; pratik koşuda “PRATİK” etiketi görünür.
 
