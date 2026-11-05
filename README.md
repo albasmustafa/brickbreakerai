@@ -27,7 +27,8 @@ Bu dosya, modüllere ayrılmış proje sürümünden derlenir: `/run/media/albas
 - **SMASH:** raketin en ucuyla (%20) vuruş topa geçici hız patlaması verir.
 - **Duvar bölgeleri:** yan duvarlarda parlayan şeritler, bölüm ilerledikçe çoğalır (bölüm numarasıyla tohumlanır, her oynayışta aynı): **tampon** (pembe, oklu: pinball gibi fırlatır, ×1.6 hız + rastgele sapma) · **falso** (yeşil: topa sert kavis verir) · **portal** (mor, 3. bölümden itibaren: soldan giren top sağ duvardaki eşinden aynı yönde çıkar).
 - **Yatay sekme koruması:** top hiçbir zaman yataya 16°'den fazla yaklaşmaz, duvarlar arasında sonsuza dek sekmez.
-- **Tuğla türleri:** 1–3 vuruş (mavi/sarı/kırmızı, hasar aldıkça çatlaklar), **X** kırılmaz (gri, bölüm bitirmek için kırılması gerekmez), **E** patlayıcı (turuncu; kırılınca çevresindeki tuğlaları da patlatır, zincirlenir), **Z** elektrik (mor, 2 vuruş; her vuruşta en yakın 3 tuğlaya yıldırım, yıldırım yiyen elektrikli tuğla bir kez daha zincirler), **$** altın (2 vuruş; ×10 puan, altın yağmuru, kesin iyi kapsül), **+** çoğaltan (yeşil; kırılınca aşağı doğru yeni top). Satırın 11. karakteri `>` ise o sıra sağa sola kayar.
+- **Tuğla türleri:** 1–3 vuruş (mavi/sarı/kırmızı; hasar aldıkça renk yumuşar, çatlaklar ve kenar parçaları belirir), **X** kırılmaz, **E** patlayıcı (zincirlenir), **Z** elektrik (yakın 3 tuğlaya yıldırım), **$** altın (×10 puan + kesin iyi kapsül), **+** çoğaltan (yeni top).
+- **Yeni nesil tuğlalar:** **H** yenilenen (yarım kalırsa canını geri kazanır), **A** kalkanlı (topu 4 vuruşta aşındırır; ateş/lazer hemen söker), **T** ikiz (biri kırılınca eşi de dağılır), **I** buz (komşularını dondurur, ateşte erir), **V** virüs (komşularını güçlendirir), **S** şifacı (boss'u ve komşuları onarır). Günlük/haftalık koşularda bölümler tohumdan **simetrik yordamsal duvarlar** olarak üretilir; yeni **Düşen Duvar** laneti duvarı adım adım indirir, müzik vuruşuna denk kırışlar **RİTİM!** bonusu verir.
 - **Combo:** rakete dokunmadan üst üste kırılan her tuğla çarpanı büyütür (x8) ve kırılma sesi perde perde incelir. Skor = 10 × dayanıklılık × çarpan. 5/8/15/20/30 combo'da ekranda dev yazı çıkar.
 - **ÇILGIN MOD:** 10 combo'da 6 sn boyunca tüm toplar ateş topu olur, puanlar ×2, tahta gökkuşağına döner.
 - **Bölümler:** 12 bölüm `LEVELS` dizisinde (11 harita: satır = sıra, karakter = tuğla türü); 5. ve 10. bölüm boss, 11. bölüm *Siber Labirent*, 12. bölüm **Tünel Fırtınası** (aşağıda). Sonrası döngü, bölüm başına top hızı +%7, her turda boss canı +%50.
@@ -64,7 +65,7 @@ Oyun **25 dilde** oynanır: Türkçe, English, Deutsch, Français, Español, Ita
 - **Lanet Paktı:** 1. ve her 5. bölümün başında 3 risk/ödül paktı; koşu boyunca sürer, istersen seçmezsin.
 - **Son Top Bahsi:** Son can gidince bir kez 1 canla devam + lanet bedeli.
 - **Dramaturg:** Her bölüme isteğe bağlı görev (tuğla kır, combo yap, boss'u 30 sn'de yen…); zor anda nefes, uzun sessizlikte gösteri.
-- **Koleksiyon:** 20 lanet + 8 tuğla + 2 boss kartı; 1/5/15 eşiklerinde seviye, lanet kartı süreyi kısaltır.
+- **Koleksiyon:** 21 lanet + 14 tuğla + 2 boss kartı; 1/5/15 eşiklerinde seviye, lanet kartı süreyi kısaltır.
 - **Hayalet Koşu:** En iyi klasik koşunun hayaleti yeni koşuda tempo tutar; `BBG1:` koduyla paylaşılır.
 - **Haftalık Kaos Tohumu:** Her hafta aynı tohumla deterministik koşu; `BBW1:` sonuç kodu.
 - **Şarkıdan Bölüm:** BPM/bas/tiz analiziyle 3 bölüm (+ boss); `BBS1:` koduyla paylaşılır.
