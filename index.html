@@ -214,6 +214,23 @@ input[type="range"] { accent-color: var(--accent); }
 /* Dil seçici */
 select { font: inherit; font-size: 13px; color: var(--uitext); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; cursor: pointer; }
 select:hover { border-color: var(--accent); }
+
+/* Bölüm editörü: 10 sütun + kaydırma düğmesi; tuğla oranı oyundakiyle aynı (70×22) */
+#editorpanel { width: min(680px, calc(100vw - 24px)); }
+#ed-palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 5px; margin: 6px 0; }
+#ed-palette .ed-brush { display: flex; align-items: center; gap: 6px; padding: 4px 7px; text-align: left; min-width: 0; }
+#ed-palette .ed-brush > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#ed-palette .ed-brush.active { background: var(--panel2); box-shadow: 0 0 0 2px var(--accent); color: var(--uitext); }
+.ed-sw { flex: none; width: 26px; height: 14px; border-radius: 4px; border: 1px solid var(--line); font: bold 10px/12px monospace; text-align: center; }
+#ed-grid { display: grid; grid-template-columns: repeat(10, 1fr) 26px; gap: 3px; padding: 8px; border-radius: 10px; background: var(--bg, #0b0f1e); border: 1px solid var(--line); touch-action: none; user-select: none; }
+#ed-grid .ed-cell { aspect-ratio: 70 / 22; min-width: 0; padding: 0; border: 1px dashed var(--line); border-radius: 4px; background: transparent; font: bold 11px monospace; cursor: crosshair; }
+#ed-grid .ed-cell[style*="background"] { border-style: solid; border-color: rgba(255,255,255,0.18); }
+#ed-grid .ed-cell.locked { opacity: 0.25; cursor: not-allowed; background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,77,109,0.35) 4px 6px) !important; }
+#ed-grid .ed-slide { padding: 0; font-size: 11px; border-radius: 4px; min-width: 0; }
+#ed-grid .ed-slide.active { background: var(--accent); color: var(--accent-ink); }
+#ed-boss, #ed-templates, #ed-saved { display: flex; flex-wrap: wrap; gap: 5px; }
+#ed-code { width: 100%; min-height: 48px; }
+@media (max-width: 560px) { #ed-grid { gap: 2px; padding: 5px; grid-template-columns: repeat(10, 1fr) 20px; } #ed-grid .ed-cell { font-size: 9px; } }
 </style>
 </head>
 <body>
@@ -353,6 +370,23 @@ select:hover { border-color: var(--accent); }
   <textarea id="ghost-code" placeholder="BBG1:... hayalet kodunu buraya yapıştır"></textarea>
   <div class="setnote" id="ghost-msg"></div>
   <div class="setnote">Klasik koşunda en iyi skorun hayaleti kaydedilir; yeni koşuda yarı saydam rakip olarak aynı tempoyu gösterir. Kodla arkadaşına gönderebilirsin.</div>
+</section>
+<section id="editorpanel" class="panel" role="dialog" aria-label="Bölüm editörü" hidden>
+  <div class="setrow"><span class="label">Bölüm adı</span><input type="text" id="ed-name" maxlength="30" placeholder="Benim bölümüm"></div>
+  <div id="ed-palette"></div>
+  <div id="ed-grid"></div>
+  <div class="setnote" id="ed-info"></div>
+  <div class="setrow"><button id="ed-mirror">🪞 Ayna</button><button id="ed-undo">↶ Geri al</button><button id="ed-clear">🧹 Temizle</button><button id="ed-random">🎲 Rastgele</button></div>
+  <div class="setrow"><span class="label">Boss</span><div id="ed-boss"></div></div>
+  <div class="setrow"><span class="label">Şablon</span><div id="ed-templates"></div></div>
+  <div class="setrow"><button id="ed-play">▶ Test et</button><button id="ed-save">💾 Kaydet</button><button id="ed-delete">🗑 Sil</button></div>
+  <div class="sethead">Kayıtlı bölümlerim</div>
+  <div id="ed-saved"></div>
+  <div class="sethead">Paylaş</div>
+  <div class="setrow"><button id="ed-export">📤 Kodu al</button><button id="ed-link">🔗 Bağlantı</button><button id="ed-import">📥 Yükle</button></div>
+  <textarea id="ed-code" placeholder="BBL1:... bölüm kodunu ya da bağlantısını buraya yapıştır"></textarea>
+  <div class="setnote" id="ed-msg"></div>
+  <div class="setnote">Paletten tuğla seç, ızgaraya tıkla ya da sürükle; sağ tık siler. Sıra sonundaki ↔ o sırayı kaydırır, Ayna açıkken çizdiğin sağ yarıya yansır. Boss seçilirse ilk 5 sıra boss'a ayrılır. Test koşuları rekor ve kariyere sayılmaz. Bağlantıyla açılan bölüm doğrudan editöre yüklenir.</div>
 </section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
@@ -1192,6 +1226,40 @@ const I18N_KEYS = [
 "DONDU!", // 709
 "ENFEKTE!", // 710
 "ŞİFA", // 711
+"Silgi", // 712
+"Elektrik", // 713
+"Benim bölümüm", // 714
+"✏️ BÖLÜM TAMAM!", // 715
+"Bu sıra sağa sola kayar", // 716
+"{n} tuğla · {s} özel", // 717
+"en az bir kırılabilir tuğla koy", // 718
+"📂 {name} açıldı.", // 719
+"Henüz kayıtlı bölüm yok.", // 720
+"✏️ Bölüm Editörü", // 721
+"{n}. bölümü şablon olarak aç", // 722
+"⚠️ En az bir kırılabilir tuğla koy.", // 723
+"💾 {name} kaydedildi.", // 724
+"⚠️ Önce bölüme bir ad ver.", // 725
+"⚠️ En çok {n} bölüm kaydedilebilir; önce birini sil.", // 726
+"🗑 {name} silindi.", // 727
+"⚠️ Bu adla kayıtlı bölüm yok.", // 728
+"🔗 Bağlantı panoya kopyalandı.", // 729
+"📥 Bölüm yüklendi — test edebilirsin.", // 730
+"✏️ Editör", // 731
+"Kendi bölümünü çiz, test et ve paylaş", // 732
+"🔗 Paylaşılan bölüm yüklendi — ▶ Test et ile oyna.", // 733
+"Bölüm adı", // 734
+"🪞 Ayna", // 735
+"↶ Geri al", // 736
+"🧹 Temizle", // 737
+"Boss", // 738
+"Şablon", // 739
+"▶ Test et", // 740
+"Kayıtlı bölümlerim", // 741
+"🔗 Bağlantı", // 742
+"Paletten tuğla seç, ızgaraya tıkla ya da sürükle; sağ tık siler. Sıra sonundaki ↔ o sırayı kaydırır, Ayna açıkken çizdiğin sağ yarıya yansır. Boss seçilirse ilk 5 sıra boss'a ayrılır. Test koşuları rekor ve kariyere sayılmaz. Bağlantıyla açılan bölüm doğrudan editöre yüklenir.", // 743
+"Bölüm editörü", // 744
+"BBL1:... bölüm kodunu ya da bağlantısını buraya yapıştır", // 745
 ];
 const I18N_DATA = {};
 
@@ -1394,6 +1462,40 @@ I18N_DATA.en = {
 709: "FROZEN!",
 710: "INFECTED!",
 711: "HEAL",
+712: "Eraser",
+713: "Electric",
+714: "My level",
+715: "✏️ LEVEL COMPLETE!",
+716: "This row slides left and right",
+717: "{n} bricks · {s} special",
+718: "place at least one breakable brick",
+719: "📂 {name} opened.",
+720: "No saved levels yet.",
+721: "✏️ Level Editor",
+722: "Open level {n} as a template",
+723: "⚠️ Place at least one breakable brick.",
+724: "💾 {name} saved.",
+725: "⚠️ Give the level a name first.",
+726: "⚠️ You can save at most {n} levels; delete one first.",
+727: "🗑 {name} deleted.",
+728: "⚠️ No saved level with this name.",
+729: "🔗 Link copied to clipboard.",
+730: "📥 Level loaded — you can test it.",
+731: "✏️ Editor",
+732: "Draw, test and share your own level",
+733: "🔗 Shared level loaded — play it with ▶ Test.",
+734: "Level name",
+735: "🪞 Mirror",
+736: "↶ Undo",
+737: "🧹 Clear",
+738: "Boss",
+739: "Template",
+740: "▶ Test",
+741: "My saved levels",
+742: "🔗 Link",
+743: "Pick a brick from the palette, then click or drag on the grid; right-click erases. The ↔ at the end of a row makes it slide; with Mirror on, what you draw is reflected to the right half. Choosing a boss reserves the top 5 rows for it. Test runs don't count toward records or career. A level opened from a link loads straight into the editor.",
+744: "Level editor",
+745: "BBL1:... paste a level code or link here",
 };
 
 // ======================================================================
@@ -1595,6 +1697,40 @@ I18N_DATA.de = {
 709: "GEFROREN!",
 710: "INFIZIERT!",
 711: "HEILUNG",
+712: "Radierer",
+713: "Elektro",
+714: "Mein Level",
+715: "✏️ LEVEL GESCHAFFT!",
+716: "Diese Reihe gleitet hin und her",
+717: "{n} Steine · {s} spezial",
+718: "setze mindestens einen zerstörbaren Stein",
+719: "📂 {name} geöffnet.",
+720: "Noch keine gespeicherten Level.",
+721: "✏️ Level-Editor",
+722: "Level {n} als Vorlage öffnen",
+723: "⚠️ Setze mindestens einen zerstörbaren Stein.",
+724: "💾 {name} gespeichert.",
+725: "⚠️ Gib dem Level zuerst einen Namen.",
+726: "⚠️ Höchstens {n} Level speicherbar; lösche zuerst eines.",
+727: "🗑 {name} gelöscht.",
+728: "⚠️ Kein gespeichertes Level mit diesem Namen.",
+729: "🔗 Link in die Zwischenablage kopiert.",
+730: "📥 Level geladen — du kannst es testen.",
+731: "✏️ Editor",
+732: "Eigenes Level zeichnen, testen und teilen",
+733: "🔗 Geteiltes Level geladen — spiel es mit ▶ Testen.",
+734: "Levelname",
+735: "🪞 Spiegeln",
+736: "↶ Rückgängig",
+737: "🧹 Leeren",
+738: "Boss",
+739: "Vorlage",
+740: "▶ Testen",
+741: "Meine gespeicherten Level",
+742: "🔗 Link",
+743: "Wähle einen Stein aus der Palette und klicke oder ziehe im Raster; Rechtsklick löscht. Das ↔ am Reihenende lässt die Reihe gleiten; mit Spiegeln wird das Gezeichnete auf die rechte Hälfte gespiegelt. Ein Boss belegt die oberen 5 Reihen. Testläufe zählen nicht für Rekord und Karriere. Ein per Link geöffnetes Level landet direkt im Editor.",
+744: "Level-Editor",
+745: "BBL1:... Levelcode oder Link hier einfügen",
 };
 
 // ======================================================================
@@ -1796,6 +1932,40 @@ I18N_DATA.fr = {
 709: "GELÉE !",
 710: "INFECTÉE !",
 711: "SOIN",
+712: "Gomme",
+713: "Électrique",
+714: "Mon niveau",
+715: "✏️ NIVEAU TERMINÉ !",
+716: "Cette rangée glisse de gauche à droite",
+717: "{n} briques · {s} spéciales",
+718: "place au moins une brique cassable",
+719: "📂 {name} ouvert.",
+720: "Aucun niveau enregistré pour l'instant.",
+721: "✏️ Éditeur de niveaux",
+722: "Ouvrir le niveau {n} comme modèle",
+723: "⚠️ Place au moins une brique cassable.",
+724: "💾 {name} enregistré.",
+725: "⚠️ Donne d'abord un nom au niveau.",
+726: "⚠️ {n} niveaux au maximum ; supprime-en un d'abord.",
+727: "🗑 {name} supprimé.",
+728: "⚠️ Aucun niveau enregistré sous ce nom.",
+729: "🔗 Lien copié dans le presse-papiers.",
+730: "📥 Niveau chargé — tu peux le tester.",
+731: "✏️ Éditeur",
+732: "Dessine, teste et partage ton propre niveau",
+733: "🔗 Niveau partagé chargé — joue-le avec ▶ Tester.",
+734: "Nom du niveau",
+735: "🪞 Miroir",
+736: "↶ Annuler",
+737: "🧹 Effacer",
+738: "Boss",
+739: "Modèle",
+740: "▶ Tester",
+741: "Mes niveaux enregistrés",
+742: "🔗 Lien",
+743: "Choisis une brique dans la palette, puis clique ou glisse sur la grille ; le clic droit efface. Le ↔ en bout de rangée la fait glisser ; avec Miroir, ce que tu dessines se reflète sur la moitié droite. Choisir un boss lui réserve les 5 rangées du haut. Les essais ne comptent ni pour le record ni pour la carrière. Un niveau ouvert par un lien arrive directement dans l'éditeur.",
+744: "Éditeur de niveaux",
+745: "BBL1:... colle ici un code ou un lien de niveau",
 };
 
 // ======================================================================
@@ -1997,6 +2167,40 @@ I18N_DATA.es = {
 709: "¡CONGELADO!",
 710: "¡INFECTADO!",
 711: "CURA",
+712: "Borrador",
+713: "Eléctrico",
+714: "Mi nivel",
+715: "✏️ ¡NIVEL COMPLETADO!",
+716: "Esta fila se desliza de lado a lado",
+717: "{n} ladrillos · {s} especiales",
+718: "pon al menos un ladrillo rompible",
+719: "📂 {name} abierto.",
+720: "Aún no hay niveles guardados.",
+721: "✏️ Editor de niveles",
+722: "Abrir el nivel {n} como plantilla",
+723: "⚠️ Pon al menos un ladrillo rompible.",
+724: "💾 {name} guardado.",
+725: "⚠️ Primero ponle un nombre al nivel.",
+726: "⚠️ Puedes guardar como máximo {n} niveles; borra uno primero.",
+727: "🗑 {name} borrado.",
+728: "⚠️ No hay ningún nivel guardado con ese nombre.",
+729: "🔗 Enlace copiado al portapapeles.",
+730: "📥 Nivel cargado — ya puedes probarlo.",
+731: "✏️ Editor",
+732: "Dibuja, prueba y comparte tu propio nivel",
+733: "🔗 Nivel compartido cargado — juégalo con ▶ Probar.",
+734: "Nombre del nivel",
+735: "🪞 Espejo",
+736: "↶ Deshacer",
+737: "🧹 Limpiar",
+738: "Jefe",
+739: "Plantilla",
+740: "▶ Probar",
+741: "Mis niveles guardados",
+742: "🔗 Enlace",
+743: "Elige un ladrillo de la paleta y haz clic o arrastra sobre la cuadrícula; el clic derecho borra. El ↔ al final de una fila la hace deslizarse; con Espejo, lo que dibujas se refleja en la mitad derecha. Si eliges un jefe, las 5 filas superiores quedan para él. Las pruebas no cuentan para el récord ni la carrera. Un nivel abierto desde un enlace se carga directamente en el editor.",
+744: "Editor de niveles",
+745: "BBL1:... pega aquí un código o enlace de nivel",
 };
 
 // ======================================================================
@@ -2198,6 +2402,40 @@ I18N_DATA.it = {
 709: "GELATO!",
 710: "INFETTO!",
 711: "CURA",
+712: "Gomma",
+713: "Elettrico",
+714: "Il mio livello",
+715: "✏️ LIVELLO COMPLETATO!",
+716: "Questa fila scorre a destra e sinistra",
+717: "{n} mattoni · {s} speciali",
+718: "metti almeno un mattone distruttibile",
+719: "📂 {name} aperto.",
+720: "Ancora nessun livello salvato.",
+721: "✏️ Editor di livelli",
+722: "Apri il livello {n} come modello",
+723: "⚠️ Metti almeno un mattone distruttibile.",
+724: "💾 {name} salvato.",
+725: "⚠️ Prima dai un nome al livello.",
+726: "⚠️ Puoi salvare al massimo {n} livelli; eliminane prima uno.",
+727: "🗑 {name} eliminato.",
+728: "⚠️ Nessun livello salvato con questo nome.",
+729: "🔗 Link copiato negli appunti.",
+730: "📥 Livello caricato — puoi provarlo.",
+731: "✏️ Editor",
+732: "Disegna, prova e condividi il tuo livello",
+733: "🔗 Livello condiviso caricato — giocalo con ▶ Prova.",
+734: "Nome del livello",
+735: "🪞 Specchio",
+736: "↶ Annulla",
+737: "🧹 Svuota",
+738: "Boss",
+739: "Modello",
+740: "▶ Prova",
+741: "I miei livelli salvati",
+742: "🔗 Link",
+743: "Scegli un mattone dalla tavolozza, poi clicca o trascina sulla griglia; il clic destro cancella. Il ↔ a fine fila la fa scorrere; con Specchio attivo, ciò che disegni si riflette sulla metà destra. Scegliendo un boss, le 5 file in alto sono riservate a lui. Le prove non contano per record e carriera. Un livello aperto da un link si carica direttamente nell'editor.",
+744: "Editor di livelli",
+745: "BBL1:... incolla qui un codice o un link di livello",
 };
 
 // ======================================================================
@@ -2399,6 +2637,40 @@ I18N_DATA.pt = {
 709: "CONGELADO!",
 710: "INFECTADO!",
 711: "CURA",
+712: "Borracha",
+713: "Elétrico",
+714: "Minha fase",
+715: "✏️ FASE CONCLUÍDA!",
+716: "Esta fileira desliza de um lado para o outro",
+717: "{n} tijolos · {s} especiais",
+718: "coloque pelo menos um tijolo quebrável",
+719: "📂 {name} aberta.",
+720: "Nenhuma fase salva ainda.",
+721: "✏️ Editor de fases",
+722: "Abrir a fase {n} como modelo",
+723: "⚠️ Coloque pelo menos um tijolo quebrável.",
+724: "💾 {name} salva.",
+725: "⚠️ Dê um nome à fase primeiro.",
+726: "⚠️ Dá para salvar no máximo {n} fases; apague uma primeiro.",
+727: "🗑 {name} apagada.",
+728: "⚠️ Nenhuma fase salva com esse nome.",
+729: "🔗 Link copiado.",
+730: "📥 Fase carregada — você já pode testar.",
+731: "✏️ Editor",
+732: "Desenhe, teste e compartilhe sua própria fase",
+733: "🔗 Fase compartilhada carregada — jogue com ▶ Testar.",
+734: "Nome da fase",
+735: "🪞 Espelho",
+736: "↶ Desfazer",
+737: "🧹 Limpar",
+738: "Chefe",
+739: "Modelo",
+740: "▶ Testar",
+741: "Minhas fases salvas",
+742: "🔗 Link",
+743: "Escolha um tijolo na paleta e clique ou arraste na grade; o clique direito apaga. O ↔ no fim da fileira faz ela deslizar; com Espelho ligado, o que você desenha é refletido na metade direita. Escolher um chefe reserva as 5 fileiras de cima para ele. Testes não contam para recorde nem carreira. Uma fase aberta por link vai direto para o editor.",
+744: "Editor de fases",
+745: "BBL1:... cole aqui um código ou link de fase",
 };
 
 // ======================================================================
@@ -2600,6 +2872,40 @@ I18N_DATA.ru = {
 709: "ЗАМОРОЖЕНО!",
 710: "ЗАРАЖЕНО!",
 711: "ЛЕЧЕНИЕ",
+712: "Ластик",
+713: "Электро",
+714: "Мой уровень",
+715: "✏️ УРОВЕНЬ ПРОЙДЕН!",
+716: "Этот ряд ездит влево-вправо",
+717: "{n} кирпичей · {s} особых",
+718: "поставь хотя бы один разрушаемый кирпич",
+719: "📂 {name}: открыт.",
+720: "Сохранённых уровней пока нет.",
+721: "✏️ Редактор уровней",
+722: "Открыть уровень {n} как шаблон",
+723: "⚠️ Поставь хотя бы один разрушаемый кирпич.",
+724: "💾 {name}: сохранён.",
+725: "⚠️ Сначала дай уровню название.",
+726: "⚠️ Можно сохранить не больше {n} уровней; сначала удали один.",
+727: "🗑 {name}: удалён.",
+728: "⚠️ Нет сохранённого уровня с таким названием.",
+729: "🔗 Ссылка скопирована в буфер.",
+730: "📥 Уровень загружен — можно тестировать.",
+731: "✏️ Редактор",
+732: "Нарисуй, проверь и поделись своим уровнем",
+733: "🔗 Общий уровень загружен — играй через ▶ Тест.",
+734: "Название уровня",
+735: "🪞 Зеркало",
+736: "↶ Отменить",
+737: "🧹 Очистить",
+738: "Босс",
+739: "Шаблон",
+740: "▶ Тест",
+741: "Мои уровни",
+742: "🔗 Ссылка",
+743: "Выбери кирпич в палитре и щёлкай или веди по сетке; правый щелчок стирает. Кнопка ↔ в конце ряда заставляет его ездить; с Зеркалом нарисованное отражается на правую половину. Если выбрать босса, верхние 5 рядов отводятся ему. Тестовые забеги не идут в рекорд и карьеру. Уровень, открытый по ссылке, сразу попадает в редактор.",
+744: "Редактор уровней",
+745: "BBL1:... вставь сюда код или ссылку уровня",
 };
 
 // ======================================================================
@@ -2801,6 +3107,40 @@ I18N_DATA.uk = {
 709: "ЗАМОРОЖЕНО!",
 710: "ЗАРАЖЕНО!",
 711: "ЛІКУВАННЯ",
+712: "Гумка",
+713: "Електро",
+714: "Мій рівень",
+715: "✏️ РІВЕНЬ ПРОЙДЕНО!",
+716: "Цей ряд їздить ліворуч-праворуч",
+717: "{n} цеглин · {s} особливих",
+718: "постав хоча б одну цеглину, що руйнується",
+719: "📂 {name}: відкрито.",
+720: "Збережених рівнів поки немає.",
+721: "✏️ Редактор рівнів",
+722: "Відкрити рівень {n} як шаблон",
+723: "⚠️ Постав хоча б одну цеглину, що руйнується.",
+724: "💾 {name}: збережено.",
+725: "⚠️ Спершу дай рівню назву.",
+726: "⚠️ Можна зберегти щонайбільше {n} рівнів; спершу видали один.",
+727: "🗑 {name}: видалено.",
+728: "⚠️ Немає збереженого рівня з такою назвою.",
+729: "🔗 Посилання скопійовано в буфер.",
+730: "📥 Рівень завантажено — можна тестувати.",
+731: "✏️ Редактор",
+732: "Намалюй, перевір і поділися власним рівнем",
+733: "🔗 Спільний рівень завантажено — грай через ▶ Тест.",
+734: "Назва рівня",
+735: "🪞 Дзеркало",
+736: "↶ Скасувати",
+737: "🧹 Очистити",
+738: "Бос",
+739: "Шаблон",
+740: "▶ Тест",
+741: "Мої рівні",
+742: "🔗 Посилання",
+743: "Обери цеглину в палітрі й клацай або веди по сітці; правий клік стирає. Кнопка ↔ у кінці ряду змушує його їздити; з Дзеркалом намальоване віддзеркалюється на праву половину. Якщо обрати боса, верхні 5 рядів відводяться йому. Тестові забіги не йдуть у рекорд і кар'єру. Рівень, відкритий за посиланням, одразу потрапляє в редактор.",
+744: "Редактор рівнів",
+745: "BBL1:... встав сюди код або посилання рівня",
 };
 
 // ======================================================================
@@ -3002,6 +3342,40 @@ I18N_DATA.pl = {
 709: "ZAMROŻONA!",
 710: "ZARAŻONA!",
 711: "LECZENIE",
+712: "Gumka",
+713: "Elektryczna",
+714: "Mój poziom",
+715: "✏️ POZIOM UKOŃCZONY!",
+716: "Ten rząd przesuwa się na boki",
+717: "{n} cegieł · {s} specjalnych",
+718: "postaw co najmniej jedną zniszczalną cegłę",
+719: "📂 Otwarto: {name}.",
+720: "Brak zapisanych poziomów.",
+721: "✏️ Edytor poziomów",
+722: "Otwórz poziom {n} jako szablon",
+723: "⚠️ Postaw co najmniej jedną zniszczalną cegłę.",
+724: "💾 Zapisano: {name}.",
+725: "⚠️ Najpierw nazwij poziom.",
+726: "⚠️ Można zapisać najwyżej {n} poziomów; najpierw usuń jeden.",
+727: "🗑 Usunięto: {name}.",
+728: "⚠️ Brak zapisanego poziomu o tej nazwie.",
+729: "🔗 Link skopiowany do schowka.",
+730: "📥 Poziom wczytany — możesz go przetestować.",
+731: "✏️ Edytor",
+732: "Narysuj, przetestuj i udostępnij własny poziom",
+733: "🔗 Wczytano udostępniony poziom — zagraj przez ▶ Testuj.",
+734: "Nazwa poziomu",
+735: "🪞 Lustro",
+736: "↶ Cofnij",
+737: "🧹 Wyczyść",
+738: "Boss",
+739: "Szablon",
+740: "▶ Testuj",
+741: "Moje zapisane poziomy",
+742: "🔗 Link",
+743: "Wybierz cegłę z palety i klikaj lub przeciągaj po siatce; prawy przycisk usuwa. ↔ na końcu rzędu sprawia, że się przesuwa; z Lustrem rysunek odbija się na prawą połowę. Wybrany boss zajmuje 5 górnych rzędów. Próby nie liczą się do rekordu ani kariery. Poziom otwarty z linku trafia prosto do edytora.",
+744: "Edytor poziomów",
+745: "BBL1:... wklej tu kod lub link poziomu",
 };
 
 // ======================================================================
@@ -3203,6 +3577,40 @@ I18N_DATA.nl = {
 709: "BEVROREN!",
 710: "GEÏNFECTEERD!",
 711: "GENEZING",
+712: "Gum",
+713: "Elektrisch",
+714: "Mijn level",
+715: "✏️ LEVEL VOLTOOID!",
+716: "Deze rij schuift heen en weer",
+717: "{n} stenen · {s} speciaal",
+718: "zet minstens één breekbare steen",
+719: "📂 {name} geopend.",
+720: "Nog geen opgeslagen levels.",
+721: "✏️ Leveleditor",
+722: "Level {n} als sjabloon openen",
+723: "⚠️ Zet minstens één breekbare steen.",
+724: "💾 {name} opgeslagen.",
+725: "⚠️ Geef het level eerst een naam.",
+726: "⚠️ Je kunt hooguit {n} levels opslaan; verwijder er eerst één.",
+727: "🗑 {name} verwijderd.",
+728: "⚠️ Geen opgeslagen level met deze naam.",
+729: "🔗 Link naar klembord gekopieerd.",
+730: "📥 Level geladen — je kunt het testen.",
+731: "✏️ Editor",
+732: "Teken, test en deel je eigen level",
+733: "🔗 Gedeeld level geladen — speel het met ▶ Testen.",
+734: "Levelnaam",
+735: "🪞 Spiegel",
+736: "↶ Ongedaan maken",
+737: "🧹 Wissen",
+738: "Baas",
+739: "Sjabloon",
+740: "▶ Testen",
+741: "Mijn opgeslagen levels",
+742: "🔗 Link",
+743: "Kies een steen uit het palet en klik of sleep over het raster; rechtsklikken wist. De ↔ aan het eind van een rij laat die schuiven; met Spiegel wordt wat je tekent naar de rechterhelft gespiegeld. Kies je een baas, dan zijn de bovenste 5 rijen voor hem. Testrondes tellen niet mee voor record en carrière. Een level dat via een link wordt geopend, komt meteen in de editor.",
+744: "Leveleditor",
+745: "BBL1:... plak hier een levelcode of link",
 };
 
 // ======================================================================
@@ -3404,6 +3812,40 @@ I18N_DATA.sv = {
 709: "FRYST!",
 710: "SMITTAD!",
 711: "LÄKNING",
+712: "Suddgummi",
+713: "Elektrisk",
+714: "Min nivå",
+715: "✏️ NIVÅ KLAR!",
+716: "Den här raden glider fram och tillbaka",
+717: "{n} tegel · {s} special",
+718: "placera minst ett krossbart tegel",
+719: "📂 {name} öppnad.",
+720: "Inga sparade nivåer än.",
+721: "✏️ Nivåredigerare",
+722: "Öppna nivå {n} som mall",
+723: "⚠️ Placera minst ett krossbart tegel.",
+724: "💾 {name} sparad.",
+725: "⚠️ Ge nivån ett namn först.",
+726: "⚠️ Högst {n} nivåer kan sparas; radera en först.",
+727: "🗑 {name} raderad.",
+728: "⚠️ Ingen sparad nivå med det namnet.",
+729: "🔗 Länken kopierades.",
+730: "📥 Nivån laddad — du kan testa den.",
+731: "✏️ Redigerare",
+732: "Rita, testa och dela din egen nivå",
+733: "🔗 Delad nivå laddad — spela den med ▶ Testa.",
+734: "Nivåns namn",
+735: "🪞 Spegel",
+736: "↶ Ångra",
+737: "🧹 Rensa",
+738: "Boss",
+739: "Mall",
+740: "▶ Testa",
+741: "Mina sparade nivåer",
+742: "🔗 Länk",
+743: "Välj ett tegel i paletten och klicka eller dra över rutnätet; högerklick suddar. ↔ i slutet av en rad får den att glida; med Spegel speglas det du ritar till högra halvan. Väljer du en boss reserveras de 5 översta raderna för den. Testrundor räknas inte till rekord eller karriär. En nivå som öppnas via länk hamnar direkt i redigeraren.",
+744: "Nivåredigerare",
+745: "BBL1:... klistra in en nivåkod eller länk här",
 };
 
 // ======================================================================
@@ -3605,6 +4047,40 @@ I18N_DATA.el = {
 709: "ΠΑΓΩΜΕΝΟ!",
 710: "ΜΟΛΥΝΜΕΝΟ!",
 711: "ΘΕΡΑΠΕΙΑ",
+712: "Γόμα",
+713: "Ηλεκτρικό",
+714: "Το επίπεδό μου",
+715: "✏️ ΤΟ ΕΠΙΠΕΔΟ ΟΛΟΚΛΗΡΩΘΗΚΕ!",
+716: "Αυτή η σειρά γλιστράει δεξιά-αριστερά",
+717: "{n} τούβλα · {s} ειδικά",
+718: "βάλε τουλάχιστον ένα τούβλο που σπάει",
+719: "📂 Άνοιξε: {name}.",
+720: "Δεν υπάρχουν ακόμη αποθηκευμένα επίπεδα.",
+721: "✏️ Επεξεργαστής επιπέδων",
+722: "Άνοιγμα του επιπέδου {n} ως πρότυπο",
+723: "⚠️ Βάλε τουλάχιστον ένα τούβλο που σπάει.",
+724: "💾 Αποθηκεύτηκε: {name}.",
+725: "⚠️ Δώσε πρώτα όνομα στο επίπεδο.",
+726: "⚠️ Αποθηκεύονται έως {n} επίπεδα· διάγραψε πρώτα ένα.",
+727: "🗑 Διαγράφηκε: {name}.",
+728: "⚠️ Δεν υπάρχει αποθηκευμένο επίπεδο με αυτό το όνομα.",
+729: "🔗 Ο σύνδεσμος αντιγράφηκε.",
+730: "📥 Το επίπεδο φορτώθηκε — μπορείς να το δοκιμάσεις.",
+731: "✏️ Επεξεργαστής",
+732: "Σχεδίασε, δοκίμασε και μοιράσου το δικό σου επίπεδο",
+733: "🔗 Το κοινόχρηστο επίπεδο φορτώθηκε — παίξ' το με ▶ Δοκιμή.",
+734: "Όνομα επιπέδου",
+735: "🪞 Καθρέφτης",
+736: "↶ Αναίρεση",
+737: "🧹 Καθαρισμός",
+738: "Αρχηγός",
+739: "Πρότυπο",
+740: "▶ Δοκιμή",
+741: "Τα επίπεδά μου",
+742: "🔗 Σύνδεσμος",
+743: "Διάλεξε τούβλο από την παλέτα και κάνε κλικ ή σύρε στο πλέγμα· το δεξί κλικ σβήνει. Το ↔ στο τέλος μιας σειράς την κάνει να γλιστράει· με τον Καθρέφτη, ό,τι σχεδιάζεις αντανακλάται στο δεξί μισό. Αν διαλέξεις αρχηγό, οι 5 πάνω σειρές κρατιούνται γι' αυτόν. Οι δοκιμές δεν μετράνε σε ρεκόρ και καριέρα. Ένα επίπεδο που ανοίγει από σύνδεσμο φορτώνεται κατευθείαν στον επεξεργαστή.",
+744: "Επεξεργαστής επιπέδων",
+745: "BBL1:... επικόλλησε εδώ κωδικό ή σύνδεσμο επιπέδου",
 };
 
 // ======================================================================
@@ -3806,6 +4282,40 @@ I18N_DATA.cs = {
 709: "ZMRAZENÉ!",
 710: "NAKAŽENÉ!",
 711: "LÉČENÍ",
+712: "Guma",
+713: "Elektrická",
+714: "Moje úroveň",
+715: "✏️ ÚROVEŇ DOKONČENA!",
+716: "Tato řada jezdí ze strany na stranu",
+717: "{n} cihel · {s} speciálních",
+718: "polož aspoň jednu zničitelnou cihlu",
+719: "📂 Otevřeno: {name}.",
+720: "Zatím žádné uložené úrovně.",
+721: "✏️ Editor úrovní",
+722: "Otevřít úroveň {n} jako šablonu",
+723: "⚠️ Polož aspoň jednu zničitelnou cihlu.",
+724: "💾 Uloženo: {name}.",
+725: "⚠️ Nejdřív úroveň pojmenuj.",
+726: "⚠️ Uložit lze nejvýš {n} úrovní; nejdřív jednu smaž.",
+727: "🗑 Smazáno: {name}.",
+728: "⚠️ Úroveň s tímto názvem není uložená.",
+729: "🔗 Odkaz zkopírován do schránky.",
+730: "📥 Úroveň načtena — můžeš ji vyzkoušet.",
+731: "✏️ Editor",
+732: "Nakresli, vyzkoušej a sdílej vlastní úroveň",
+733: "🔗 Sdílená úroveň načtena — hraj ji přes ▶ Zkusit.",
+734: "Název úrovně",
+735: "🪞 Zrcadlo",
+736: "↶ Zpět",
+737: "🧹 Vymazat",
+738: "Boss",
+739: "Šablona",
+740: "▶ Zkusit",
+741: "Moje uložené úrovně",
+742: "🔗 Odkaz",
+743: "Vyber cihlu z palety a klikej nebo táhni po mřížce; pravé tlačítko maže. ↔ na konci řady ji rozjede; se Zrcadlem se nakreslené odrazí do pravé poloviny. Zvolený boss zabere horních 5 řad. Zkušební hry se nepočítají do rekordu ani kariéry. Úroveň otevřená z odkazu se načte rovnou do editoru.",
+744: "Editor úrovní",
+745: "BBL1:... sem vlož kód nebo odkaz úrovně",
 };
 
 // ======================================================================
@@ -4007,6 +4517,40 @@ I18N_DATA.ro = {
 709: "ÎNGHEȚATĂ!",
 710: "INFECTATĂ!",
 711: "VINDECARE",
+712: "Radieră",
+713: "Electrică",
+714: "Nivelul meu",
+715: "✏️ NIVEL TERMINAT!",
+716: "Acest rând alunecă stânga-dreapta",
+717: "{n} cărămizi · {s} speciale",
+718: "pune cel puțin o cărămidă care se sparge",
+719: "📂 {name} deschis.",
+720: "Încă nu ai niveluri salvate.",
+721: "✏️ Editor de niveluri",
+722: "Deschide nivelul {n} ca șablon",
+723: "⚠️ Pune cel puțin o cărămidă care se sparge.",
+724: "💾 {name} salvat.",
+725: "⚠️ Dă-i întâi un nume nivelului.",
+726: "⚠️ Poți salva cel mult {n} niveluri; șterge întâi unul.",
+727: "🗑 {name} șters.",
+728: "⚠️ Nu există niciun nivel salvat cu acest nume.",
+729: "🔗 Link copiat.",
+730: "📥 Nivel încărcat — îl poți testa.",
+731: "✏️ Editor",
+732: "Desenează, testează și distribuie propriul nivel",
+733: "🔗 Nivel distribuit încărcat — joacă-l cu ▶ Testează.",
+734: "Numele nivelului",
+735: "🪞 Oglindă",
+736: "↶ Anulează",
+737: "🧹 Golește",
+738: "Boss",
+739: "Șablon",
+740: "▶ Testează",
+741: "Nivelurile mele salvate",
+742: "🔗 Link",
+743: "Alege o cărămidă din paletă, apoi dă clic sau trage pe grilă; clicul dreapta șterge. ↔ de la capătul unui rând îl face să alunece; cu Oglindă, ce desenezi se reflectă pe jumătatea dreaptă. Dacă alegi un boss, primele 5 rânduri îi sunt rezervate. Testele nu contează la record și carieră. Un nivel deschis dintr-un link se încarcă direct în editor.",
+744: "Editor de niveluri",
+745: "BBL1:... lipește aici codul sau linkul unui nivel",
 };
 
 // ======================================================================
@@ -4208,6 +4752,40 @@ I18N_DATA.hu = {
 709: "MEGFAGYOTT!",
 710: "FERTŐZÖTT!",
 711: "GYÓGYULÁS",
+712: "Radír",
+713: "Elektromos",
+714: "Saját pályám",
+715: "✏️ PÁLYA TELJESÍTVE!",
+716: "Ez a sor jobbra-balra csúszik",
+717: "{n} tégla · {s} különleges",
+718: "tegyél le legalább egy törhető téglát",
+719: "📂 Megnyitva: {name}.",
+720: "Még nincs mentett pálya.",
+721: "✏️ Pályaszerkesztő",
+722: "A(z) {n}. pálya megnyitása sablonként",
+723: "⚠️ Tegyél le legalább egy törhető téglát.",
+724: "💾 Mentve: {name}.",
+725: "⚠️ Előbb adj nevet a pályának.",
+726: "⚠️ Legfeljebb {n} pálya menthető; előbb törölj egyet.",
+727: "🗑 Törölve: {name}.",
+728: "⚠️ Nincs ilyen nevű mentett pálya.",
+729: "🔗 Link vágólapra másolva.",
+730: "📥 Pálya betöltve — kipróbálhatod.",
+731: "✏️ Szerkesztő",
+732: "Rajzold meg, próbáld ki és oszd meg a saját pályádat",
+733: "🔗 Megosztott pálya betöltve — játszd a ▶ Próba gombbal.",
+734: "Pálya neve",
+735: "🪞 Tükör",
+736: "↶ Visszavonás",
+737: "🧹 Törlés",
+738: "Főellenség",
+739: "Sablon",
+740: "▶ Próba",
+741: "Mentett pályáim",
+742: "🔗 Link",
+743: "Válassz téglát a palettáról, majd kattints vagy húzd a rácson; a jobb klikk töröl. A sor végi ↔ csúszóvá teszi a sort; Tükör módban a rajz a jobb felére tükröződik. Főellenség választásakor a felső 5 sor neki jut. A próbajátékok nem számítanak a csúcsba és a karrierbe. A linkről megnyitott pálya egyből a szerkesztőbe töltődik.",
+744: "Pályaszerkesztő",
+745: "BBL1:... ide illeszd be a pályakódot vagy linket",
 };
 
 // ======================================================================
@@ -4409,6 +4987,40 @@ I18N_DATA.az = {
 709: "DONDU!",
 710: "YOLUXDU!",
 711: "ŞƏFA",
+712: "Pozan",
+713: "Elektrik",
+714: "Mənim mərhələm",
+715: "✏️ MƏRHƏLƏ TAMAM!",
+716: "Bu sıra sağa-sola sürüşür",
+717: "{n} kərpic · {s} xüsusi",
+718: "ən azı bir sınan kərpic qoy",
+719: "📂 {name} açıldı.",
+720: "Hələ saxlanmış mərhələ yoxdur.",
+721: "✏️ Mərhələ redaktoru",
+722: "{n}. mərhələni şablon kimi aç",
+723: "⚠️ Ən azı bir sınan kərpic qoy.",
+724: "💾 {name} saxlanıldı.",
+725: "⚠️ Əvvəlcə mərhələyə ad ver.",
+726: "⚠️ Ən çox {n} mərhələ saxlamaq olar; əvvəlcə birini sil.",
+727: "🗑 {name} silindi.",
+728: "⚠️ Bu adla saxlanmış mərhələ yoxdur.",
+729: "🔗 Keçid panoya kopyalandı.",
+730: "📥 Mərhələ yükləndi — sınaya bilərsən.",
+731: "✏️ Redaktor",
+732: "Öz mərhələni çək, sına və paylaş",
+733: "🔗 Paylaşılan mərhələ yükləndi — ▶ Sına ilə oyna.",
+734: "Mərhələnin adı",
+735: "🪞 Güzgü",
+736: "↶ Geri qaytar",
+737: "🧹 Təmizlə",
+738: "Boss",
+739: "Şablon",
+740: "▶ Sına",
+741: "Saxladığım mərhələlər",
+742: "🔗 Keçid",
+743: "Palitradan kərpic seç, şəbəkəyə klik et və ya sürüşdür; sağ klik silir. Sıranın sonundakı ↔ həmin sıranı sürüşdürür; Güzgü açıq olanda çəkdiyin sağ yarıya əks olunur. Boss seçsən, yuxarıdakı 5 sıra ona ayrılır. Sınaq oyunları rekorda və karyeraya sayılmır. Keçidlə açılan mərhələ birbaşa redaktora yüklənir.",
+744: "Mərhələ redaktoru",
+745: "BBL1:... mərhələ kodunu və ya keçidini bura yapışdır",
 };
 
 // ======================================================================
@@ -4610,6 +5222,40 @@ I18N_DATA.ar = {
 709: "تجمّدت!",
 710: "أُصيبت!",
 711: "شفاء",
+712: "ممحاة",
+713: "كهربائية",
+714: "مرحلتي",
+715: "✏️ اكتملت المرحلة!",
+716: "هذا الصف ينزلق يمينًا ويسارًا",
+717: "{n} طوبة · {s} خاصة",
+718: "ضع طوبة واحدة قابلة للكسر على الأقل",
+719: "📂 فُتحت {name}.",
+720: "لا توجد مراحل محفوظة بعد.",
+721: "✏️ محرر المراحل",
+722: "افتح المرحلة {n} كقالب",
+723: "⚠️ ضع طوبة واحدة قابلة للكسر على الأقل.",
+724: "💾 حُفظت {name}.",
+725: "⚠️ أعطِ المرحلة اسمًا أولًا.",
+726: "⚠️ يمكن حفظ {n} مرحلة على الأكثر؛ احذف واحدة أولًا.",
+727: "🗑 حُذفت {name}.",
+728: "⚠️ لا توجد مرحلة محفوظة بهذا الاسم.",
+729: "🔗 نُسخ الرابط إلى الحافظة.",
+730: "📥 حُمّلت المرحلة — يمكنك تجربتها.",
+731: "✏️ المحرر",
+732: "ارسم مرحلتك الخاصة وجرّبها وشاركها",
+733: "🔗 حُمّلت المرحلة المشتركة — العبها عبر ▶ تجربة.",
+734: "اسم المرحلة",
+735: "🪞 مرآة",
+736: "↶ تراجع",
+737: "🧹 مسح",
+738: "الزعيم",
+739: "قالب",
+740: "▶ تجربة",
+741: "مراحلي المحفوظة",
+742: "🔗 رابط",
+743: "اختر طوبة من اللوحة ثم انقر أو اسحب على الشبكة؛ النقر بالزر الأيمن يمسح. الزر ↔ في نهاية الصف يجعله ينزلق؛ ومع المرآة ينعكس ما ترسمه على النصف الأيمن. اختيار زعيم يحجز له الصفوف الخمسة العليا. جولات التجربة لا تُحتسب في الرقم القياسي ولا المسيرة. المرحلة المفتوحة من رابط تُحمَّل مباشرة في المحرر.",
+744: "محرر المراحل",
+745: "BBL1:... الصق هنا رمز المرحلة أو رابطها",
 };
 
 // ======================================================================
@@ -4811,6 +5457,40 @@ I18N_DATA.fa = {
 709: "یخ زد!",
 710: "آلوده شد!",
 711: "شفا",
+712: "پاک‌کن",
+713: "برقی",
+714: "مرحلهٔ من",
+715: "✏️ مرحله تمام شد!",
+716: "این ردیف به چپ و راست می‌لغزد",
+717: "{n} آجر · {s} ویژه",
+718: "دست‌کم یک آجر شکستنی بگذار",
+719: "📂 {name} باز شد.",
+720: "هنوز مرحلهٔ ذخیره‌شده‌ای نیست.",
+721: "✏️ ویرایشگر مرحله",
+722: "باز کردن مرحلهٔ {n} به‌عنوان الگو",
+723: "⚠️ دست‌کم یک آجر شکستنی بگذار.",
+724: "💾 {name} ذخیره شد.",
+725: "⚠️ اول برای مرحله نامی بگذار.",
+726: "⚠️ حداکثر {n} مرحله ذخیره می‌شود؛ اول یکی را پاک کن.",
+727: "🗑 {name} پاک شد.",
+728: "⚠️ مرحلهٔ ذخیره‌شده‌ای با این نام نیست.",
+729: "🔗 پیوند در کلیپ‌بورد کپی شد.",
+730: "📥 مرحله بارگذاری شد — می‌توانی امتحانش کنی.",
+731: "✏️ ویرایشگر",
+732: "مرحلهٔ خودت را بکش، امتحان کن و به اشتراک بگذار",
+733: "🔗 مرحلهٔ اشتراکی بارگذاری شد — با ▶ امتحان بازی کن.",
+734: "نام مرحله",
+735: "🪞 آینه",
+736: "↶ واگرد",
+737: "🧹 پاک کردن",
+738: "غول",
+739: "الگو",
+740: "▶ امتحان",
+741: "مرحله‌های ذخیره‌شدهٔ من",
+742: "🔗 پیوند",
+743: "از پالت یک آجر انتخاب کن و روی شبکه کلیک کن یا بکش؛ کلیک راست پاک می‌کند. ↔ در انتهای هر ردیف آن را لغزان می‌کند؛ با آینه، آنچه می‌کشی در نیمهٔ راست بازتاب می‌شود. با انتخاب غول، ۵ ردیف بالا برای او کنار گذاشته می‌شود. بازی‌های آزمایشی در رکورد و کارنامه حساب نمی‌شوند. مرحله‌ای که از پیوند باز شود مستقیم در ویرایشگر بارگذاری می‌شود.",
+744: "ویرایشگر مرحله",
+745: "BBL1:... کد یا پیوند مرحله را اینجا بچسبان",
 };
 
 // ======================================================================
@@ -5012,6 +5692,40 @@ I18N_DATA.hi = {
 709: "जम गई!",
 710: "संक्रमित!",
 711: "उपचार",
+712: "रबर",
+713: "बिजली",
+714: "मेरा लेवल",
+715: "✏️ लेवल पूरा!",
+716: "यह पंक्ति दाएँ-बाएँ खिसकती है",
+717: "{n} ईंटें · {s} खास",
+718: "कम से कम एक टूटने वाली ईंट रखो",
+719: "📂 {name} खुला।",
+720: "अभी कोई सहेजा लेवल नहीं।",
+721: "✏️ लेवल एडिटर",
+722: "लेवल {n} को टेम्पलेट की तरह खोलो",
+723: "⚠️ कम से कम एक टूटने वाली ईंट रखो।",
+724: "💾 {name} सहेजा गया।",
+725: "⚠️ पहले लेवल का नाम रखो।",
+726: "⚠️ ज़्यादा से ज़्यादा {n} लेवल सहेजे जा सकते हैं; पहले एक हटाओ।",
+727: "🗑 {name} हटाया गया।",
+728: "⚠️ इस नाम का कोई सहेजा लेवल नहीं।",
+729: "🔗 लिंक क्लिपबोर्ड पर कॉपी हुआ।",
+730: "📥 लेवल लोड हुआ — अब टेस्ट कर सकते हो।",
+731: "✏️ एडिटर",
+732: "अपना लेवल बनाओ, टेस्ट करो और शेयर करो",
+733: "🔗 शेयर किया लेवल लोड हुआ — ▶ टेस्ट से खेलो।",
+734: "लेवल का नाम",
+735: "🪞 आईना",
+736: "↶ वापस लो",
+737: "🧹 साफ़ करो",
+738: "बॉस",
+739: "टेम्पलेट",
+740: "▶ टेस्ट",
+741: "मेरे सहेजे लेवल",
+742: "🔗 लिंक",
+743: "पैलेट से ईंट चुनो, फिर ग्रिड पर क्लिक करो या खींचो; राइट-क्लिक मिटाता है। पंक्ति के आखिर का ↔ उसे खिसकाता है; आईना चालू हो तो जो बनाओ वह दाएँ आधे में भी उभरता है। बॉस चुनने पर ऊपर की 5 पंक्तियाँ उसके लिए रहती हैं। टेस्ट रन रिकॉर्ड और करियर में नहीं गिने जाते। लिंक से खुला लेवल सीधे एडिटर में आता है।",
+744: "लेवल एडिटर",
+745: "BBL1:... लेवल कोड या लिंक यहाँ चिपकाओ",
 };
 
 // ======================================================================
@@ -5213,6 +5927,40 @@ I18N_DATA.id = {
 709: "BEKU!",
 710: "TERINFEKSI!",
 711: "PENYEMBUHAN",
+712: "Penghapus",
+713: "Listrik",
+714: "Level saya",
+715: "✏️ LEVEL SELESAI!",
+716: "Baris ini bergeser ke kiri dan kanan",
+717: "{n} bata · {s} khusus",
+718: "pasang setidaknya satu bata yang bisa pecah",
+719: "📂 {name} dibuka.",
+720: "Belum ada level tersimpan.",
+721: "✏️ Editor Level",
+722: "Buka level {n} sebagai templat",
+723: "⚠️ Pasang setidaknya satu bata yang bisa pecah.",
+724: "💾 {name} disimpan.",
+725: "⚠️ Beri nama level dulu.",
+726: "⚠️ Maksimal {n} level bisa disimpan; hapus satu dulu.",
+727: "🗑 {name} dihapus.",
+728: "⚠️ Tidak ada level tersimpan dengan nama ini.",
+729: "🔗 Tautan disalin ke papan klip.",
+730: "📥 Level dimuat — kamu bisa mengujinya.",
+731: "✏️ Editor",
+732: "Gambar, uji, dan bagikan levelmu sendiri",
+733: "🔗 Level bersama dimuat — mainkan dengan ▶ Uji.",
+734: "Nama level",
+735: "🪞 Cermin",
+736: "↶ Urungkan",
+737: "🧹 Bersihkan",
+738: "Bos",
+739: "Templat",
+740: "▶ Uji",
+741: "Level tersimpan saya",
+742: "🔗 Tautan",
+743: "Pilih bata dari palet, lalu klik atau seret di kisi; klik kanan menghapus. ↔ di ujung baris membuatnya bergeser; dengan Cermin, gambarmu dipantulkan ke separuh kanan. Memilih bos menyisakan 5 baris teratas untuknya. Uji coba tidak dihitung untuk rekor dan karier. Level yang dibuka dari tautan langsung dimuat ke editor.",
+744: "Editor level",
+745: "BBL1:... tempel kode atau tautan level di sini",
 };
 
 // ======================================================================
@@ -5414,6 +6162,40 @@ I18N_DATA.vi = {
 709: "ĐÓNG BĂNG!",
 710: "NHIỄM TRÙNG!",
 711: "CHỮA",
+712: "Tẩy",
+713: "Điện",
+714: "Màn của tôi",
+715: "✏️ HOÀN THÀNH MÀN!",
+716: "Hàng này trượt qua lại",
+717: "{n} gạch · {s} đặc biệt",
+718: "đặt ít nhất một viên gạch phá được",
+719: "📂 Đã mở {name}.",
+720: "Chưa có màn nào được lưu.",
+721: "✏️ Trình chỉnh màn",
+722: "Mở màn {n} làm mẫu",
+723: "⚠️ Đặt ít nhất một viên gạch phá được.",
+724: "💾 Đã lưu {name}.",
+725: "⚠️ Hãy đặt tên cho màn trước.",
+726: "⚠️ Chỉ lưu được tối đa {n} màn; hãy xóa bớt một màn.",
+727: "🗑 Đã xóa {name}.",
+728: "⚠️ Không có màn đã lưu với tên này.",
+729: "🔗 Đã sao chép liên kết.",
+730: "📥 Đã tải màn — bạn có thể chơi thử.",
+731: "✏️ Chỉnh màn",
+732: "Vẽ, chơi thử và chia sẻ màn của riêng bạn",
+733: "🔗 Đã tải màn được chia sẻ — chơi bằng ▶ Chơi thử.",
+734: "Tên màn",
+735: "🪞 Đối xứng",
+736: "↶ Hoàn tác",
+737: "🧹 Xóa hết",
+738: "Trùm",
+739: "Mẫu",
+740: "▶ Chơi thử",
+741: "Màn đã lưu của tôi",
+742: "🔗 Liên kết",
+743: "Chọn gạch từ bảng màu rồi nhấp hoặc kéo trên lưới; nhấp chuột phải để xóa. Nút ↔ cuối hàng làm hàng đó trượt; khi bật Đối xứng, nét vẽ được phản chiếu sang nửa phải. Chọn trùm thì 5 hàng trên cùng dành cho trùm. Lượt chơi thử không tính kỷ lục và sự nghiệp. Màn mở từ liên kết được tải thẳng vào trình chỉnh.",
+744: "Trình chỉnh màn",
+745: "BBL1:... dán mã hoặc liên kết màn vào đây",
 };
 
 // ======================================================================
@@ -5615,6 +6397,40 @@ I18N_DATA.zh = {
 709: "冻结！",
 710: "感染！",
 711: "治疗",
+712: "橡皮",
+713: "电击",
+714: "我的关卡",
+715: "✏️ 关卡完成！",
+716: "这一行会左右滑动",
+717: "{n} 块砖 · {s} 块特殊砖",
+718: "至少放一块能打碎的砖",
+719: "📂 已打开 {name}。",
+720: "还没有保存的关卡。",
+721: "✏️ 关卡编辑器",
+722: "把第 {n} 关作为模板打开",
+723: "⚠️ 至少放一块能打碎的砖。",
+724: "💾 已保存 {name}。",
+725: "⚠️ 请先给关卡起个名字。",
+726: "⚠️ 最多保存 {n} 个关卡；请先删除一个。",
+727: "🗑 已删除 {name}。",
+728: "⚠️ 没有这个名字的已存关卡。",
+729: "🔗 链接已复制到剪贴板。",
+730: "📥 关卡已载入——可以试玩了。",
+731: "✏️ 编辑器",
+732: "绘制、试玩并分享你自己的关卡",
+733: "🔗 已载入分享的关卡——点 ▶ 试玩 开始。",
+734: "关卡名称",
+735: "🪞 镜像",
+736: "↶ 撤销",
+737: "🧹 清空",
+738: "首领",
+739: "模板",
+740: "▶ 试玩",
+741: "我保存的关卡",
+742: "🔗 链接",
+743: "从调色板选一种砖，然后在网格上点击或拖动；右键擦除。行末的 ↔ 让这一行滑动；开启镜像时，画的内容会映到右半边。选择首领后，最上面 5 行留给首领。试玩不计入纪录和生涯。从链接打开的关卡会直接载入编辑器。",
+744: "关卡编辑器",
+745: "BBL1:... 在这里粘贴关卡代码或链接",
 };
 
 // ======================================================================
@@ -5816,6 +6632,40 @@ I18N_DATA.ja = {
 709: "凍結！",
 710: "感染！",
 711: "回復",
+712: "消しゴム",
+713: "電撃",
+714: "マイステージ",
+715: "✏️ ステージクリア！",
+716: "この列は左右に動きます",
+717: "ブロック {n} 個 · 特殊 {s} 個",
+718: "壊せるブロックを1つ以上置いてください",
+719: "📂 {name} を開きました。",
+720: "保存したステージはまだありません。",
+721: "✏️ ステージエディター",
+722: "ステージ {n} をテンプレートとして開く",
+723: "⚠️ 壊せるブロックを1つ以上置いてください。",
+724: "💾 {name} を保存しました。",
+725: "⚠️ 先にステージに名前を付けてください。",
+726: "⚠️ 保存できるのは {n} 個までです。先に1つ削除してください。",
+727: "🗑 {name} を削除しました。",
+728: "⚠️ この名前の保存ステージはありません。",
+729: "🔗 リンクをコピーしました。",
+730: "📥 ステージを読み込みました — テストできます。",
+731: "✏️ エディター",
+732: "自分のステージを作って、試して、共有しよう",
+733: "🔗 共有ステージを読み込みました — ▶ テスト で遊べます。",
+734: "ステージ名",
+735: "🪞 ミラー",
+736: "↶ 元に戻す",
+737: "🧹 クリア",
+738: "ボス",
+739: "テンプレート",
+740: "▶ テスト",
+741: "保存したステージ",
+742: "🔗 リンク",
+743: "パレットからブロックを選び、グリッドをクリックまたはドラッグ。右クリックで消去。列の端の ↔ でその列が左右に動きます。ミラーをオンにすると描いた内容が右半分に反転コピーされます。ボスを選ぶと上の5列はボス用になります。テストプレイは記録とキャリアに数えません。リンクから開いたステージはそのままエディターに読み込まれます。",
+744: "ステージエディター",
+745: "BBL1:... ステージコードかリンクをここに貼り付け",
 };
 
 // ======================================================================
@@ -6017,6 +6867,40 @@ I18N_DATA.ko = {
 709: "결빙!",
 710: "감염!",
 711: "치유",
+712: "지우개",
+713: "전기",
+714: "내 스테이지",
+715: "✏️ 스테이지 클리어!",
+716: "이 줄은 좌우로 움직입니다",
+717: "벽돌 {n}개 · 특수 {s}개",
+718: "깰 수 있는 벽돌을 하나 이상 놓으세요",
+719: "📂 {name} 열림.",
+720: "저장된 스테이지가 아직 없습니다.",
+721: "✏️ 스테이지 에디터",
+722: "스테이지 {n}을(를) 템플릿으로 열기",
+723: "⚠️ 깰 수 있는 벽돌을 하나 이상 놓으세요.",
+724: "💾 {name} 저장됨.",
+725: "⚠️ 먼저 스테이지 이름을 정하세요.",
+726: "⚠️ 최대 {n}개까지 저장할 수 있습니다. 먼저 하나를 지우세요.",
+727: "🗑 {name} 삭제됨.",
+728: "⚠️ 이 이름으로 저장된 스테이지가 없습니다.",
+729: "🔗 링크를 클립보드에 복사했습니다.",
+730: "📥 스테이지를 불러왔습니다 — 테스트할 수 있어요.",
+731: "✏️ 에디터",
+732: "나만의 스테이지를 그리고, 테스트하고, 공유하세요",
+733: "🔗 공유된 스테이지를 불러왔습니다 — ▶ 테스트로 플레이하세요.",
+734: "스테이지 이름",
+735: "🪞 미러",
+736: "↶ 되돌리기",
+737: "🧹 비우기",
+738: "보스",
+739: "템플릿",
+740: "▶ 테스트",
+741: "저장한 스테이지",
+742: "🔗 링크",
+743: "팔레트에서 벽돌을 고른 뒤 격자를 클릭하거나 드래그하세요. 오른쪽 클릭은 지웁니다. 줄 끝의 ↔는 그 줄을 좌우로 움직이게 합니다. 미러를 켜면 그린 내용이 오른쪽 절반에 대칭으로 복사됩니다. 보스를 고르면 위쪽 5줄은 보스 자리입니다. 테스트 플레이는 기록과 커리어에 반영되지 않습니다. 링크로 연 스테이지는 바로 에디터에 불러옵니다.",
+744: "스테이지 에디터",
+745: "BBL1:... 스테이지 코드나 링크를 여기에 붙여 넣으세요",
 };
 
 // ======================================================================
@@ -6577,7 +7461,11 @@ const paddle = {
 
 let balls = [];                         // çoklu top: hepsi aynı anda yaşayabilir
 let bricks = [], powerups = [], particles = [], fragments = [], floaters = [], stars = [], matrixCols = [];
+let confetti = [];                      // kutlama konfetisi: kartların ÜSTÜNDE çizilir
 let zones = [], lasers = [], bullets = [], holes = [], bolts = [], movingRows = [];
+// Bölüm açılışında çapraz belirme dalgası: tuğlanın görünürlüğü 0..1 (çizim, parıltı ve sınır tek yerden)
+const REVEAL_COL = 0.18, REVEAL_MAX = 99;
+const revealOf = b => clamp(state.buildFade - b.row - b.col * REVEAL_COL, 0, 1);
 const fxOn = k => state[k + "Until"] > state.time;
 const isFever = () => fxOn("fever");
 const isFire = () => fxOn("fire") || isFever();
@@ -6688,7 +7576,9 @@ function seedVirusBricks(n) {
 }
 
 function buildLevel(n) {
-  const song = typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1];
+  // Şarkı bölümü ya da editörden test koşusu: hazır harita, döngü/tohum/piksel duvar yok
+  const song = (typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1]) ||
+               (typeof editorPlayDef === "function" && editorPlayDef(n));
   const def = song || LEVELS[(n - 1) % LEVELS.length], cycle = song ? 0 : Math.floor((n - 1) / LEVELS.length);
   // Günlük/haftalık koşuda bölümler tohumdan üretilir: aynı tohum = aynı simetrik duvar
   const proc = !song && (run.daily || (typeof weekly !== "undefined" && weekly.active)) && Array.isArray(def);
@@ -6763,16 +7653,17 @@ function addScore(n) {
 function startGame() {
   if (typeof weekly !== "undefined" && !weekly.starting) stopWeekly();
   if (typeof songLevel !== "undefined" && !songLevel.starting) stopSongLevel();
+  if (typeof editor !== "undefined" && !editor.starting) stopEditorPlay();
   if (run.daily && typeof finishDaily === "function") finishDaily();
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
   Object.assign(state, { level: 1, score: 0, diffSpeed: diff.speedMul, lives: diff.lives, combo: 0, startHigh: state.high,
-                         newRecord: false, recordShown: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0 });
+                         newRecord: false, recordShown: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0, hurt: 0 });
   state.speed = levelSpeed(1);
   clearEffects();
   paddle.x = W / 2 - PADDLE_W / 2;
   paddle.w = paddle.targetW = PADDLE_W;
-  powerups = []; particles = []; fragments = []; floaters = [];
+  powerups = []; particles = []; fragments = []; floaters = []; confetti = [];
   buildLevel(1);
   resetDirectorRun();
   startDirectorChallenge(1);
@@ -6781,6 +7672,7 @@ function startGame() {
   callout(tr("BÖLÜM {n}", { n: 1 }), T().accent);
 }
 function toMenu() {
+  const backToEditor = run.custom;          // editör testinden dönünce editör yeniden açılır
   if (run.daily && typeof finishDaily === "function") finishDaily();
   run.daily = false;
   run.dailyFinished = false;
@@ -6791,14 +7683,17 @@ function toMenu() {
   stopGhost();
   stopWeekly();
   stopSongLevel();
+  if (typeof stopEditorPlay === "function") stopEditorPlay();
   flushCodex();
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
+  state.hurt = 0;
   clearEffects();
   buildLevel(1);
   powerups = []; particles = []; fragments = []; floaters = [];
   balls = [newBall(true)];
+  if (backToEditor && typeof openEditor === "function") openEditor();
 }
 function serveBall() {
   state.mode = "serve";
@@ -6847,7 +7742,6 @@ function loseLife() {
 function gameOver() {
   hidePactOffer();
   hideLastChance();
-  hudScore = state.score * 0.5;            // cila: karttaki skor sayacı görünür biçimde yukarı saysın
   failDirectorChallenge();
   finishGhostRun();
   const wasWeekly = weekly.active;
@@ -6876,6 +7770,7 @@ function levelCleared() {
   battleCharge(6);
 }
 function nextLevel() {
+  if (run.custom) { editorComplete(); return; }   // editör bölümü tek bölümdür
   if (typeof songLevel !== "undefined" && songLevel.active && state.level >= songLevel.levels.length) { songComplete(); return; }
   state.level++;
   trackBest("bestLevel", state.level);
@@ -6943,9 +7838,9 @@ function addFloater(x, y, text, color) {
 // Konfeti: tema renkleriyle yukarı fışkıran kutlama yağmuru (bölüm sonu, yeni rekor)
 function spawnConfetti(x, y, count) {
   const cols = [T().b1, T().b2, T().b3, T().accent, "#ffd166", "#ffffff"];
-  for (let i = scaled(count); i > 0 && particles.length <= particleCap(); i--) {
+  for (let i = scaled(count); i > 0 && confetti.length <= 160; i--) {
     const a = rnd(-Math.PI, 0), s = rnd(120, 420);
-    particles.push({ x: x + rnd(-60, 60), y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120, size: rnd(2.5, 5.5),
+    confetti.push({ x: x + rnd(-60, 60), y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120, size: rnd(2.5, 5.5),
                      life: rnd(0.7, 1.3), color: pick(cols) });
   }
 }
@@ -6984,12 +7879,14 @@ function age(list, dt, gravity, keep) {
 }
 function updateEffects(dt) {
   particles = age(particles, dt, 900, p => p.life > 0 && p.y < H + 20);
+  confetti = age(confetti, dt, 900, p => p.life > 0 && p.y < H + 20);
   fragments = age(fragments, dt, 1100, f => f.life > 0 && f.y < H + 40);
   for (const b of bricks) { b.flash = Math.max(0, b.flash - dt * 7); b.wob = Math.max(0, (b.wob || 0) - dt * 4); b.colFade = Math.max(0, (b.colFade || 0) - dt * 5); }
   updateGlints(dt);
   paddle.flash = Math.max(0, paddle.flash - dt * 6);
-  state.hurt = Math.max(0, (state.hurt || 0) - dt * 1.4);       // can kaybı kırmızı vinyeti söner
-  state.buildFade = Math.min(COLS + 2, state.buildFade + dt * 4);   // çapraz belirme dalgası her ekranda ilerler
+  state.hurt = Math.max(0, state.hurt - dt * 1.4);               // can kaybı kırmızı vinyeti söner
+  // Çapraz belirme dalgası her ekranda ilerler; top fırlatılınca hızlanır (görünmeyen tuğlaya çarpılmasın)
+  state.buildFade = Math.min(REVEAL_MAX, state.buildFade + dt * (state.mode === "playing" ? 16 : 4));
 
   // Arka plan parçacıkları süzülür (kar sallanır, kabarcık yükselir, matrix akar)
   const fx = settings.bgFx;
@@ -8508,7 +9405,7 @@ function paintBrickIcon(g, kind, col) {
 function drawBricks() {
   const rounded = roundedStyle();
   for (const b of bricks) {
-    const a = clamp(state.buildFade - b.row - b.col * 0.18, 0, 1);   // bölüm başında çapraz dalga ile "pop"layarak belirme
+    const a = revealOf(b);                              // bölüm başında çapraz dalga ile "pop"layarak belirme
     if (b.dead || a <= 0) continue;
     let jx = 0, jy = 0;                                 // kara deliğe yakın tuğlalar titrer
     for (const h of holes) if (Math.hypot(b.x + BRICK.w / 2 - h.x, b.y + BRICK.h / 2 - h.y) < 95) { jx = rnd(-1.5, 1.5); jy = rnd(-1.5, 1.5); }
@@ -8622,7 +9519,7 @@ let glints = [], glintCd = 0;
 function updateGlints(dt) {
   if ((glintCd -= dt) <= 0) {
     glintCd = rnd(0.2, 0.55);
-    const alive = bricks.filter(b => !b.dead && state.buildFade - b.row - b.col * 0.18 >= 1);
+    const alive = bricks.filter(b => !b.dead && revealOf(b) >= 1);
     if (alive.length) glints.push({ b: pick(alive), ox: rnd(8, BRICK.w - 8), oy: rnd(3, 8), life: 0.55 });
   }
   for (const g of glints) g.life -= dt;
@@ -8755,7 +9652,7 @@ function drawPaddle() {
   const { x, y, w, h } = paddle;
   // Cila: raket hızına göre hafif eğilir, top değince squash yapar (canlı hissi)
   const tilt = clamp(paddle.vx / 2600, -1, 1) * 0.07;
-  const squash = paddle.flash > 0 ? paddle.flash : 0;
+  const squash = paddle.flash > 0 && balls.length <= 40 ? paddle.flash : 0;   // top fırtınasında sürekli basık kalmasın
   ctx.save();
   if (tilt || squash) {
     ctx.translate(x + w / 2, y + h / 2);
@@ -8782,7 +9679,6 @@ function drawPaddle() {
   }
   if (fxOn("magnet")) fillRR(x + 6, y + 4, w - 12, 6, 3, "#b388eb");
   if (fxOn("laser")) { ctx.fillStyle = "#ff4d6d"; ctx.fillRect(x + 3, y - 7, 6, 9); ctx.fillRect(x + w - 9, y - 7, 6, 9); }
-  if (fxOn("reverse")) text("⇄ " + tr("TERS") + " ⇄", x + w / 2, y + h + 14, "bold 12px monospace", "#ff4d6d");
   if (paddle.flash > 0) { ctx.globalAlpha = paddle.flash * 0.7; fillRR(x, y, w, h, 6, "#ffffff"); ctx.globalAlpha = 1; }
   if (curseOn("yarik")) {       // YARIK RAKET: ortadaki boşluk (top buradan düşer)
     const gx = x + w * 0.375, gw = w * 0.25;
@@ -8793,6 +9689,7 @@ function drawPaddle() {
   }
   ctx.globalAlpha = 1;
   ctx.restore();                // raket eğim/squash dönüşümü sonu
+  if (fxOn("reverse")) text("⇄ " + tr("TERS") + " ⇄", x + w / 2, y + h + 14, "bold 12px monospace", "#ff4d6d");   // yazı eğilmez
   if (state.shield > 0) {       // kalkan çizgisi
     ctx.globalAlpha = 0.6 + 0.3 * Math.sin(state.time * 8);
     ctx.fillStyle = "#64dfdf";
@@ -8803,8 +9700,8 @@ function drawPaddle() {
 function drawBalls() {
   const fire = isFire(), ballCol = fire ? "#ff6b35" : T().ball, rainbow = settings.trail === "gokkusagi";
   const crowd = balls.length > 40;                       // top fırtınası: iz, hale ve gölge çizilmez (akıcı kalsın)
-  if (!crowd && balls.some(b => b.stuck) && (state.mode === "serve" || state.mode === "playing")) {
-    const sb = balls.find(b => b.stuck);                 // cila: fırlatma bekleyen topa genişleyip sönen hedef halkası
+  const sb = !crowd && (state.mode === "serve" || state.mode === "playing") && balls.find(b => b.stuck);
+  if (sb) {                                              // cila: fırlatma bekleyen topa genişleyip sönen hedef halkası
     const ph = (state.time * 1.4) % 1;
     ctx.globalAlpha = (1 - ph) * 0.55;
     ctx.strokeStyle = T().accent;
@@ -9089,13 +9986,11 @@ function drawScreens() {
       else { const b = { row: 0, col: 0, hp: 1, ...what }; blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y, 44 / BRICK.w); }
       text(tr(label), x + 50, y + 12, "12px monospace", T().text, "left", 58);
     });
-    NEW_TYPES.forEach(([ch, label], i) => {   // cila: yeni nesil türler menüde tanıtılır
-      const x = W / 2 - 258 + i * 103, y = H / 2 + 138;
-      const b = { row: 0, col: 0, hp: 1, ...BRICK_TYPES[ch] };
-      if (ch === "A") b.armorHp = 4;
-      if (ch === "T") b.wasTwin = true;
-      blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y, 40 / BRICK.w);
-      text(tr(label), x + 46, y + 12, "11px monospace", T().text, "left", 54);
+    NEW_TYPES.forEach(([ch, label], i) => {   // cila: yeni nesil türler menüde tanıtılır (kart içinde kalır: 600 px)
+      const x = W / 2 - 300 + i * 100, y = H / 2 + 138;
+      const b = makeBrick(0, 0, ch);                 // oyundaki kurulumun aynısı (kalkan, ikiz rengi...)
+      blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y + 1, 34 / BRICK.w);
+      text(tr(label), x + 39, y + 12, "11px monospace", T().text, "left", 58);
     });
     if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 172, "13px monospace", CURSE_COLOR, "center", 610);
     ctx.restore();
@@ -9133,7 +10028,9 @@ function drawScreens() {
     drawCard(W / 2, H / 2, 520, 400);
     const GW = 490;   // oyun sonu kartının iç genişliği
     titleText(tr("OYUN BİTTİ"), W / 2, H / 2 - 148, 44, T().ex, "#ff4d6d", GW);
-    text(tr("Skor: {n}", { n: Math.round(hudScore) }), W / 2, H / 2 - 96, "bold 24px monospace", T().text, "center", GW);
+    // cila: karttaki skor 0.7 sn'de yarısından yukarı sayar (zamana bağlı; köşedeki HUD skoruna dokunmaz)
+    const up = 1 - (1 - clamp((performance.now() - modeAt) / 700, 0, 1)) ** 3;
+    text(tr("Skor: {n}", { n: Math.round(state.score * (0.5 + 0.5 * up)) }), W / 2, H / 2 - 96, "bold 24px monospace", T().text, "center", GW);
     if (state.newRecord) { ctx.globalAlpha = pulse; text(tr("🏆 YENİ REKOR!"), W / 2, H / 2 - 62, "bold 22px monospace", T().b2, "center", GW); ctx.globalAlpha = 1; }
     else text(tr("Rekor: {n}", { n: state.high }), W / 2, H / 2 - 62, "18px monospace", T().dim, "center", GW);
     text(tr("Bölüm {level} · Süre {time}", { level: state.level, time: fmtTime(Math.round(state.time)) }), W / 2, H / 2 - 28, "15px monospace", T().text, "center", GW);
@@ -9142,7 +10039,8 @@ function drawScreens() {
     if (run.pacts.length) text("📜 " + pactNames(), W / 2, H / 2 + 56, "bold 12px monospace", CURSE_COLOR, "center", GW);
     const pactY = run.pacts.length ? 34 : 0;
     if (run.song && typeof songLevel !== "undefined") text("🎵 " + songLevel.name + " · " + Math.round(songLevel.bpm) + " BPM", W / 2, H / 2 + 56 + pactY, "bold 12px monospace", "#ffd166", "center", GW);
-    const extraY = pactY + (run.song ? 26 : 0);
+    else if (run.custom) text("✏️ " + (editor.name.trim() || tr("Benim bölümüm")), W / 2, H / 2 + 56 + pactY, "bold 12px monospace", T().accent, "center", GW);
+    const extraY = pactY + (run.song || run.custom ? 26 : 0);
     if (run.daily && typeof daily !== "undefined") text(tr("GÜNLÜK · en iyi {best} · seri {n}", { best: daily.best, n: daily.streak }), W / 2, H / 2 + 62 + extraY, "bold 15px monospace", T().b2, "center", GW);
     else if (run.practice) text(tr("PRATİK — rekor ve kariyer sayılmadı"), W / 2, H / 2 + 62 + extraY, "14px monospace", T().dim, "center", GW);
     if (state.lbRank) text(tr("Liderlik tablosu: #{n} ({name})", { n: state.lbRank, name: vsCfg.name }), W / 2, H / 2 + 96 + extraY, "bold 15px monospace", T().b2, "center", GW);
@@ -9239,6 +10137,9 @@ function draw() {
   if (state.mode !== "menu") drawHUD();
   drawCallout();
   drawScreens();
+  // Konfeti en üstte: oyun sonu / bölüm kartının arkasında kalmasın
+  for (const p of confetti) { ctx.globalAlpha = clamp(p.life * 2.5, 0, 1); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size * 0.6); }
+  ctx.globalAlpha = 1;
 }
 
 // ======================================================================
@@ -9878,10 +10779,10 @@ function nextToast() {
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
 const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
-              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false };
+              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false };
 const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
-              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false });
+              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false });
 function track(key, n = 1) {
   if (run.practice) return;
   career.stats[key] += n;
@@ -10629,6 +11530,7 @@ function startPractice(level, anyLevel) {
   if (battle.active) closeBattle();
   startGame();
   run.practice = true;
+  hidePactOffer();                  // startGame paktı pratik bayrağından önce açmıştı (pratikte pakt yok)
   stopGhost();
   if (level > 1) { state.level = level - 1; nextLevel(); }
   return true;
@@ -11451,6 +12353,330 @@ function lastEnd() {
 
 onClick("last-continue", lastContinue);
 onClick("last-end", lastEnd);
+
+// ======================================================================
+// js/editor.js
+// ======================================================================
+// 28. BÖLÜM EDİTÖRÜ: kendi duvarını çiz, test et, kaydet, kodla ya da
+//     bağlantıyla paylaş. Harita biçimi levels.js ile aynıdır (10 sütun,
+//     '>' = kayan sıra, boss seçilirse ilk 5 sıra boss'a ayrılır).
+//     Test koşuları pratik sayılır: rekor, liderlik, kariyer etkilenmez.
+// ======================================================================
+const ED_ROWS = 12;                                        // raketle arada nefes payı kalsın (70 + 12×28 = 406 px)
+const ED_BOSS_ROWS = 5;
+const ED_CHARS = ".123XEZ$+HATIVS";
+const ED_CHAR_RE = /^[.123XEZ$+HATIVS]{10}>?$/;
+const ED_MAX_SAVED = 30;
+const ED_BOSSES = LEVELS.filter(l => l.boss).map(l => l.boss);
+// Palet: karakter → kısa ad (koleksiyon ve harita açıklamasıyla aynı adlar)
+const ED_PALETTE = [
+  [".", N_("Silgi")], ["1", N_("1 vuruş")], ["2", N_("2 vuruş")], ["3", N_("3 vuruş")], ["X", N_("Kırılmaz")],
+  ["E", N_("Patlayan")], ["Z", N_("Elektrik")], ["$", N_("Altın")], ["+", N_("Çoğaltan")], ["H", N_("Yenilenen")],
+  ["A", N_("Kalkanlı")], ["T", N_("İkiz")], ["I", N_("Buz")], ["V", N_("Virüs")], ["S", N_("Şifacı")],
+];
+
+const editor = {
+  name: "", rows: Array(ED_ROWS).fill(".........."), slide: Array(ED_ROWS).fill(false), boss: -1,
+  brush: "1", mirror: false, undo: [], painting: false, playing: false, starting: false, playDef: null,
+};
+const edPanel = $("editorpanel"), edGrid = $("ed-grid"), edMsg = $("ed-msg"), edCode = $("ed-code"), edName = $("ed-name");
+
+// --- Model ---
+const edSnapshot = () => JSON.stringify({ rows: editor.rows, slide: editor.slide, boss: editor.boss });
+function edPushUndo() {
+  editor.undo.push(edSnapshot());
+  if (editor.undo.length > 60) editor.undo.shift();
+}
+function edUndo() {
+  const s = editor.undo.pop();
+  if (!s) return false;
+  Object.assign(editor, JSON.parse(s));
+  renderEditor();
+  return true;
+}
+const edLocked = r => editor.boss >= 0 && r < ED_BOSS_ROWS;
+function edSet(r, c, ch) {
+  if (edLocked(r) || r < 0 || r >= ED_ROWS || c < 0 || c >= COLS) return;
+  const put = (cc) => { const line = editor.rows[r]; editor.rows[r] = line.slice(0, cc) + ch + line.slice(cc + 1); };
+  put(c);
+  if (editor.mirror) put(COLS - 1 - c);
+}
+function edClearBossRows() {
+  if (editor.boss < 0) return;
+  for (let r = 0; r < ED_BOSS_ROWS; r++) { editor.rows[r] = ".........."; editor.slide[r] = false; }
+}
+// Editör durumu → oyunun bölüm tanımı (levels.js biçimi); sondaki boş sıralar atılır
+function editorDef() {
+  let last = -1;
+  editor.rows.forEach((line, r) => { if (/[^.]/.test(line)) last = r; });
+  const map = editor.rows.slice(0, Math.max(last + 1, editor.boss >= 0 ? ED_BOSS_ROWS : 0))
+    .map((line, r) => (edLocked(r) ? ".........." : line + (editor.slide[r] && /[^.]/.test(line) ? ">" : "")));
+  return editor.boss >= 0 ? { boss: { ...ED_BOSSES[editor.boss] }, map } : map;
+}
+// Oynanabilir mi: en az bir kırılabilir tuğla ya da boss
+const edBreakable = () => editor.rows.some((line, r) => !edLocked(r) && /[123EZ$+HATIVS]/.test(line));
+const edPlayable = () => editor.boss >= 0 || edBreakable();
+function edStats() {
+  const all = editor.rows.join("");
+  return { bricks: all.replace(/\./g, "").length, specials: all.replace(/[.123]/g, "").length };
+}
+function edLoad(d) {
+  editor.name = String(d.n || "").slice(0, 30);
+  editor.boss = Number.isInteger(d.b) && d.b >= 0 && d.b < ED_BOSSES.length ? d.b : -1;
+  editor.rows = Array(ED_ROWS).fill("..........");
+  editor.slide = Array(ED_ROWS).fill(false);
+  (d.m || []).slice(0, ED_ROWS).forEach((line, r) => { editor.rows[r] = line.slice(0, 10); editor.slide[r] = line[10] === ">"; });
+  edClearBossRows();
+}
+const edData = () => ({ n: editor.name, b: editor.boss, m: editor.rows.map((line, r) => line + (editor.slide[r] ? ">" : "")) });
+
+// --- Paylaşım kodu: BBL1:<base64url(JSON)>, bağlantıda #bbl=<aynı gövde> ---
+const b64url = s => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64url = s => decodeURIComponent(escape(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4))));
+function encodeEditorLevel() {
+  const d = edData();
+  let last = -1;
+  d.m.forEach((line, r) => { if (/[^.>]/.test(line)) last = r; });
+  d.m = d.m.slice(0, last + 1);
+  return "BBL1:" + b64url(JSON.stringify(d));
+}
+// Kodu çözer ve doğrular; geçersizse null
+function decodeEditorLevel(code) {
+  try {
+    const raw = String(code || "").trim();
+    const body = raw.startsWith("BBL1:") ? raw.slice(5) : (raw.match(/#bbl=([\w-]+)/) || [])[1];
+    if (!body) return null;
+    const d = JSON.parse(unb64url(body));
+    if (!d || !Array.isArray(d.m) || d.m.length > ED_ROWS) return null;
+    const m = d.m.map(String);
+    if (!m.every(line => ED_CHAR_RE.test(line))) return null;
+    const b = d.b == null ? -1 : d.b;
+    if (!(Number.isInteger(b) && b >= -1 && b < ED_BOSSES.length)) return null;
+    return { n: String(d.n || "").slice(0, 30), b, m };
+  } catch (e) { return null; }
+}
+function importEditorLevel(code) {
+  const d = decodeEditorLevel(code);
+  if (!d) return false;
+  edLoad(d);
+  renderEditor();
+  return true;
+}
+const editorLink = () => location.href.split("#")[0] + "#bbl=" + encodeEditorLevel().slice(5);
+
+// --- Kayıtlı bölümler (bu cihazda) ---
+const edSaved = () => {
+  const v = store.get("bb_mylevels", []);
+  return Array.isArray(v) ? v.map(x => decodeEditorLevel("BBL1:" + b64url(JSON.stringify(x)))).filter(Boolean) : [];
+};
+function saveEditorLevel() {
+  const name = editor.name.trim();
+  if (!name) return "noname";
+  if (!edPlayable()) return "empty";
+  const list = edSaved().filter(x => x.n !== name);
+  if (list.length >= ED_MAX_SAVED) return "full";
+  list.unshift({ ...edData(), n: name });
+  store.set("bb_mylevels", list);
+  return "ok";
+}
+function deleteEditorLevel(name) {
+  const list = edSaved(), next = list.filter(x => x.n !== name);
+  store.set("bb_mylevels", next);
+  return next.length < list.length;
+}
+
+// --- Test koşusu ---
+// flow.js buildLevel/nextLevel/startGame/toMenu bu fonksiyonlara bakar
+const editorPlayDef = n => (editor.playing && n === 1 ? editor.playDef : null);
+function playEditorLevel() {
+  if (!edPlayable()) return false;
+  closePanels();
+  if (battle.active) closeBattle();
+  editor.playDef = editorDef();
+  editor.starting = editor.playing = true;
+  startGame();
+  editor.starting = false;
+  run.practice = true;
+  run.custom = true;
+  hidePactOffer();                  // startGame paktı pratik bayrağından önce açmıştı
+  callout("✏️ " + (editor.name.trim() || tr("Benim bölümüm")).toLocaleUpperCase(LOCALE), T().accent);
+  return true;
+}
+function stopEditorPlay() { editor.playing = false; }
+function editorComplete() {
+  stopEditorPlay();
+  addScore(2000);
+  callout(tr("✏️ BÖLÜM TAMAM!"), T().accent);
+  gameOver();
+}
+
+// --- Arayüz ---
+const edColor = ch => {
+  if (ch === ".") return null;
+  if (/\d/.test(ch)) return hpColor(+ch);
+  return brickColor({ ...BRICK_TYPES[ch], wasTwin: ch === "T", row: 0, col: 0, hp: 1 });
+};
+const edLabel = ch => (ch === "." ? "" : ch);
+function edCellStyle(btn, ch) {
+  const c = edColor(ch);
+  btn.style.background = c || "";
+  btn.style.color = c && c.startsWith("#") ? dotColorFor(c) : "";
+  btn.textContent = edLabel(ch);
+}
+const edCells = [];
+const edSlides = [];
+function buildEditorGrid() {
+  edGrid.replaceChildren();
+  for (let r = 0; r < ED_ROWS; r++) {
+    edCells[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      const b = el("button", { type: "button", className: "ed-cell", dataset: { r, c } });
+      edCells[r][c] = b;
+      edGrid.append(b);
+    }
+    const s = el("button", { type: "button", className: "ed-slide", textContent: "↔", title: tr("Bu sıra sağa sola kayar"),
+      onclick: () => { if (edLocked(r)) return; edPushUndo(); editor.slide[r] = !editor.slide[r]; renderEditor(); } });
+    edSlides[r] = s;
+    edGrid.append(s);
+  }
+}
+function renderEditor() {
+  if (!edPanel) return;
+  if (document.activeElement !== edName) edName.value = editor.name;
+  for (let r = 0; r < ED_ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const b = edCells[r][c];
+      edCellStyle(b, editor.rows[r][c]);
+      b.classList.toggle("locked", edLocked(r));
+    }
+    edSlides[r].classList.toggle("active", !!editor.slide[r]);
+    edSlides[r].disabled = edLocked(r);
+  }
+  edGrid.classList.toggle("boss", editor.boss >= 0);
+  for (const b of $("ed-palette").children) b.classList.toggle("active", b.dataset.ch === editor.brush);
+  for (const b of $("ed-boss").children) b.classList.toggle("active", +b.dataset.boss === editor.boss);
+  $("ed-mirror").classList.toggle("active", editor.mirror);
+  $("ed-undo").disabled = !editor.undo.length;
+  $("ed-play").disabled = !edPlayable();
+  const s = edStats();
+  $("ed-info").textContent = tr("{n} tuğla · {s} özel", { n: s.bricks, s: s.specials }) +
+    (editor.boss >= 0 ? " · " + tr("boss: {name}", { name: tr(ED_BOSSES[editor.boss].name) }) : "") +
+    (edPlayable() ? "" : " · " + tr("en az bir kırılabilir tuğla koy"));
+  const saved = edSaved();
+  $("ed-saved").replaceChildren(...(saved.length ? saved.map(d => el("button", {
+    type: "button", className: d.n === editor.name ? "active" : "", textContent: (d.b >= 0 ? "☠ " : "") + d.n,
+    onclick: () => { edLoad(d); renderEditor(); edMsg.textContent = tr("📂 {name} açıldı.", { name: d.n }); },
+  })) : [el("span", { className: "setnote", textContent: tr("Henüz kayıtlı bölüm yok.") })]));
+}
+const openEditor = () => { if (edPanel.hidden) togglePanel(edPanel, renderEditor); };
+
+function edCellAt(x, y) {
+  const t = document.elementFromPoint(x, y);
+  return t && t.closest ? t.closest(".ed-cell") : null;
+}
+function edPaint(cell, erase) {
+  if (!cell) return;
+  const r = +cell.dataset.r, c = +cell.dataset.c, ch = erase ? "." : editor.brush;
+  if (editor.rows[r][c] === ch && (!editor.mirror || editor.rows[r][COLS - 1 - c] === ch)) return;
+  edSet(r, c, ch);
+  renderEditor();
+}
+function setupEditor() {
+  setupPanel(edPanel, tr("✏️ Bölüm Editörü"));
+  $("ed-palette").replaceChildren(...ED_PALETTE.map(([ch, name]) => {
+    const b = el("button", { type: "button", className: "ed-brush", dataset: { ch }, title: tr(name),
+      onclick: () => { editor.brush = ch; renderEditor(); } });
+    const sw = el("span", { className: "ed-sw" });
+    edCellStyle(sw, ch);
+    if (ch === ".") sw.textContent = "⌫";
+    b.append(sw, el("span", { textContent: tr(name) }));
+    return b;
+  }));
+  $("ed-boss").replaceChildren(
+    el("button", { type: "button", dataset: { boss: -1 }, textContent: tr("Yok"), onclick: () => { edPushUndo(); editor.boss = -1; renderEditor(); } }),
+    ...ED_BOSSES.map((spec, i) => el("button", { type: "button", dataset: { boss: i }, textContent: "☠ " + tr(spec.name),
+      onclick: () => { edPushUndo(); editor.boss = i; edClearBossRows(); renderEditor(); } })));
+  $("ed-templates").replaceChildren(...LEVELS.map((def, i) => (def.pixel ? null : el("button", {
+    type: "button", textContent: (def.boss ? "☠ " : "") + (i + 1), title: tr("{n}. bölümü şablon olarak aç", { n: i + 1 }),
+    onclick: () => {
+      edPushUndo();
+      const map = Array.isArray(def) ? def : def.map;
+      const b = def.boss ? ED_BOSSES.findIndex(x => x.name === def.boss.name) : -1;
+      edLoad({ n: tr("Bölüm {n}", { n: i + 1 }) + " +", b, m: map });
+      renderEditor();
+    },
+  }))).filter(Boolean));
+  buildEditorGrid();
+
+  // Boyama: fareyle sürükle (sağ tık siler), dokunmatikte parmakla sürükle
+  edGrid.addEventListener("contextmenu", e => e.preventDefault());
+  edGrid.addEventListener("pointerdown", e => {
+    const cell = e.target.closest && e.target.closest(".ed-cell");
+    if (!cell) return;
+    e.preventDefault();
+    if (edGrid.releasePointerCapture && e.pointerId != null) try { edGrid.releasePointerCapture(e.pointerId); } catch (err) {}
+    edPushUndo();
+    editor.painting = e.button === 2 ? "erase" : "paint";
+    edPaint(cell, editor.painting === "erase");
+  });
+  edGrid.addEventListener("pointermove", e => { if (editor.painting) edPaint(edCellAt(e.clientX, e.clientY), editor.painting === "erase"); });
+  document.addEventListener("pointerup", () => { editor.painting = false; });
+  document.addEventListener("pointercancel", () => { editor.painting = false; });
+
+  edName.addEventListener("input", () => { editor.name = edName.value.slice(0, 30); });
+  onClick("ed-mirror", () => { editor.mirror = !editor.mirror; renderEditor(); });
+  onClick("ed-undo", edUndo);
+  onClick("ed-clear", () => {
+    edPushUndo();
+    editor.rows = Array(ED_ROWS).fill(".........."); editor.slide = Array(ED_ROWS).fill(false);
+    renderEditor();
+  });
+  onClick("ed-random", () => {
+    edPushUndo();
+    const lvl = 1 + ((Math.random() * 9) | 0), off = editor.boss >= 0 ? ED_BOSS_ROWS : 0;
+    const map = proceduralMap((Math.random() * 1e9) | 0, lvl);
+    editor.rows = Array(ED_ROWS).fill("..........");
+    editor.slide = Array(ED_ROWS).fill(false);
+    map.forEach((line, r) => { if (r + off < ED_ROWS) editor.rows[r + off] = line; });
+    renderEditor();
+  });
+  onClick("ed-play", () => { if (!playEditorLevel()) edMsg.textContent = tr("⚠️ En az bir kırılabilir tuğla koy."); });
+  onClick("ed-save", () => {
+    const r = saveEditorLevel();
+    edMsg.textContent = r === "ok" ? tr("💾 {name} kaydedildi.", { name: editor.name.trim() })
+      : r === "noname" ? tr("⚠️ Önce bölüme bir ad ver.")
+      : r === "empty" ? tr("⚠️ En az bir kırılabilir tuğla koy.")
+      : tr("⚠️ En çok {n} bölüm kaydedilebilir; önce birini sil.", { n: ED_MAX_SAVED });
+    renderEditor();
+  });
+  onClick("ed-delete", () => {
+    edMsg.textContent = deleteEditorLevel(editor.name.trim()) ? tr("🗑 {name} silindi.", { name: editor.name.trim() }) : tr("⚠️ Bu adla kayıtlı bölüm yok.");
+    renderEditor();
+  });
+  const copy = (text, okMsg) => {
+    edCode.value = text; edCode.select();
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => (edMsg.textContent = okMsg), () => (edMsg.textContent = tr("Kodu kutudan kopyala.")));
+    else edMsg.textContent = tr("Kodu kutudan kopyala.");
+  };
+  onClick("ed-export", () => { if (!edPlayable()) { edMsg.textContent = tr("⚠️ En az bir kırılabilir tuğla koy."); return; } copy(encodeEditorLevel(), tr("📋 Bölüm kodu panoya kopyalandı.")); });
+  onClick("ed-link", () => { if (!edPlayable()) { edMsg.textContent = tr("⚠️ En az bir kırılabilir tuğla koy."); return; } copy(editorLink(), tr("🔗 Bağlantı panoya kopyalandı.")); });
+  onClick("ed-import", () => {
+    edPushUndo();
+    edMsg.textContent = importEditorLevel(edCode.value) ? tr("📥 Bölüm yüklendi — test edebilirsin.") : tr("⚠️ Geçersiz bölüm kodu.");
+  });
+
+  toolbar.insertBefore(el("button", { textContent: tr("✏️ Editör"), title: tr("Kendi bölümünü çiz, test et ve paylaş"),
+    onclick: () => togglePanel(edPanel, renderEditor) }), careerBtn);
+  renderEditor();
+
+  // Bağlantıyla gelen bölüm: #bbl=... → editöre yükle ve paneli aç
+  if (/#bbl=/.test(location.hash) && importEditorLevel(location.hash)) {
+    try { history.replaceState(null, "", location.href.split("#")[0]); } catch (e) {}
+    openEditor();
+    edMsg.textContent = tr("🔗 Paylaşılan bölüm yüklendi — ▶ Test et ile oyna.");
+  }
+}
+setupEditor();
 
 // ======================================================================
 // js/main.js

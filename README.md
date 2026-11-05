@@ -1,6 +1,6 @@
 # Brick Breaker AI
 
-Tek dosya, sıfır bağımlılık — tarayıcıda aç, oyna. İstersen kendi video ve müziğini arka plana koy. Lanetler, boss'lar, günlük meydan okuma, bölüm seçimi ve koşu özeti dahil.
+Tek dosya, sıfır bağımlılık — tarayıcıda aç, oyna. İstersen kendi video ve müziğini arka plana koy. Lanetler, boss'lar, günlük meydan okuma, bölüm seçimi, bölüm editörü ve koşu özeti dahil.
 
 ## Çalıştırma
 
@@ -174,6 +174,17 @@ Araç çubuğundaki **🎯 Meydan** düğmesi iki şeyi bir arada açar:
 - **🌀 Tünel Fırtınası:** 12. bölüm kilitli olsa bile bu düğmeyle her zaman pratik olarak oynanır.
 
 **Koşu özeti:** oyun sonu ekranı skorun yanında bölüm, süre, kırılan tuğla, en iyi combo, toplanan kapsül, atlatılan lanet ve yenilen boss sayılarını gösterir. Günlük koşuda ayrıca günlük en iyi ve seri; pratik koşuda “PRATİK” etiketi görünür.
+
+## Bölüm editörü (✏️ Editör)
+
+Kendi bölümünü çiz, test et ve arkadaşınla paylaş.
+
+- 10 sütun × 12 sıralık ızgaraya paletten tuğla seçip tıkla ya da sürükle; sağ tık siler. Telefonda parmakla çizilir.
+- **↔** bir sırayı kayan sıra yapar · **🪞 Ayna** simetrik çizer · **↶ Geri al** · **🧹 Temizle** · **🎲 Rastgele** duvar.
+- **Boss** seçebilir (ilk 5 sıra ona ayrılır) ya da oyundaki bir bölümü **şablon** olarak açıp değiştirebilirsin.
+- **▶ Test et** bölümü hemen oynatır. Test koşusu rekora ve kariyere sayılmaz; bitince editöre geri dönersin.
+- **💾 Kaydet** ile bu cihazda 30 bölüme kadar saklanır.
+- **📤 Kodu al** `BBL1:` kodu, **🔗 Bağlantı** tıklanınca bölümü açan bir adres verir. Gelen kodu kutuya yapıştırıp **📥 Yükle**.
 
 ## Sesler
 
