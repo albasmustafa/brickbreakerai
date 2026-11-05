@@ -186,6 +186,15 @@ Kendi bölümünü çiz, test et ve arkadaşınla paylaş.
 - **💾 Kaydet** ile bu cihazda 30 bölüme kadar saklanır.
 - **📤 Kodu al** `BBL1:` kodu, **🔗 Bağlantı** tıklanınca bölümü açan bir adres verir. Gelen kodu kutuya yapıştırıp **📥 Yükle**.
 
+## Erişilebilirlik ve performans
+
+- **Klavyeyle oyna:** tüm menüler Tab ve Enter ile gezilir, Esc paneli kapatır. Lanet Paktı kartları **1 / 2 / 3** ile seçilir, **0** pakt yok.
+- **Ekran okuyucu:** bölüm, boss ve oyun sonu duyuruları okunur.
+- **⚙️ Ayarlar → Renk körü dostu:** tuğla renkleri renk körlüğünde de ayırt edilen bir palete geçer ve her tuğlada kalan vuruş noktacıkları çıkar.
+- **⚙️ Ayarlar → Parlama ve yanıp sönme: Azaltılmış:** müzik flaşı kapanır, hızlı yanıp sönmeler durur (ışığa duyarlıysan bunu seç).
+- **⚙️ Ayarlar → Grafik kalitesi:** Otomatik (oyun takılırsa kendiliğinden düşük kaliteye geçer), Yüksek ya da Düşük (yavaş cihaz). 300 topluk fırtına artık eskisinin yaklaşık iki katı hızlı çiziliyor.
+- **⚙️ Ayarlar → Dokunmatik: Kaydırarak:** telefonda raket parmağın altına zıplamaz, parmağın kaydığı kadar gider; ekranın her yerinden oynarsın, parmak raketi örtmez.
+
 ## Sesler
 
 Web Audio ile sentezlenir; her yüzeyin kendi sesi vardır: yan duvar (tok), tavan (tink), tuğla kırma (combo ile incelen pop), dayanıklı tuğla (clack), kırılmaz tuğla (metalik clank), patlama (güm), kapsüller, kayıp, bölüm/oyun sonu melodileri. Kaos sürümüyle: tampon (boing), falso (vızıltı), portal, SMASH, yıldırım, lazer, altın, kötü kapsül, kalkan, kara delik uğultusu ve fırlatma, ÇILGIN MOD arpeji, boss kükremesi/isabet/mermi, sersemleme. Rekabetle: geri sayım, saldırı, başarım melodisi.
