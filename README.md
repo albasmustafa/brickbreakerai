@@ -32,6 +32,9 @@ Bu dosya, modüllere ayrılmış proje sürümünden derlenir: `/run/media/albas
 - **Cila:** çapraz belirme dalgası, eğilen/squash yapan raket, fırlatma hedef halkası, zeminli duyurular, bölüm sonu ve yeni rekor konfetisi, can kaybı vinyeti, oyun sonunda yukarı sayan skor, nabız atan menü başlığı ve yeni türleri tanıtan gösterge.
 - **Modlar (Kolay/Orta/Zor):** menüden hapla seçilir; hız ve can yetmez — raket genişliği (kolayda ×1.12, zorda ×0.88), kapsül oranı, lanet sıklığı ve puan çarpanı (zorda ×1.35, kolayda ×0.75) da moda bağlıdır.
 - **Mikro Duvar (14. bölüm):** üstteki kutuların küçük hali — 4 px hücreler (11.700+ minik tuğla) ve boşluklu çelik kaburgalar; top yalnız boşluklardan sızar, ateş topu delemeye başlar. Kazanınca toplar sahaya saçılır.
+- **Mozaik Duvar (15. bölüm):** dikdörtgenler 28 px'lik tek renk fayanslara bölünür — mavi/çelik/boşluk salınımı; top fayans fayans öğütür.
+- **Adalar Duvarı (16. bölüm):** ~120 küçük elmas tuğla takımı, her dördüncü çelik çekirdekli; top adalar arasında serbestçe dolaşır.
+- **Görsel cila:** kartlarda ışık süpürmesi, toplarda parıltı halesi, duvarlarda gölge + tam bevel hücreler, yıldızlarda raketi izleyen paralaks.
 - **CR7 Koridoru (13. bölüm):** tamı tamına mavi piksel duvar, ortada dar dikey koridor; top koridordan girip zinciri tutuşturur. Turuncu dar raket (%72), küpler: 🟡 +3 top · 🟢 → yörünge kılavuzu · 🟠 ▲ ateş topu. Sağ altta animasyonlu **CR7**: kutlama yapar, üzülünce yüzünü kapatır; kazanınca ⚽ SIUUU! toplar sahaya saçılır.
 - **Combo:** rakete dokunmadan üst üste kırılan her tuğla çarpanı büyütür (x8) ve kırılma sesi perde perde incelir. Skor = 10 × dayanıklılık × çarpan. 5/8/15/20/30 combo'da ekranda dev yazı çıkar.
 - **ÇILGIN MOD:** 10 combo'da 6 sn boyunca tüm toplar ateş topu olur, puanlar ×2, tahta gökkuşağına döner.
