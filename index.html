@@ -236,6 +236,14 @@ select:hover { border-color: var(--accent); }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 @media (prefers-reduced-motion: reduce) { .panel:not([hidden]) { animation: none; } *, *::before, *::after { transition-duration: 0.01ms !important; } }
+
+/* Kampanya paneli: dünya kartları */
+.camp-world { border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 10px; padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 6px; background: var(--panel2); }
+.camp-world.locked { opacity: 0.55; }
+.camp-world > strong { font-size: 13px; color: var(--c); }
+.camp-levels { display: flex; gap: 6px; flex-wrap: wrap; }
+.camp-levels button { min-width: 76px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -365,6 +373,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   <div class="setnote" id="song-msg"></div>
   <div class="setnote">Şarkının BPM'i, bas ve tiz enerjisi 3 bölüme dönüşür; güçlü bir final varsa son bölüme boss eklenir. Aynı şarkı her zaman aynı bölümü üretir. Bölüm kodu arkadaşlarınla paylaşılabilir.</div>
   <div class="sethead">🌀 Tünel Fırtınası</div>
+  <div class="setrow"><button id="campaign-open">🗺️ Kampanya'yı aç</button></div>
   <div class="setrow"><button id="tunnel-start">🌀 Tünel Fırtınası'nı oyna</button><button id="koridor-start">⚽ CR7 Koridoru'nu oyna</button><button id="mikro-start">🔹 Mikro Duvar'ı oyna</button><button id="mozaik-start">🧩 Mozaik Duvar'ı oyna</button><button id="adalar-start">💠 Adalar Duvarı'nı oyna</button></div>
   <div class="setnote">Binlerce mavi piksel tuğla ve içinden geçen kırılmaz çelik L ve sarmal tüneller. Topu tünele sok: çıkışa taşınır, duvarı içeriden oyar, zincir reaksiyon başlar. Çıkışlardaki sarı +3 ve turuncu x3 küpleri raketle yakala, 300 topa kadar fırtına. Klasik oyunda 12. bölüm; buradan her zaman pratik olarak açık.</div>
   <div class="sethead">Bölüm seçimi (pratik)</div>
@@ -393,6 +402,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   <textarea id="ed-code" placeholder="BBL1:... bölüm kodunu ya da bağlantısını buraya yapıştır"></textarea>
   <div class="setnote" id="ed-msg"></div>
   <div class="setnote">Paletten tuğla seç, ızgaraya tıkla ya da sürükle; sağ tık siler. Sıra sonundaki ↔ o sırayı kaydırır, Ayna açıkken çizdiğin sağ yarıya yansır. Boss seçilirse ilk 5 sıra boss'a ayrılır. Test koşuları rekor ve kariyere sayılmaz. Bağlantıyla açılan bölüm doğrudan editöre yüklenir.</div>
+</section>
+
+<section id="campaignpanel" class="panel" role="dialog" aria-label="Kampanya" hidden>
+  <div id="campaign-worlds"></div>
 </section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
@@ -1327,6 +1340,27 @@ const I18N_KEYS = [
 "Derin Deniz", // 782
 "🔥 Hayatta Kalma", // 783
 "🔥 HAYATTA KALMA", // 784
+"GECE BEKÇİSİ", // 785
+"NEON LORD", // 786
+"Tünel", // 787
+"TÜNEL USTASI", // 788
+"BUZ KRALİÇESİ", // 789
+"KAN KONTU", // 790
+"KUZEY IŞIĞI", // 791
+"DERİNLİK DEVRİ", // 792
+"SİBER İMPARATOR", // 793
+"DÜNYA {n} TAMAM!", // 794
+"🌍 TUR TAMAMLANDI!", // 795
+"🗺️ Kampanya'yı aç", // 796
+"Kampanya", // 797
+"🗺️ Kampanya", // 798
+"Önce {n}. dünyayı bitir", // 799
+"İlk Dünya", // 800
+"Kampanyada bir dünyayı bitir", // 801
+"Turun Yarısı", // 802
+"Kampanyada 4 dünyayı bitir", // 803
+"Tur Şampiyonu", // 804
+"Kampanyayı baştan sona bitir", // 805
 ];
 const I18N_DATA = {};
 
@@ -1606,6 +1640,29 @@ I18N_DATA.en = {
 782: "Deep Sea",
 783: "🔥 Survival",
 784: "🔥 SURVIVAL",
+
+785: "NIGHT WARDEN",
+786: "NEON LORD",
+787: "Tunnel",
+788: "TUNNEL MASTER",
+789: "ICE QUEEN",
+790: "BLOOD COUNT",
+791: "NORTHERN LIGHT",
+792: "ABYSS GIANT",
+793: "CYBER EMPEROR",
+794: "WORLD {n} COMPLETE!",
+795: "🌍 TOUR COMPLETE!",
+796: "🗺️ Open the Campaign",
+797: "Campaign",
+798: "🗺️ Campaign",
+799: "Finish world {n} first",
+
+800: "First World",
+801: "Finish a world in the Campaign",
+802: "Half the Tour",
+803: "Finish 4 worlds in the Campaign",
+804: "Tour Champion",
+805: "Finish the whole Campaign",
 };
 
 // ======================================================================
@@ -1884,6 +1941,29 @@ I18N_DATA.de = {
 782: "Tiefsee",
 783: "🔥 Überleben",
 784: "🔥 ÜBERLEBEN",
+
+785: "NACHTWÄCHTER",
+786: "NEON-LORD",
+787: "Tunnel",
+788: "TUNNELMEISTER",
+789: "EISKÖNIGIN",
+790: "BLUTGRAF",
+791: "NORDLICHT",
+792: "ABGRUND-RIESE",
+793: "CYBER-KAISER",
+794: "WELT {n} GESCHAFFT!",
+795: "🌍 TOUR BEENDET!",
+796: "🗺️ Kampagne öffnen",
+797: "Kampagne",
+798: "🗺️ Kampagne",
+799: "Beende zuerst Welt {n}",
+
+800: "Erste Welt",
+801: "Beende eine Welt in der Kampagne",
+802: "Halbe Tour",
+803: "Beende 4 Welten in der Kampagne",
+804: "Tour-Champion",
+805: "Beende die ganze Kampagne",
 };
 
 // ======================================================================
@@ -2162,6 +2242,29 @@ I18N_DATA.fr = {
 782: "Mer Profonde",
 783: "🔥 Survie",
 784: "🔥 SURVIE",
+
+785: "GARDIEN DE LA NUIT",
+786: "SEIGNEUR NÉON",
+787: "Tunnel",
+788: "MAÎTRE DU TUNNEL",
+789: "REINE DE GLACE",
+790: "COMTE DE SANG",
+791: "LUMIÈRE DU NORD",
+792: "GÉANT DES ABÎMES",
+793: "EMPEREUR CYBER",
+794: "MONDE {n} TERMINÉ !",
+795: "🌍 TOUR TERMINÉ !",
+796: "🗺️ Ouvrir la Campagne",
+797: "Campagne",
+798: "🗺️ Campagne",
+799: "Termine d'abord le monde {n}",
+
+800: "Premier Monde",
+801: "Termine un monde dans la Campagne",
+802: "Moitié du Tour",
+803: "Termine 4 mondes dans la Campagne",
+804: "Champion du Tour",
+805: "Termine toute la Campagne",
 };
 
 // ======================================================================
@@ -2440,6 +2543,29 @@ I18N_DATA.es = {
 782: "Mar Profundo",
 783: "🔥 Supervivencia",
 784: "🔥 SUPERVIVENCIA",
+
+785: "CENTINELA NOCTURNO",
+786: "SEÑOR NEÓN",
+787: "Túnel",
+788: "MAESTRO DEL TÚNEL",
+789: "REINA DE HIELO",
+790: "CONDE DE SANGRE",
+791: "LUZ DEL NORTE",
+792: "GIGANTE DEL ABISMO",
+793: "EMPERADOR CIBERNÉTICO",
+794: "¡MUNDO {n} COMPLETO!",
+795: "¡🌍 GIRA COMPLETO!",
+796: "🗺️ Abrir la Campaña",
+797: "Campaña",
+798: "🗺️ Campaña",
+799: "Termina primero el mundo {n}",
+
+800: "Primer Mundo",
+801: "Termina un mundo en la Campaña",
+802: "Mitad del Recorrido",
+803: "Termina 4 mundos en la Campaña",
+804: "Campeón del Recorrido",
+805: "Termina toda la Campaña",
 };
 
 // ======================================================================
@@ -2718,6 +2844,29 @@ I18N_DATA.it = {
 782: "Mare Profondo",
 783: "🔥 Sopravvivenza",
 784: "🔥 SOPRAVVIVENZA",
+
+785: "GUARDIA NOTTURNA",
+786: "SIGNORE NEON",
+787: "Tunnel",
+788: "MAESTRO DEL TUNNEL",
+789: "REGINA DEL GHIACCIO",
+790: "CONTE DEL SANGUE",
+791: "LUCE DEL NORD",
+792: "GIGANTE DELL'ABISSO",
+793: "IMPERATORE CYBER",
+794: "MONDO {n} COMPLETO!",
+795: "🌍 TOUR COMPLETATO!",
+796: "🗺️ Apri la Campagna",
+797: "Campagna",
+798: "🗺️ Campagna",
+799: "Completa prima il mondo {n}",
+
+800: "Primo Mondo",
+801: "Completa un mondo nella Campagna",
+802: "Metà del Giro",
+803: "Completa 4 mondi nella Campagna",
+804: "Campione del Giro",
+805: "Completa tutta la Campagna",
 };
 
 // ======================================================================
@@ -2996,6 +3145,29 @@ I18N_DATA.pt = {
 782: "Mar Profundo",
 783: "🔥 Sobrevivência",
 784: "🔥 SOBREVIVÊNCIA",
+
+785: "GUARDIÃO DA NOITE",
+786: "SENHOR NEON",
+787: "Túnel",
+788: "MESTRE DO TÚNEL",
+789: "RAINHA DO GELO",
+790: "CONDE DE SANGUE",
+791: "LUZ DO NORTE",
+792: "GIGANTE DO ABISMO",
+793: "IMPERADOR CIBER",
+794: "MUNDO {n} COMPLETO!",
+795: "🌍 TOUR COMPLETO!",
+796: "🗺️ Abrir a Campanha",
+797: "Campanha",
+798: "🗺️ Campanha",
+799: "Termine primeiro o mundo {n}",
+
+800: "Primeiro Mundo",
+801: "Termine um mundo na Campanha",
+802: "Metade do Tour",
+803: "Termine 4 mundos na Campanha",
+804: "Campeão do Tour",
+805: "Termine toda a Campanha",
 };
 
 // ======================================================================
@@ -3274,6 +3446,29 @@ I18N_DATA.ru = {
 782: "Глубина Моря",
 783: "🔥 Выживание",
 784: "🔥 ВЫЖИВАНИЕ",
+
+785: "НОЧНОЙ СТРАЖ",
+786: "НЕОН-ЛОРД",
+787: "Тоннель",
+788: "МАСТЕР ТОННЕЛЕЙ",
+789: "ЛЕДЯНАЯ КОРОЛЕВА",
+790: "КРОВАВЫЙ ГРАФ",
+791: "СЕВЕРНОЕ СИЯНИЕ",
+792: "ГРОМАДИНА ГЛУБИН",
+793: "КИБЕР-ИМПЕРАТОР",
+794: "МИР {n} ПРОЙДЕН!",
+795: "🌍 ТУР ЗАВЕРШЁН!",
+796: "🗺️ Открыть Кампанию",
+797: "Кампания",
+798: "🗺️ Кампания",
+799: "Сначала пройдите мир {n}",
+
+800: "Первый Мир",
+801: "Пройди мир в Кампании",
+802: "Половина Тура",
+803: "Пройди 4 мира в Кампании",
+804: "Чемпион Тура",
+805: "Пройди всю Кампанию",
 };
 
 // ======================================================================
@@ -3552,6 +3747,29 @@ I18N_DATA.uk = {
 782: "Глибина Моря",
 783: "🔥 Виживання",
 784: "🔥 ВИЖИВАННЯ",
+
+785: "НІЧНИЙ ВАРТА",
+786: "НЕОН-ЛОРД",
+787: "Тунель",
+788: "МАЙСТЕР ТУНЕЛІВ",
+789: "КРИЖАНА КОРОЛЕВА",
+790: "КРОВАВИЙ ГРАФ",
+791: "ПІВНІЧНЕ СЯЙВО",
+792: "ВЕЛЕТ ГЛИБИН",
+793: "КІБЕР-ІМПЕРАТОР",
+794: "СВІТ {n} ПРОЙДЕНО!",
+795: "🌍 ТУР ЗАВЕРШЕНО!",
+796: "🗺️ Відкрити Кампанію",
+797: "Кампанія",
+798: "🗺️ Кампанія",
+799: "Спершу пройдіть світ {n}",
+
+800: "Перший Світ",
+801: "Пройди світ у Кампанії",
+802: "Половина Туру",
+803: "Пройди 4 світи у Кампанії",
+804: "Чемпіон Туру",
+805: "Пройди всю Кампанію",
 };
 
 // ======================================================================
@@ -3830,6 +4048,29 @@ I18N_DATA.pl = {
 782: "Głębina",
 783: "🔥 Przetrwanie",
 784: "🔥 PRZETRWANIE",
+
+785: "STRAŻNIK NOCY",
+786: "LORD NEON",
+787: "Tunel",
+788: "MISTRZ TUNELI",
+789: "LODOWA KRÓLOWA",
+790: "KRWAWY HRABIA",
+791: "ZORZA POLARNA",
+792: "GIGANT GŁĘBIN",
+793: "CYBER-CESARZ",
+794: "ŚWIAT {n} UKOŃCZONY!",
+795: "🌍 TURA UKOŃCZONA!",
+796: "🗺️ Otwórz Kampanię",
+797: "Kampania",
+798: "🗺️ Kampania",
+799: "Najpierw ukończ świat {n}",
+
+800: "Pierwszy Świat",
+801: "Ukończ świat w Kampanii",
+802: "Połowa Trasy",
+803: "Ukończ 4 światy w Kampanii",
+804: "Mistrz Trasy",
+805: "Ukończ całą Kampanię",
 };
 
 // ======================================================================
@@ -4108,6 +4349,29 @@ I18N_DATA.nl = {
 782: "Diepzee",
 783: "🔥 Overleven",
 784: "🔥 OVERLEVEN",
+
+785: "NACHTWACHT",
+786: "NEONHEER",
+787: "Tunnel",
+788: "TUNNELMEESTER",
+789: "IJSKONINGIN",
+790: "BLOEDGRAAF",
+791: "NOORDERLICHT",
+792: "AFGRONDREUS",
+793: "CYBERKEIZER",
+794: "WERELD {n} VOLTOOID!",
+795: "🌍 TOUR VOLTOOID!",
+796: "🗺️ Campagne openen",
+797: "Campagne",
+798: "🗺️ Campagne",
+799: "Voltooi eerst wereld {n}",
+
+800: "Eerste Wereld",
+801: "Voltooi een wereld in de Campagne",
+802: "Helft van de Tour",
+803: "Voltooi 4 werelden in de Campagne",
+804: "Tourkampioen",
+805: "Voltooi de hele Campagne",
 };
 
 // ======================================================================
@@ -4386,6 +4650,29 @@ I18N_DATA.sv = {
 782: "Djuphav",
 783: "🔥 Överlevnad",
 784: "🔥 ÖVERLEVNAD",
+
+785: "NATTVAKT",
+786: "NEONLORD",
+787: "Tunnel",
+788: "TUNNELMÄSTARE",
+789: "ISDROTTNING",
+790: "BLODGREVE",
+791: "NORRSKEN",
+792: "DJUPETS JÄTTE",
+793: "CYBERKEJSARE",
+794: "VÄRLD {n} KLAR!",
+795: "🌍 TURNÉN KLAR!",
+796: "🗺️ Öppna Kampanjen",
+797: "Kampanj",
+798: "🗺️ Kampanj",
+799: "Klara först värld {n}",
+
+800: "Första Världen",
+801: "Klara en värld i Kampanjen",
+802: "Halva Turnén",
+803: "Klara 4 världar i Kampanjen",
+804: "Turnéns Mästare",
+805: "Klara hela Kampanjen",
 };
 
 // ======================================================================
@@ -4664,6 +4951,29 @@ I18N_DATA.el = {
 782: "Βαθιά Θάλασσα",
 783: "🔥 Επιβίωση",
 784: "🔥 ΕΠΙΒΙΩΣΗ",
+
+785: "ΦΥΛΑΚΑΣ ΤΗΣ ΝΥΧΤΑΣ",
+786: "ΑΡΧΟΝΤΑΣ ΝΕΟΝ",
+787: "Σήραγγα",
+788: "ΔΕΣΠΟΤΗΣ ΤΗΣ ΣΗΡΑΓΓΑΣ",
+789: "ΒΑΣΙΛΙΣΣΑ ΤΟΥ ΠΑΓΟΥ",
+790: "ΚΟΜΗΣ ΤΟΥ ΑΙΜΑΤΟΣ",
+791: "ΒΟΡΕΙΟ ΦΩΣ",
+792: "ΓΙΓΑΝΤΑΣ ΤΟΥ ΒΥΘΟΥ",
+793: "ΚΥΒΕΡΝΟ-ΑΥΤΟΚΡΑΤΟΡΑΣ",
+794: "ΚΟΣΜΟΣ {n} ΟΛΟΚΛΗΡΩΘΗΚΕ!",
+795: "🌍 ΠΕΡΙΗΓΗΣΗ ΟΛΟΚΛΗΡΩΘΗΚΕ!",
+796: "🗺️ Ανοίγμα την Εκστρατεία",
+797: "Εκστρατεία",
+798: "🗺️ Εκστρατεία",
+799: "Ολοκλήρωσε πρώτα τον κόσμο {n}",
+
+800: "Πρώτος Κόσμος",
+801: "Ολοκλήρωσε έναν κόσμο στην Εκστρατεία",
+802: "Μισή Περιήγηση",
+803: "Ολοκλήρωσε 4 κόσμους στην Εκστρατεία",
+804: "Πρωταθλητής της Περιήγησης",
+805: "Ολοκλήρωσε ολόκληρη την Εκστρατεία",
 };
 
 // ======================================================================
@@ -4942,6 +5252,29 @@ I18N_DATA.cs = {
 782: "Hluboké Moře",
 783: "🔥 Přežití",
 784: "🔥 PŘEŽITÍ",
+
+785: "NOČNÍ STRÁŽCE",
+786: "NEONOVÝ PÁN",
+787: "Tunel",
+788: "MISTR TUNELŮ",
+789: "LEDOWÁ KRÁLOVNA",
+790: "KRVAVÝ HRABĚ",
+791: "POLÁRNÍ ZÁŘE",
+792: "OBR HLUBIN",
+793: "KYBER-CÍSAŘ",
+794: "SVĚT {n} DOKONČEN!",
+795: "🌍 TURA DOKONČENA!",
+796: "🗺️ Otevřít Kampaň",
+797: "Kampaň",
+798: "🗺️ Kampaň",
+799: "Nejdřív dokonči svět {n}",
+
+800: "První Svět",
+801: "Dokonči svět v Kampani",
+802: "Polovina Tury",
+803: "Dokonči 4 světy v Kampani",
+804: "Mistr Tury",
+805: "Dokonči celou Kampaň",
 };
 
 // ======================================================================
@@ -5220,6 +5553,29 @@ I18N_DATA.ro = {
 782: "Marea Adâncă",
 783: "🔥 Supraviețuire",
 784: "🔥 SUPRAVIEȚUIRE",
+
+785: "STRAJUL NOPȚII",
+786: "DOMNUL NEON",
+787: "Tunel",
+788: "MAESTRUL TUNELURILOR",
+789: "REGINA GHEȚURILOR",
+790: "CONTUL SÂNGELUI",
+791: "LUMINA NORDULUI",
+792: "GIGANTUL ADâncurilor",
+793: "ÎMPĂRATUL CIBERNETIC",
+794: "LUMEA {n} TERMINATĂ!",
+795: "🌍 TURUL TERMINAT!",
+796: "🗺️ Deschide Campania",
+797: "Campanie",
+798: "🗺️ Campanie",
+799: "Termină mai întâi lumea {n}",
+
+800: "Prima Lume",
+801: "Termină o lume în Campanie",
+802: "Jumătate de Tur",
+803: "Termină 4 lumi în Campanie",
+804: "Campion al Turului",
+805: "Termină toată Campania",
 };
 
 // ======================================================================
@@ -5498,6 +5854,29 @@ I18N_DATA.hu = {
 782: "Mélytenger",
 783: "🔥 Túlélés",
 784: "🔥 TÚLÉLÉS",
+
+785: "ÉJFÉLI ŐR",
+786: "NEON ÚR",
+787: "Alagút",
+788: "ALAGÚT MESTERE",
+789: "JÉGKIRÁLYNŐ",
+790: "VÉRGRÓF",
+791: "SARKI FÉNY",
+792: "MÉLYSÉG ÓRIÁSA",
+793: "KIBER CSÁSZÁR",
+794: "{n}. VILÁG KÉSZ!",
+795: "🌍 TÚRA KÉSZ!",
+796: "🗺️ Kampány megnyitása",
+797: "Kampány",
+798: "🗺️ Kampány",
+799: "Először fejezd be a(z) {n}. világot",
+
+800: "Első Világ",
+801: "Fejez be egy világot a Kampányban",
+802: "A Túra Fele",
+803: "Fejez be 4 világot a Kampányban",
+804: "A Túra Bajnoka",
+805: "Fejezd be a teljes Kampányt",
 };
 
 // ======================================================================
@@ -5776,6 +6155,29 @@ I18N_DATA.az = {
 782: "Dəniz Dərinliyi",
 783: "🔥 Sağ Qalma",
 784: "🔥 SAĞ QALMA",
+
+785: "GEÇƏ QORUYUCUSU",
+786: "NEON LORDU",
+787: "Tunel",
+788: "TUNEL USTASI",
+789: "BUZ KRALİÇƏSİ",
+790: "QAN QRAFI",
+791: "ŞİMAL İŞIĞI",
+792: "DƏRİNLİK DEVRİ",
+793: "SİBER İMPERATOR",
+794: "{n}. DÜNYA TAMAM!",
+795: "🌍 TUR TAMAMLANDI!",
+796: "🗺️ Kampaniyanı aç",
+797: "Kampaniya",
+798: "🗺️ Kampaniya",
+799: "Əvvəlcə {n}. dünyanı bitir",
+
+800: "İlk Dünya",
+801: "Kampaniyada bir dünyanı bitir",
+802: "Turun Yarısı",
+803: "Kampaniyada 4 dünyanı bitir",
+804: "Tur Çempionu",
+805: "Bütün Kampaniyanı bitir",
 };
 
 // ======================================================================
@@ -6054,6 +6456,29 @@ I18N_DATA.ar = {
 782: "أعماق البحر",
 783: "🔥 البقاء",
 784: "🔥 البقاء",
+
+785: "حارس الليل",
+786: "سيد النيون",
+787: "النفق",
+788: "سيد النفق",
+789: "ملكة الجليد",
+790: "كونت الدم",
+791: "الشفق القطبي",
+792: "عملاق الأعماق",
+793: "الإمبراطور السيبراني",
+794: "اكتمل العالم {n}!",
+795: "🌍 اكتملت الجولة!",
+796: "🗺️ افتتح الحملة",
+797: "الحملة",
+798: "🗺️ الحملة",
+799: "أنهِ العالم {n} أولاً",
+
+800: "العالم الأول",
+801: "أنهِ عالماً في الحملة",
+802: "نصف الجولة",
+803: "أنهِ 4 عوالم في الحملة",
+804: "بطل الجولة",
+805: "أنهِ الحملة كاملة",
 };
 
 // ======================================================================
@@ -6332,6 +6757,29 @@ I18N_DATA.fa = {
 782: "اقیانوس عمیق",
 783: "🔥 بقا",
 784: "🔥 بقا",
+
+785: "نگهبان شب",
+786: "ارباب نئون",
+787: "تونل",
+788: "استاد تونل",
+789: "ملکه یخ",
+790: "کنت خون",
+791: "شفق قطبی",
+792: "غول اعماق",
+793: "امپراتور سایبر",
+794: "دنیای {n} کامل شد!",
+795: "🌍 تور کامل شد!",
+796: "🗺️ کمپین را باز کن",
+797: "کمپین",
+798: "🗺️ کمپین",
+799: "اول دنیای {n} را تمام کن",
+
+800: "نخستین دنیا",
+801: "یک دنیا را در کمپین تمام کن",
+802: "نیمی از تور",
+803: "4 دنیا را در کمپین تمام کن",
+804: "قهرمان تور",
+805: "کل کمپین را تمام کن",
 };
 
 // ======================================================================
@@ -6610,6 +7058,29 @@ I18N_DATA.hi = {
 782: "गहरा सागर",
 783: "🔥 अस्तित्व",
 784: "🔥 अस्तित्व",
+
+785: "रात का रक्षक",
+786: "नियॉन स्वामी",
+787: "सुरंग",
+788: "सुरंग गुरु",
+789: "बर्फ की रानी",
+790: "खून का काउंट",
+791: "उत्तरी प्रकाश",
+792: "गहराई का दैत्य",
+793: "साइबर सम्राट",
+794: "दुनिया {n} पूरी!",
+795: "🌍 दौरा पूरा!",
+796: "🗺️ अभियान खोलें",
+797: "अभियान",
+798: "🗺️ अभियान",
+799: "पहले दुनिया {n} पूरी करें",
+
+800: "पहली दुनिया",
+801: "अभियान में एक दुनिया पूरी करें",
+802: "दौरे का आधा भाग",
+803: "अभियान में 4 दुनियाएँ पूरी करें",
+804: "दौरे का चैंपियन",
+805: "पूरा अभियान पूरी करें",
 };
 
 // ======================================================================
@@ -6888,6 +7359,29 @@ I18N_DATA.id = {
 782: "Laut Dalam",
 783: "🔥 Bertahan",
 784: "🔥 BERTAHAN",
+
+785: "PENJAGA MALAM",
+786: "TUHAN NEON",
+787: "Terowongan",
+788: "AHLI TEROWONGAN",
+789: "RATU ES",
+790: "COUNT DARAH",
+791: "CAHAYA UTARA",
+792: "RAKSASA PALUNG",
+793: "KAISAR SIBER",
+794: "DUNIA {n} SELESAI!",
+795: "🌍 TUR SELESAI!",
+796: "🗺️ Buka Kampanye",
+797: "Kampanye",
+798: "🗺️ Kampanye",
+799: "Selesaikan dulu dunia {n}",
+
+800: "Dunia Pertama",
+801: "Selesaikan satu dunia di Kampanye",
+802: "Separuh Tur",
+803: "Selesaikan 4 dunia di Kampanye",
+804: "Juara Tur",
+805: "Selesaikan seluruh Kampanye",
 };
 
 // ======================================================================
@@ -7166,6 +7660,29 @@ I18N_DATA.vi = {
 782: "Biển Sâu",
 783: "🔥 Sinh Tồn",
 784: "🔥 SINH TỒN",
+
+785: "VỆ SĨ ĐÊM",
+786: "CHÚA NEON",
+787: "Đường hầm",
+788: "BẬC THẦY ĐƯỜNG HẦM",
+789: "NỮ HOÀNG BĂNG",
+790: "BÁ TƯỚC MÁU",
+791: "ÁNH SÁNG BẮC CỰC",
+792: "KHỔNG LỒ VỰC SÂU",
+793: "HOÀNG ĐẾ SIBER",
+794: "THẾ GIỚI {n} HOÀN THÀNH!",
+795: "🌍 CHUYẾN ĐI HOÀN THÀNH!",
+796: "🗺️ Mở Chiến dịch",
+797: "Chiến dịch",
+798: "🗺️ Chiến dịch",
+799: "Hoàn thành thế giới {n} trước",
+
+800: "Thế Giới Đầu Tiên",
+801: "Hoàn thành một thế giới trong Chiến dịch",
+802: "Nửa Chuyến Đi",
+803: "Hoàn thành 4 thế giới trong Chiến dịch",
+804: "Vô Địch Chuyến Đi",
+805: "Hoàn thành toàn bộ Chiến dịch",
 };
 
 // ======================================================================
@@ -7444,6 +7961,29 @@ I18N_DATA.zh = {
 782: "深海",
 783: "🔥生存",
 784: "🔥生存",
+
+785: "夜之守卫",
+786: "霓虹之主",
+787: "隧道",
+788: "隧道大师",
+789: "寒冰女王",
+790: "血之伯爵",
+791: "北极之光",
+792: "深渊巨人",
+793: "赛博皇帝",
+794: "世界 {n} 通关！",
+795: "🌍 环球通关！",
+796: "🗺️ 打开战役",
+797: "战役",
+798: "🗺️ 战役",
+799: "先完成世界 {n}",
+
+800: "首个世界",
+801: "在战役中完成一个世界",
+802: "半程之旅",
+803: "在战役中完成4个世界",
+804: "环球冠军",
+805: "完成整个战役",
 };
 
 // ======================================================================
@@ -7722,6 +8262,29 @@ I18N_DATA.ja = {
 782: "深海",
 783: "🔥サバイバル",
 784: "🔥サバイバル",
+
+785: "ナイトウォーデン",
+786: "ネオンロード",
+787: "トンネル",
+788: "トンネルマスター",
+789: "氷の女王",
+790: "血の伯爵",
+791: "北極光",
+792: "深淵の巨人",
+793: "サイバー皇帝",
+794: "ワールド{n}クリア！",
+795: "🌍ツアー完了！",
+796: "🗺️キャンペーンを開く",
+797: "キャンペーン",
+798: "🗺️キャンペーン",
+799: "まずワールド{n}をクリア",
+
+800: "初めての世界",
+801: "キャンペーンでワールドを1つクリア",
+802: "ツアーの半分",
+803: "キャンペーンでワールドを4つクリア",
+804: "ツアーのチャンピオン",
+805: "キャンペーンをすべてクリア",
 };
 
 // ======================================================================
@@ -8000,6 +8563,29 @@ I18N_DATA.ko = {
 782: "심해",
 783: "🔥 생존",
 784: "🔥 생존",
+
+785: "밤의 수호자",
+786: "네온 군주",
+787: "터널",
+788: "터널의 달인",
+789: "얼음 여왕",
+790: "피의 백작",
+791: "북극광",
+792: "심연의 거인",
+793: "사이버 황제",
+794: "월드 {n} 클리어!",
+795: "🌍 투어 완료!",
+796: "🗺️ 캠페인 열기",
+797: "캠페인",
+798: "🗺️ 캠페인",
+799: "먼저 월드 {n}를 클리어하세요",
+
+800: "첫 번째 세계",
+801: "캠페인에서 월드 하나를 클리어",
+802: "투어의 절반",
+803: "캠페인에서 월드 4개를 클리어",
+804: "투어 챔피언",
+805: "캠페인 전체를 클리어",
 };
 
 // ======================================================================
@@ -8694,10 +9280,12 @@ function seedVirusBricks(n) {
 }
 
 function buildLevel(n) {
+  // KAMPANYA: dünyanın bölümü her şeyin önündedir
+  const cdef = run.campaign && typeof campaignDef === "function" ? campaignDef() : null;
   // Şarkı bölümü ya da editörden test koşusu: hazır harita, döngü/tohum/piksel duvar yok
-  const song = (typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1]) ||
-               (typeof editorPlayDef === "function" && editorPlayDef(n));
-  const def = song || LEVELS[(n - 1) % LEVELS.length], cycle = song ? 0 : Math.floor((n - 1) / LEVELS.length);
+  const song = !cdef && ((typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1]) ||
+               (typeof editorPlayDef === "function" && editorPlayDef(n)));
+  const def = cdef || song || LEVELS[(n - 1) % LEVELS.length], cycle = cdef ? run.world - 1 : song ? 0 : Math.floor((n - 1) / LEVELS.length);
   // Günlük/haftalık koşuda bölümler tohumdan üretilir: aynı tohum = aynı simetrik duvar
   const proc = !song && (run.daily || (typeof weekly !== "undefined" && weekly.active)) && Array.isArray(def);
   const map = proc ? proceduralMap(run.daily ? weekHash(daily.date) : weekly.seed, n) : (Array.isArray(def) ? def : def.map || []);
@@ -8723,7 +9311,8 @@ function buildLevel(n) {
 function makeBoss(spec, cycle) {
   const hp = Math.round(spec.hp * (1 + 0.5 * cycle) * pactBossHpMul());
   return { name: spec.name, hp, maxHp: hp, w: 200, h: 62, x: W / 2 - 100, y: 78, baseY: 78, vx: spec.speed * (1 + 0.15 * cycle),
-           shootEvery: spec.shootEvery, shootAt: 2.5, minionAt: 6, t: 0, flash: 0, enraged: false, dead: false };
+           shootEvery: spec.shootEvery, shootAt: 2.5, minionAt: 6, t: 0, flash: 0, enraged: false, dead: false,
+           spread: spec.volley || 3, minions: !!spec.minions, rain: !!spec.rain, rainAt: 0 };   // kampanya boss bayrakları
 }
 // Duvar bölgeleri: tampon (hız patlaması), falso (kavis), portal (karşı duvardan çıkar); bölüm numarasıyla tohumlanır
 function buildZones(n) {
@@ -8810,6 +9399,7 @@ function toMenu() {
   run.dailyFinished = false;
   run.practice = false;
   run.survival = false;
+  run.campaign = false;
   hidePactOffer();
   hideLastChance();
   director.challenge = null;
@@ -8867,6 +9457,7 @@ function loseLife() {
   sfx("lose");
   addShake(6);
   state.hurt = 1;                          // cila: kenarlarda sönen kırmızı vinyet
+  if (run.campaign) campaign.stageLost++;   // KAMPANYA: yıldız etkisi
   if (pxWall.mode === "koridor" && typeof cr7Facepalm === "function") cr7Facepalm();   // CR7 üzülür
   state.combo = 0;
   clearEffects();
@@ -8889,12 +9480,13 @@ function gameOver() {
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
   else if (run.practice || wasWeekly || run.song) state.lbRank = 0;
-  else { state.lbRank = recordScore(run.survival ? "kalma" : "klasik", { score: state.score, level: state.level }); careerGameEnd(); }
+  else { state.lbRank = recordScore(run.survival ? "kalma" : run.campaign ? "kampanya" : "klasik", { score: state.score, level: state.level }); careerGameEnd(); }
   if (run.daily && typeof finishDaily === "function") finishDaily();
 }
 function levelCleared() {
   if (state.mode !== "playing") return;    // aynı karede iki kez tetiklenmesin
   addScore(500);
+  if (run.campaign) campaignStars();       // KAMPANYA: yıldızlar hesaplanır ve kaydedilir
   spawnConfetti(W / 2, H / 2 - 40, 46);    // cila: konfeti yağmuru
   directorLevelEnd();
   state.mode = "levelclear";
@@ -8905,6 +9497,7 @@ function levelCleared() {
   battleCharge(6);
 }
 function nextLevel() {
+  if (run.campaign) return advanceCampaign();              // KAMPANYA: dünya içi ilerleme
   if (run.custom) { editorComplete(); return; }   // editör bölümü tek bölümdür
   if (typeof songLevel !== "undefined" && songLevel.active && state.level >= songLevel.levels.length) { songComplete(); return; }
   state.level++;
@@ -9164,6 +9757,7 @@ function destroyBrick(b) {
   codexBump("brick:" + brickCodexKey(b));
   track("bricks");
   run.bestCombo = Math.max(run.bestCombo, state.combo);
+  if (run.campaign) campaign.bestCombo = Math.max(campaign.bestCombo, state.combo);   // kampanya yıldız ölçütü
   trackBest("bestCombo", state.combo);
   const pts = Math.round(10 * b.maxHp * Math.min(state.combo, 8) * (b.gold ? 10 * pactGoldMul() : 1) * (isFever() ? 2 : 1) * curseBonus());
   addScore(pts);
@@ -9585,9 +10179,14 @@ function updateBoss(dt) {
   if (bo.x < 20 || bo.x + bo.w > W - 20) { bo.x = clamp(bo.x, 20, W - 20 - bo.w); bo.vx = bo.x <= 20 ? Math.abs(bo.vx) : -Math.abs(bo.vx); }
   bo.y = bo.baseY + Math.sin(bo.t * 1.6) * 10;
   if (state.mode !== "playing") return;
-  if ((bo.shootAt -= dt) <= 0) {   // öfkeliyken üçlü yelpaze
+  if (bo.rain && bo.enraged && (bo.rainAt -= dt) <= 0) {   // kampanya: öfkeli boss tepeden mermi yağmuru yağdırır
+    bo.rainAt = 2.8;
+    for (let i = 0; i < 3; i++) bullets.push({ x: grnd(state.inset + 30, W - state.inset - 30), y: -10, vx: grnd(-40, 40), vy: 300, r: 7, dead: false });
+    sfx("bossShoot");
+  }
+  if ((bo.shootAt -= dt) <= 0) {   // öfkeliyken yelpaze (kampanya boss'ları daha geniş açar)
     bo.shootAt = bo.shootEvery;
-    const n = bo.enraged ? 3 : 1, sx = bo.x + bo.w / 2, sy = bo.y + bo.h;
+    const n = bo.enraged ? bo.spread || 3 : 1, sx = bo.x + bo.w / 2, sy = bo.y + bo.h;
     const base = Math.atan2(paddle.y - sy, paddle.x + paddle.w / 2 - sx);
     for (let i = 0; i < n; i++) {
       const a = base + (i - (n - 1) / 2) * 0.28;
@@ -9595,7 +10194,7 @@ function updateBoss(dt) {
     }
     sfx("bossShoot");
   }
-  if (bo.enraged && (bo.minionAt -= dt) <= 0) { bo.minionAt = 7; spawnMinions(); }
+  if (bo.enraged && bo.minions && (bo.minionAt -= dt) <= 0) { bo.minionAt = 7; spawnMinions(); }
 }
 // Öfkeli boss altına (4. sıraya) en çok 4 yeni tuğla diker
 function spawnMinions() {
@@ -12221,6 +12820,9 @@ const ACHIEVEMENTS = [
   { id: "cesitli", icon: "🎨", name: tr("Çeşitlilik Ustası"), desc: tr("Yeni türlerden toplam 100 tuğla kır"), test: s => s.specials >= 100 },
   { id: "duvar", icon: "🧱", name: tr("İlk Duvar"), desc: tr("Bir piksel duvar kazan"), test: s => s.walls >= 1 },
   { id: "duvarkral", icon: "👑", name: tr("Duvarlar Kralı"), desc: tr("10 piksel duvar kazan"), test: s => s.walls >= 10 },
+  { id: "kampilk", icon: "🌍", name: tr("İlk Dünya"), desc: tr("Kampanyada bir dünyayı bitir"), test: () => campSave.unlocked >= 2 },
+  { id: "kampyarim", icon: "🗺️", name: tr("Turun Yarısı"), desc: tr("Kampanyada 4 dünyayı bitir"), test: () => campSave.unlocked >= 5 },
+  { id: "kamptam", icon: "👑", name: tr("Tur Şampiyonu"), desc: tr("Kampanyayı baştan sona bitir"), test: () => campSave.done },
   { id: "kapisma", icon: "⚔", name: tr("İlk Kapışma"), desc: tr("Bir kapışmayı bitir"), test: s => s.matches >= 1 },
   { id: "zafer", icon: "🏆", name: tr("İlk Zafer"), desc: tr("Bir kapışmayı kazan"), test: s => s.wins >= 1 },
   { id: "seri3", icon: "📈", name: tr("Seri Galip"), desc: tr("3 kapışmayı üst üste kazan"), test: s => s.bestStreak >= 3 },
@@ -12274,10 +12876,10 @@ function nextToast() {
 }
 
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
-const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, campaign: false, world: 1, cstage: 1, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0, walls: 0, survival: false,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false };
-const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, campaign: false, world: 1, cstage: 1, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0, walls: 0, survival: false,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false });
 function track(key, n = 1) {
@@ -13083,6 +13685,195 @@ onClick("adalar-start", () => startPractice(ADALAR_LEVEL, true));
 renderChallenge();
 
 // ======================================================================
+// js/campaign.js
+// ======================================================================
+// 27. KAMPANYA — 8 Dünya Turu: her dünya 5 bölümdür (5.'si boss), kendi
+//     temasıyla açılır. Bölüm başına 1-3 yıldız: temizle + can kaybetmeden +
+//     8 combo. İlerleme (yıldız/kilit) bb_campaign içinde kalıcıdır.
+//     Haritalar klasik alfabeyi (123XEZ$+HATIVS) kullanır; 3. bölüm olarak
+//     bazı dünyalar piksel duvar modunu (mikro/mozaik/adalar) tekrar ziyaret eder.
+// ======================================================================
+const CAMPAIGN_BOSS_ROOM = Array(5).fill("..........");
+const CAMPAIGN = [
+  { name: N_("Gece"), theme: 0, levels: [                                    // 1. DÜNYA — nazik başlangıç, yeni türler tanıtılır
+    ["1111111111", "1.111111.1", "1111111111", ".11111111.", "1111111111"],
+    [".22222222.", "2211111122", "2222222222", "1111H11111", "2222222222"],
+    ["..EEEE....", ".22222222.", "1111111111", "22T1111T22", "1111111111"],
+    ["3333333333", "22.2222.22", "1HH1111HH1", "2222222222", ".33333333."],
+    { boss: { name: N_("GECE BEKÇİSİ"), hp: 30, speed: 90, shootEvery: 2.6 }, map: [...CAMPAIGN_BOSS_ROOM, "2.+.11.+.2", "..1....1.."] },
+  ]},
+  { name: N_("Neon"), theme: 3, levels: [                                    // 2. DÜNYA — elektrik zincirleri ve altın
+    ["Z11111111Z", "1Z2222$Z11", "111Z11Z111", "22$2222$22", "1Z111111Z1"],
+    ["2Z2Z2Z2Z2Z", "1$111111$1", "Z22222222Z", "111Z11Z111", "2$22Z2Z22$"],
+    ["1111111111", "Z$Z1111Z$Z", "22.2222.22", "1Z111111Z1", "$$1111$$11"],
+    ["Z33333333Z", "3Z3EEEE3Z3", "3333333333", "Z3$3333$3Z", "33Z3333Z33"],
+    { boss: { name: N_("NEON LORD"), hp: 45, speed: 120, shootEvery: 2.2 }, map: [...CAMPAIGN_BOSS_ROOM, "Z.2$EE$2.Z", "...+..+..."] },
+  ]},
+  { name: N_("Tünel"), theme: 11, levels: [                                  // 3. DÜNYA — matrix; mikro duvar ziyareti
+    ["11XX111X11", "..222222..", "X33333333X", "2211Z11122", ".33333333."],
+    ["X2.2222.2X", "22Z1111Z22", "3.333333.3", "2222$$2222", "1333333331"],
+    { pixel: "mikro", map: [] },
+    ["Z3333Z3333", "X22..T..22", "333X33X333", "2ZA2222AZ2", "3333333333"],
+    { boss: { name: N_("TÜNEL USTASI"), hp: 55, speed: 100, shootEvery: 2.0, minions: true }, map: [...CAMPAIGN_BOSS_ROOM, "X.3Z33Z3.X", "..2.+.2..."] },
+  ]},
+  { name: N_("Buz"), theme: 5, levels: [                                     // 4. DÜNYA — buz dondurur, ateş eritir
+    ["II111111II", "2I222222I2", "111IIII111", "2222222222", "3I333333I3"],
+    ["IIII22IIII", "22II$$II22", "1II1111II1", "2H222222H2", "IIII33IIII"],
+    ["3333333333", "III.33.III", "22EIIIIE22", "3II3HH3II3", "3333333333"],
+    ["XII3333IIX", "3IIIIIIII3", "II3$$$$3II", "22IIIIII22", "3II3333II3"],
+    { boss: { name: N_("BUZ KRALİÇESİ"), hp: 65, speed: 130, shootEvery: 1.9, volley: 5 }, map: [...CAMPAIGN_BOSS_ROOM, "3.IIIIII.3", "..+.$$.+.."] },
+  ]},
+  { name: N_("Vampir"), theme: 18, levels: [                                 // 5. DÜNYA — virüsler ve patlamalar
+    ["V22222222V", "22E1111E22", "3V333333V3", "2222$$2222", "111V11V111"],
+    ["XV33333VXX", "22V1111V22", "3VVE22EVV3", "2222222222", "1V1$11$1V1"],
+    ["VV333333VV", "22VE22EV22", "3V333333V3", "11V1HH1V11", "2V22$$22V2"],
+    ["3333333333", "VVA3333AVV", "22V1EE1V22", "3VV3333VV3", "1111111111"],
+    { boss: { name: N_("KAN KONTU"), hp: 75, speed: 110, shootEvery: 1.8, minions: true }, map: [...CAMPAIGN_BOSS_ROOM, "V.3$$$$3.V", "..E.VV.E.."] },
+  ]},
+  { name: N_("Aurora"), theme: 23, levels: [                                 // 6. DÜNYA — ikizler dansı; mozaik ziyareti
+    ["TT11111TT1", "22T2222T22", "1T111111T1", "2T2T$$T2T2", "TT111111TT"],
+    ["33333T3333", "TT3HHHH3TT", "22T1111T22", "3TT3333TT3", "11TT$$TT11"],
+    { pixel: "mozaik", map: [] },
+    ["T33333333T", "2T2T1S1T2T", "333T11T333", "22T3$$3T22", "TT222222TT"],
+    { boss: { name: N_("KUZEY IŞIĞI"), hp: 85, speed: 150, shootEvery: 1.7, volley: 5 }, map: [...CAMPAIGN_BOSS_ROOM, "T.T3$$3T.T", "...TT.TT.."] },
+  ]},
+  { name: N_("Derin Deniz"), theme: 27, levels: [                            // 7. DÜNYA — adalar ziyareti; her şey karışır
+    ["Z22XXX22Z2", "22V1TT1V22", "3333$$3333", "1ZA2222AZ1", "22..SS..22"],
+    ["XX333333XX", "2Z222222Z2", "3T333333T3", "22$$222$$2", "1V1HHHH1V1"],
+    { pixel: "adalar", map: [] },
+    ["333X33X333", "22Z1EE1Z22", "3V33TT33V3", "11A2$$2A11", "2222222222"],
+    { boss: { name: N_("DERİNLİK DEVRİ"), hp: 100, speed: 125, shootEvery: 1.6, minions: true, volley: 5 }, map: [...CAMPAIGN_BOSS_ROOM, "3.V.TT.V.3", ".2.E..E.2."] },
+  ]},
+  { name: N_("Siberpunk"), theme: 24, levels: [                              // 8. DÜNYA — final: her tür, en sert duvarlar
+    ["Z33333333Z", "3AT1VV1TA3", "33Z3$$3Z33", "2T222222T2", "1V1E33E1V1"],
+    ["XX333333XX", "ZAZ1111ZAZ", "3T3VHHV3T3", "22$3TT3$22", "3333333333"],
+    ["3333ZZ3333", "2V2T11T2V2", "3A3VSSV3A3", "11E3333E11", "2Z2$$$$2Z2"],
+    { pixel: "koridor", map: [] },
+    { boss: { name: N_("SİBER İMPARATOR"), hp: 140, speed: 160, shootEvery: 1.4, minions: true, volley: 5, rain: true }, map: [...CAMPAIGN_BOSS_ROOM, "Z.3V$$V3.Z", ".E.T..T.E."] },
+  ]},
+];
+
+// --- Kalıcı ilerleme: yıldızlar ve açılan dünyalar ---
+const campaign = { world: 1, stage: 1, stageLost: 0, bestCombo: 0 };
+function campaignDef() { return CAMPAIGN[run.world - 1].levels[run.cstage - 1]; }
+let campSave = (() => {
+  const v = store.get("bb_campaign", null);
+  if (v && typeof v === "object" && v.stars && typeof v.stars === "object" && Number.isFinite(+v.unlocked)) {
+    return { stars: v.stars, unlocked: clamp(Math.round(+v.unlocked), 1, 8), done: !!v.done };
+  }
+  return { stars: {}, unlocked: 1, done: false };
+})();
+const saveCampaign = () => store.set("bb_campaign", campSave);
+const campStars = (w, s) => (campSave.stars[w] || [0, 0, 0, 0, 0])[s - 1] || 0;
+const campWorldStars = w => (campSave.stars[w] || [0, 0, 0, 0, 0]).reduce((a, b) => a + b, 0);
+const campTotalStars = () => { let t = 0; for (let w = 1; w <= 8; w++) t += campWorldStars(w); return t; };
+
+function startCampaign(world, stage = 1) {
+  world = clamp(Math.round(world), 1, 8);
+  stage = clamp(Math.round(stage), 1, 5);
+  if (world > campSave.unlocked) return false;
+  closePanels();
+  if (battle.active) closeBattle();
+  startGame();
+  run.campaign = true;
+  campaign.world = run.world = world;
+  campaign.stage = run.cstage = stage;
+  campaign.stageLost = 0;
+  campaign.bestCombo = 0;
+  state.level = (world - 1) * 5 + stage;
+  state.speed = levelSpeed(state.level);
+  setTheme(THEMES[CAMPAIGN[world - 1].theme]);
+  clearEffects();
+  buildLevel(state.level);
+  startDirectorChallenge(state.level);
+  serveBall();
+  if (state.boss) callout("⚠ " + tr(state.boss.name) + " ⚠", "#ff4d6d");
+  else callout(tr(CAMPAIGN[world - 1].name), T().accent);
+  renderCampaignUI();
+  return true;
+}
+
+// Bölüm temizlendi: yıldızları hesapla, kaydet ve duyur (levelCleared çağırır)
+function campaignStars() {
+  const w = campaign.world, s = campaign.stage;
+  const stars = 1 + (campaign.stageLost === 0 ? 1 : 0) + (campaign.bestCombo >= 8 ? 1 : 0);
+  const row = campSave.stars[w] || (campSave.stars[w] = [0, 0, 0, 0, 0]);
+  const gain = Math.max(0, stars - row[s - 1]);
+  if (gain > 0) { row[s - 1] = stars; saveCampaign(); }
+  if (stars >= 2) callout("★".repeat(stars) + "☆".repeat(3 - stars), "#ffd60a");
+  return stars;
+}
+
+// Bölüm geçişi (nextLevel kampanyadayken buraya gelir)
+function advanceCampaign() {
+  if (campaign.stage >= 5) {                       // dünya tamam
+    if (campaign.world >= 8) { campaignFinish(); return; }
+    if (campSave.unlocked > campaign.world) {      // bu dünya yeniden oynanıyordu: tur bitti
+      campaignFinish(false);
+      return;
+    }
+    campSave.unlocked = campaign.world + 1;
+    saveCampaign();
+    campaign.world++;
+    campaign.stage = 1;
+    callout(tr("DÜNYA {n} TAMAM!", { n: campaign.world - 1 }), "#ffd60a");
+  } else campaign.stage++;
+  campaign.stageLost = 0;
+  campaign.bestCombo = 0;
+  run.world = campaign.world;
+  run.cstage = campaign.stage;
+  state.level = (campaign.world - 1) * 5 + campaign.stage;
+  state.speed = levelSpeed(state.level);
+  clearEffects();
+  if (campaign.stage === 1) setTheme(THEMES[CAMPAIGN[campaign.world - 1].theme]);   // yeni dünya, yeni tema
+  buildLevel(state.level);
+  startDirectorChallenge(state.level);
+  serveBall();
+  if (state.boss) { callout("⚠ " + tr(state.boss.name) + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
+  else if (pxWall.active) {
+    const pxLabel = { mikro: tr("🔹 MİKRO DUVAR"), koridor: tr("⚽ CR7 KORİDORU"), mozaik: tr("🧩 MOZAİK DUVAR"), adalar: tr("💠 ADALAR DUVARI") }[pxWall.mode];
+    if (pxLabel) callout(pxLabel, "#4cc9f0");
+  }
+  else callout(tr("BÖLÜM {n}", { n: state.level }), T().accent);
+}
+
+// Tur bitti (final: true) ya da yeniden oynanan dünya tamamlandı
+function campaignFinish(final = true) {
+  if (final) {
+    campSave.done = true;
+    saveCampaign();
+    callout(tr("🌍 TUR TAMAMLANDI!"), "#ffd60a");
+    spawnConfetti(W / 2, H / 2 - 60, 80);
+    checkAchievements();
+  }
+  state.score += 2500;                            // tur ödülü
+  gameOver();
+}
+
+
+// --- Kampanya paneli: 8 dünya kartı, bölüm düğmeleri yıldız gösterir ---
+const campaignPanel = $("campaignpanel"), campaignWorlds = $("campaign-worlds");
+setupPanel(campaignPanel, tr("🗺️ Kampanya"));
+function renderCampaignUI() {
+  if (!campaignWorlds || campaignPanel.hidden) return;
+  campaignWorlds.replaceChildren(...CAMPAIGN.map((w, wi) => {
+    const n = wi + 1, locked = n > campSave.unlocked;
+    return el("div", { className: "camp-world" + (locked ? " locked" : ""), style: { "--c": THEMES[w.theme].accent } },
+      el("strong", { textContent: (locked ? "🔒 " : "") + tr(w.name) + " · " + "★".repeat(campWorldStars(n)) }),
+      el("div", { className: "camp-levels" }, ...w.levels.map((lv, li) => {
+        const st = li + 1, stars = campStars(n, st), boss = !!lv.boss, px = !!lv.pixel;
+        return el("button", {
+          textContent: (boss ? "☠ " : px ? "🌀 " : "") + n + "-" + st + (stars ? " " + "★".repeat(stars) : ""),
+          title: locked ? tr("Önce {n}. dünyayı bitir", { n: n - 1 }) : tr("Bölüm {n}", { n: (n - 1) * 5 + st }),
+          disabled: locked,
+          onclick: () => startCampaign(n, st),
+        });
+      })));
+  }));
+}
+onClick("campaign-open", () => togglePanel(campaignPanel, renderCampaignUI));
+
+// ======================================================================
 // js/director.js
 // ======================================================================
 // 23. DRAMATURG: her bölüme küçük bir görev koyar, koşuya ritim katar.
@@ -13424,7 +14215,7 @@ function updateBattle(dt) {
 }
 
 // --- Liderlik tablosu (bu cihazda) ---
-const leaderboard = { klasik: [], kapisma: [], kalma: [] };
+const leaderboard = { klasik: [], kapisma: [], kalma: [], kampanya: [] };
 { const l = store.get("bb_leaderboard", null); if (l) for (const k in leaderboard) if (Array.isArray(l[k])) leaderboard[k] = l[k].slice(0, 10); }
 function recordScore(mode, entry) {
   if (!entry.score) return 0;
