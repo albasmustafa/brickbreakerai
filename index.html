@@ -350,7 +350,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 <section id="challengepanel" class="panel" role="dialog" aria-label="Meydan okuma" hidden>
   <div class="sethead">Günlük meydan okuma</div>
   <div id="daily-card"></div>
-  <div class="setrow"><button id="daily-start">☀️ Bugünün koşusunu başlat</button></div>
+  <div class="setrow"><button id="daily-start">☀️ Bugünün koşusunu başlat</button><button id="survival-start">🔥 Hayatta Kalma</button></div>
   <div class="setnote">Günde tek deneme · 1 can · Kabus lanetleri · +%15 hız. Deneme başladığı an kullanılmış sayılır.</div>
   <div class="sethead">🗓 Haftalık Kaos Tohumu</div>
   <div id="weekly-card" class="setnote"></div>
@@ -1314,6 +1314,19 @@ const I18N_KEYS = [
 "💠 ADALAR DUVARI", // 769
 "🧩 Mozaik Duvar'ı oyna", // 770
 "💠 Adalar Duvarı'nı oyna", // 771
+"ZIK ZIK TOP", // 772
+"ZIK ZIK", // 773
+"BOMBA", // 774
+"Yenilen duvar", // 775
+"İlk Duvar", // 776
+"Bir piksel duvar kazan", // 777
+"Duvarlar Kralı", // 778
+"10 piksel duvar kazan", // 779
+"Turkuaz", // 780
+"Gül Bahçesi", // 781
+"Derin Deniz", // 782
+"🔥 Hayatta Kalma", // 783
+"🔥 HAYATTA KALMA", // 784
 ];
 const I18N_DATA = {};
 
@@ -1579,6 +1592,20 @@ I18N_DATA.en = {
 769: "💠 ISLANDS WALL",
 770: "🧩 Play the Mosaic Wall",
 771: "💠 Play the Islands Wall",
+
+772: "WOBBLY BALL",
+773: "WOBBLY",
+774: "BOMB",
+775: "Walls won",
+776: "First Wall",
+777: "Win a pixel wall",
+778: "King of Walls",
+779: "Win 10 pixel walls",
+780: "Turquoise",
+781: "Rose Garden",
+782: "Deep Sea",
+783: "🔥 Survival",
+784: "🔥 SURVIVAL",
 };
 
 // ======================================================================
@@ -1843,6 +1870,20 @@ I18N_DATA.de = {
 769: "💠 INSELWAND",
 770: "🧩 Mosaikwand spielen",
 771: "💠 Inselwand spielen",
+
+772: "TAUMELNDER BALL",
+773: "TAUMELN",
+774: "BOMBE",
+775: "Gewonnene Wände",
+776: "Erste Wand",
+777: "Gewinne eine Pixelwand",
+778: "König der Wände",
+779: "Gewinne 10 Pixelwände",
+780: "Türkis",
+781: "Rosengarten",
+782: "Tiefsee",
+783: "🔥 Überleben",
+784: "🔥 ÜBERLEBEN",
 };
 
 // ======================================================================
@@ -2107,6 +2148,20 @@ I18N_DATA.fr = {
 769: "💠 MUR DES ÎLES",
 770: "🧩 Jouer au Mur mosaïque",
 771: "💠 Jouer au Mur des îles",
+
+772: "BALLE IVRE",
+773: "IVRE",
+774: "BOMBE",
+775: "Murs gagnés",
+776: "Premier Mur",
+777: "Gagne un mur de pixels",
+778: "Roi des Murs",
+779: "Gagne 10 murs de pixels",
+780: "Turquoise",
+781: "Jardin de Roses",
+782: "Mer Profonde",
+783: "🔥 Survie",
+784: "🔥 SURVIE",
 };
 
 // ======================================================================
@@ -2371,6 +2426,20 @@ I18N_DATA.es = {
 769: "💠 MURO DE ISLAS",
 770: "🧩 Jugar al Muro mosaico",
 771: "💠 Jugar al Muro de islas",
+
+772: "BOLA BORRACHA",
+773: "BORRACHA",
+774: "BOMBA",
+775: "Muros ganados",
+776: "Primer Muro",
+777: "Gana un muro de píxeles",
+778: "Rey de los Muros",
+779: "Gana 10 muros de píxeles",
+780: "Turquesa",
+781: "Jardín de Rosas",
+782: "Mar Profundo",
+783: "🔥 Supervivencia",
+784: "🔥 SUPERVIVENCIA",
 };
 
 // ======================================================================
@@ -2635,6 +2704,20 @@ I18N_DATA.it = {
 769: "💠 MURO DELLE ISOLE",
 770: "🧩 Gioca al Muro mosaico",
 771: "💠 Gioca al Muro delle isole",
+
+772: "PALLA UBRIACA",
+773: "UBRIACA",
+774: "BOMBA",
+775: "Muri vinti",
+776: "Primo Muro",
+777: "Vinci un muro di pixel",
+778: "Re dei Muri",
+779: "Vinci 10 muri di pixel",
+780: "Turchese",
+781: "Giardino di Rose",
+782: "Mare Profondo",
+783: "🔥 Sopravvivenza",
+784: "🔥 SOPRAVVIVENZA",
 };
 
 // ======================================================================
@@ -2899,6 +2982,20 @@ I18N_DATA.pt = {
 769: "💠 PAREDE DAS ILHAS",
 770: "🧩 Jogar a Parede mosaico",
 771: "💠 Jogar a Parede das ilhas",
+
+772: "BOLA BÊBADA",
+773: "BÊBADA",
+774: "BOMBA",
+775: "Paredes vencidas",
+776: "Primeira Parede",
+777: "Vença uma parede de pixels",
+778: "Rei das Paredes",
+779: "Vença 10 paredes de pixels",
+780: "Turquesa",
+781: "Jardim das Rosas",
+782: "Mar Profundo",
+783: "🔥 Sobrevivência",
+784: "🔥 SOBREVIVÊNCIA",
 };
 
 // ======================================================================
@@ -3163,6 +3260,20 @@ I18N_DATA.ru = {
 769: "💠 СТЕНА ОСТРОВОВ",
 770: "🧩 Играть в Мозаичную стену",
 771: "💠 Играть в Стену островов",
+
+772: "ПЬЯНАЯ ШАР",
+773: "ПЬЯНАЯ",
+774: "БОМБА",
+775: "Побеждённые стены",
+776: "Первая Стена",
+777: "Победи пиксельную стену",
+778: "Король Стен",
+779: "Победи 10 пиксельных стен",
+780: "Бирюза",
+781: "Розовый Сад",
+782: "Глубина Моря",
+783: "🔥 Выживание",
+784: "🔥 ВЫЖИВАНИЕ",
 };
 
 // ======================================================================
@@ -3427,6 +3538,20 @@ I18N_DATA.uk = {
 769: "💠 СТІНА ОСТРОВІВ",
 770: "🧩 Грати в Мозаїчну стіну",
 771: "💠 Грати в Стіну островів",
+
+772: "П'ЯНА КУЛЯ",
+773: "П'ЯНА",
+774: "БОМБА",
+775: "Переможені стіни",
+776: "Перша Стіна",
+777: "Перемож піксельну стіну",
+778: "Король Стін",
+779: "Перемож 10 піксельних стін",
+780: "Бірюза",
+781: "Трояндовий Сад",
+782: "Глибина Моря",
+783: "🔥 Виживання",
+784: "🔥 ВИЖИВАННЯ",
 };
 
 // ======================================================================
@@ -3691,6 +3816,20 @@ I18N_DATA.pl = {
 769: "💠 ŚCIANA WYSP",
 770: "🧩 Zagraj w Mozaikową ścianę",
 771: "💠 Zagraj w Ścianę wysp",
+
+772: "CHWIAJĄCA PIŁKA",
+773: "CHWIAJĄC",
+774: "BOMBA",
+775: "Wygrane ściany",
+776: "Pierwsza Ściana",
+777: "Wygraj pikselową ścianę",
+778: "Król Ścian",
+779: "Wygraj 10 pikselowych ścian",
+780: "Turkus",
+781: "Ogród Róż",
+782: "Głębina",
+783: "🔥 Przetrwanie",
+784: "🔥 PRZETRWANIE",
 };
 
 // ======================================================================
@@ -3955,6 +4094,20 @@ I18N_DATA.nl = {
 769: "💠 EILANDENMUUR",
 770: "🧩 Speel de Mozaïekmuur",
 771: "💠 Speel de Eilandenmuur",
+
+772: "DRONKEN BAL",
+773: "DRONKEN",
+774: "BOM",
+775: "Gewonnen muren",
+776: "Eerste Muur",
+777: "Win een pixelmuur",
+778: "Koning der Muren",
+779: "Win 10 pixelmuren",
+780: "Turkoois",
+781: "Rozentuin",
+782: "Diepzee",
+783: "🔥 Overleven",
+784: "🔥 OVERLEVEN",
 };
 
 // ======================================================================
@@ -4219,6 +4372,20 @@ I18N_DATA.sv = {
 769: "💠 ÖVÄGG",
 770: "🧩 Spela Mosaikväggen",
 771: "💠 Spela Öväggen",
+
+772: "VINGLIG BOLL",
+773: "VINGLIG",
+774: "BOMB",
+775: "Vunna väggar",
+776: "Första Väggen",
+777: "Vinn en pixelvägg",
+778: "Väggarnas Kung",
+779: "Vinn 10 pixelväggar",
+780: "Turkos",
+781: "Rosenträdgård",
+782: "Djuphav",
+783: "🔥 Överlevnad",
+784: "🔥 ÖVERLEVNAD",
 };
 
 // ======================================================================
@@ -4483,6 +4650,20 @@ I18N_DATA.el = {
 769: "💠 ΤΟΙΧΟΣ ΝΗΣΩΝ",
 770: "🧩 Παίξε το Ψηφιδωτό τοίχο",
 771: "💠 Παίξε το Τοίχο των νήσων",
+
+772: "ΜΕΘΥΣΜΕΝΗ ΜΠΑΛΑ",
+773: "ΜΕΘΥΣΜΕΝΗ",
+774: "ΒΟΜΒΑ",
+775: "Κερδισμένα τοιχώματα",
+776: "Πρώτο Τοίχωμα",
+777: "Κέρδισε ένα τοίχωμα από pixel",
+778: "Βασιλιάς των Τοίχων",
+779: "Κέρδισε 10 τοιχώματα από pixel",
+780: "Τυρκουάζ",
+781: "Κήπος με Τριαντάφυλλα",
+782: "Βαθιά Θάλασσα",
+783: "🔥 Επιβίωση",
+784: "🔥 ΕΠΙΒΙΩΣΗ",
 };
 
 // ======================================================================
@@ -4747,6 +4928,20 @@ I18N_DATA.cs = {
 769: "💠 ZEĎ OSTROVŮ",
 770: "🧩 Hrát Mozaikovou zeď",
 771: "💠 Hrát Zeď ostrovů",
+
+772: "OPILÝ MÍČ",
+773: "OPILÝ",
+774: "BOMBA",
+775: "Vyhrané zdi",
+776: "První Zeď",
+777: "Vyhej pixelovou zeď",
+778: "Král Zdí",
+779: "Vyhej 10 pixelových zdí",
+780: "Tyrkys",
+781: "Růžová Zahrada",
+782: "Hluboké Moře",
+783: "🔥 Přežití",
+784: "🔥 PŘEŽITÍ",
 };
 
 // ======================================================================
@@ -5011,6 +5206,20 @@ I18N_DATA.ro = {
 769: "💠 ZIDUL INSULELOR",
 770: "🧩 Joacă Zidul mozaic",
 771: "💠 Joacă Zidul insulelor",
+
+772: "MINGE BEATĂ",
+773: "BEATĂ",
+774: "BOMBĂ",
+775: "Ziduri câștigate",
+776: "Primul Zid",
+777: "Câștigă un zid de pixeli",
+778: "Regele Zidurilor",
+779: "Câștigă 10 ziduri de pixeli",
+780: "Turcoaz",
+781: "Grădina de Trandafiri",
+782: "Marea Adâncă",
+783: "🔥 Supraviețuire",
+784: "🔥 SUPRAVIEȚUIRE",
 };
 
 // ======================================================================
@@ -5275,6 +5484,20 @@ I18N_DATA.hu = {
 769: "💠 SZIGETFAL",
 770: "🧩 Mozajkfal játéka",
 771: "💠 Szigetfal játéka",
+
+772: "RÉSZES LABDA",
+773: "RÉZES",
+774: "BOMBA",
+775: "Megnyert falak",
+776: "Első Fal",
+777: "Nyerj egy pixelfalat",
+778: "A Falak Királya",
+779: "Nyerj 10 pixelfalat",
+780: "Turkiz",
+781: "Rózsakert",
+782: "Mélytenger",
+783: "🔥 Túlélés",
+784: "🔥 TÚLÉLÉS",
 };
 
 // ======================================================================
@@ -5539,6 +5762,20 @@ I18N_DATA.az = {
 769: "💠 ADALAR DİVARI",
 770: "🧩 Mozayka Divarını oyna",
 771: "💠 Adalar Divarını oyna",
+
+772: "SALLANAN TOP",
+773: "SALLAN",
+774: "BOMBA",
+775: "Qazanılmış divarlar",
+776: "İlk Divar",
+777: "Piksel divarı qazan",
+778: "Divarlar Kralı",
+779: "10 piksel divarı qazan",
+780: "Firuzəyi",
+781: "Gül Bağı",
+782: "Dəniz Dərinliyi",
+783: "🔥 Sağ Qalma",
+784: "🔥 SAĞ QALMA",
 };
 
 // ======================================================================
@@ -5803,6 +6040,20 @@ I18N_DATA.ar = {
 769: "💠 جدار الجزر",
 770: "🧩 العب جدار الموزاييك",
 771: "💠 العب جدار الجزر",
+
+772: "كرة متمايلة",
+773: "متمايلة",
+774: "قنبلة",
+775: "جدران مكسورة",
+776: "أول جدار",
+777: "اكسب جدار بكسل",
+778: "ملك الجدران",
+779: "اكسب 10 جدران بكسل",
+780: "فيروزي",
+781: "حديقة الورود",
+782: "أعماق البحر",
+783: "🔥 البقاء",
+784: "🔥 البقاء",
 };
 
 // ======================================================================
@@ -6067,6 +6318,20 @@ I18N_DATA.fa = {
 769: "💠 دیوار جزیره‌ها",
 770: "🧩 دیوار موزاییک را بازی کن",
 771: "💠 دیوار جزیره‌ها را بازی کن",
+
+772: "توپ مست",
+773: "مست",
+774: "بمب",
+775: "دیوارهای برده",
+776: "نخستین دیوار",
+777: "یک دیوار پیکسلی ببر",
+778: "پادشاه دیوارها",
+779: "10 دیوار پیکسلی ببر",
+780: "فیروزه‌ای",
+781: "باغ گل‌ها",
+782: "اقیانوس عمیق",
+783: "🔥 بقا",
+784: "🔥 بقا",
 };
 
 // ======================================================================
@@ -6331,6 +6596,20 @@ I18N_DATA.hi = {
 769: "💠 द्वीप दीवार",
 770: "🧩 मोज़ेक दीवार खेलें",
 771: "💠 द्वीप दीवार खेलें",
+
+772: "लहराती गेंद",
+773: "लहराती",
+774: "बम",
+775: "जीती गई दीवारें",
+776: "पहली दीवार",
+777: "पिक्सेल दीवार जीतें",
+778: "दीवारों का राजा",
+779: "10 पिक्सेल दीवारें जीतें",
+780: "फ़िरोज़ा",
+781: "गुलाब उद्यान",
+782: "गहरा सागर",
+783: "🔥 अस्तित्व",
+784: "🔥 अस्तित्व",
 };
 
 // ======================================================================
@@ -6595,6 +6874,20 @@ I18N_DATA.id = {
 769: "💠 DINDING PULAU",
 770: "🧩 Mainkan Dinding Mosaik",
 771: "💠 Mainkan Dinding Pulau",
+
+772: "BOLA MABUK",
+773: "MABUK",
+774: "BOM",
+775: "Dinding yang dimenangkan",
+776: "Dinding Pertama",
+777: "Menangkan dinding piksel",
+778: "Raja Dinding",
+779: "Menangkan 10 dinding piksel",
+780: "Turkis",
+781: "Taman Mawar",
+782: "Laut Dalam",
+783: "🔥 Bertahan",
+784: "🔥 BERTAHAN",
 };
 
 // ======================================================================
@@ -6859,6 +7152,20 @@ I18N_DATA.vi = {
 769: "💠 TƯỜNG ĐẢO",
 770: "🧩 Chơi Tường khắc",
 771: "💠 Chơi Tường đảo",
+
+772: "BÓNG LẢNG ĐẢNG",
+773: "LẢNG ĐẢNG",
+774: "BOM",
+775: "Tường đã thắng",
+776: "Tường Đầu Tiên",
+777: "Thắng một tường pixel",
+778: "Vua Tường",
+779: "Thắng 10 tường pixel",
+780: "Ngọc lam",
+781: "Vườn Hồng",
+782: "Biển Sâu",
+783: "🔥 Sinh Tồn",
+784: "🔥 SINH TỒN",
 };
 
 // ======================================================================
@@ -7123,6 +7430,20 @@ I18N_DATA.zh = {
 769: "💠群岛之墙",
 770: "🧩 游玩马赛克之墙",
 771: "💠 游玩群岛之墙",
+
+772: "歪歪球",
+773: "歪歪",
+774: "炸弹",
+775: "赢得的墙",
+776: "首面之墙",
+777: "赢得一面像素墙",
+778: "众墙之王",
+779: "赢得10面像素墙",
+780: "绿松石",
+781: "玫瑰花园",
+782: "深海",
+783: "🔥生存",
+784: "🔥生存",
 };
 
 // ======================================================================
@@ -7387,6 +7708,20 @@ I18N_DATA.ja = {
 769: "💠島々の壁",
 770: "🧩モザイクの壁を遊ぶ",
 771: "💠島々の壁を遊ぶ",
+
+772: "ぐらつくボール",
+773: "ぐらつき",
+774: "ボンバ",
+775: "勝った壁",
+776: "初めての壁",
+777: "ピクセルの壁に勝つ",
+778: "壁の王",
+779: "ピクセルの壁を10回勝つ",
+780: "ターコイズ",
+781: "バラ園",
+782: "深海",
+783: "🔥サバイバル",
+784: "🔥サバイバル",
 };
 
 // ======================================================================
@@ -7651,6 +7986,20 @@ I18N_DATA.ko = {
 769: "💠 군도 벽",
 770: "🧩 모자이크 벽 플레이",
 771: "💠 군도 벽 플레이",
+
+772: "비틀거리는 공",
+773: "비틀",
+774: "폭탄",
+775: "이긴 벽",
+776: "첫 번째 벽",
+777: "픽셀 벽을 이기세요",
+778: "벽의 왕",
+779: "픽셀 벽 10개를 이기세요",
+780: "터콰이즈",
+781: "장미 정원",
+782: "심해",
+783: "🔥 생존",
+784: "🔥 생존",
 };
 
 // ======================================================================
@@ -7764,7 +8113,10 @@ Pastel|dfe7fd f0f4ff 6c8cff ff8fab 7b2cbf b5b9c9 ff9f1c 3a3a5e 3a3a5e 2b2d42 6b7
 Amber|0c0800 140d00 ffb000 ff8c00 cc5500 3d2b00 ffd000 ffb000 ffd27a ffb000 8a6100 ffb000 2b1d00
 Sonbahar|1f130a 2b1a0d f4a259 bc4b51 8cb369 5b4636 f4e285 fbe9d0 ffffff fbe9d0 b39a80 f4a259 45301d
 Aurora|021526 03203a 6ef3d6 b388ff 00e5ff 2c4a63 ff8a65 e0f7fa ffffff e0f7fa 7fa3b8 6ef3d6 0d3456
-Siberpunk|0d0221 1a0b3b 00f0ff ff2a6d fdf500 3d2c5e ff8800 f5f5f5 ffffff e0f7ff 8a7fb5 ff2a6d 2b1655`
+Siberpunk|0d0221 1a0b3b 00f0ff ff2a6d fdf500 3d2c5e ff8800 f5f5f5 ffffff e0f7ff 8a7fb5 ff2a6d 2b1655
+Turkuaz|04202a 06303c 3ddad7 20b2aa 128277 3a5a5e ff7a48 ffb86b fff4e6 eafcf9 9dbfc2 3ddad7 66e0d6
+Gül Bahçesi|2b0a1e 3a0f2a ff87ab e5547f b3325a 5c2a42 ffd166 9d4edd ffeef4 fde7ef c391a6 ff87ab ffafd0
+Derin Deniz|01111f 04203a 00b4d8 0088a3 00627a 1d3a52 ff9f1c 2ec4b6 e0fbfc caf0f8 7fa3b8 00b4d8 48cae4`
   .trim().split("\n").map((line, i) => {
     const [name, cols] = line.split("|");
     const t = { name, id: "p" + i };
@@ -7774,7 +8126,7 @@ Siberpunk|0d0221 1a0b3b 00f0ff ff2a6d fdf500 3d2c5e ff8800 f5f5f5 ffffff e0f7ff 
 const MAX_CUSTOM_THEMES = 60;
 // Hazır tema adları (çeviri anahtarları; tablo yukarıda düz metin)
 [N_("Gece"), N_("Gün Batımı"), N_("Orman"), N_("Neon"), N_("Gameboy"), N_("Buz"), N_("Şeker"), N_("Klasik"), N_("Lav"), N_("Okyanus"), N_("Synthwave"), N_("Matrix"), N_("Sakura"),
- N_("Çöl"), N_("Uzay"), N_("Kahve"), N_("Altın"), N_("Lavanta"), N_("Vampir"), N_("Kağıt"), N_("Pastel"), N_("Amber"), N_("Sonbahar"), N_("Aurora"), N_("Siberpunk")];
+ N_("Çöl"), N_("Uzay"), N_("Kahve"), N_("Altın"), N_("Lavanta"), N_("Vampir"), N_("Kağıt"), N_("Pastel"), N_("Amber"), N_("Sonbahar"), N_("Aurora"), N_("Siberpunk"), N_("Turkuaz"), N_("Gül Bahçesi"), N_("Derin Deniz")];
 // Görünen tema adı: hazır tema çevrilir, adı değişmemiş rastgele tema seçilen dilde yeniden adlanır, kullanıcı adları olduğu gibi kalır
 function themeName(t) {
   if (!t) return "";
@@ -8247,7 +8599,8 @@ const newBall = stuck => ({ x: W / 2, y: H - 60, r: 8, dx: 0, dy: 0, stuck: !!st
 // Bölüm hızı: zorluk çarpanı yeni oyunda kilitlenir (oyun ortasında ayar değişse de oyun bozulmaz)
 const levelSpeed = l => Math.min(BASE_SPEED * state.diffSpeed * 1.07 ** (l - 1) * pactSpeedMul(), MAX_SPEED);
 // Hedef hız: bölüm hızı + vuruş başı hızlanma, yavaşlatma/hızlandırma çarpanlarıyla
-const mag = () => state.speed * (fxOn("slow") ? SLOW_FACTOR : 1) * (fxOn("haste") ? 1.3 : 1);
+const mag = () => state.speed * (fxOn("slow") ? SLOW_FACTOR : 1) * (fxOn("haste") ? 1.3 : 1)
+             * (run.survival ? Math.min(1.8, 1 + state.time * 0.012) : 1);   // HAYATTA KALMA: süreyle hızlanır
 function setSpeed(b, m) {
   const s = Math.hypot(b.dx, b.dy) || 1;
   b.dx = b.dx / s * m;
@@ -8437,12 +8790,26 @@ function startGame() {
   serveBall();
   callout(tr("BÖLÜM {n}", { n: 1 }), T().accent);
 }
+// HAYATTA KALMA: tek can, süreyle hızlanan top, puan ×1.5 — kendi liderlik tablosu
+function startSurvival() {
+  closePanels();
+  if (battle.active) closeBattle();
+  startGame();
+  run.survival = true;
+  stopGhost();
+  state.lives = 1;
+  state.diffScoreMul *= 1.5;
+  hidePactOffer();
+  callout(tr("🔥 HAYATTA KALMA"), "#ff9f1c");
+  return true;
+}
 function toMenu() {
   const backToEditor = run.custom;          // editör testinden dönünce editör yeniden açılır
   if (run.daily && typeof finishDaily === "function") finishDaily();
   run.daily = false;
   run.dailyFinished = false;
   run.practice = false;
+  run.survival = false;
   hidePactOffer();
   hideLastChance();
   director.challenge = null;
@@ -8522,7 +8889,7 @@ function gameOver() {
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
   else if (run.practice || wasWeekly || run.song) state.lbRank = 0;
-  else { state.lbRank = recordScore("klasik", { score: state.score, level: state.level }); careerGameEnd(); }
+  else { state.lbRank = recordScore(run.survival ? "kalma" : "klasik", { score: state.score, level: state.level }); careerGameEnd(); }
   if (run.daily && typeof finishDaily === "function") finishDaily();
 }
 function levelCleared() {
@@ -8712,7 +9079,30 @@ const POWERS = {
   N: { label: tr("MİNİ"),   color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "mini" },
   Z: { label: tr("HIZ"),    color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "haste" },
   C: { label: tr("LANET"),  color: "#5a189a", w: 5, bad: true, sound: "bad", fx: () => curseFromCapsule() },
+  B: { label: tr("BOMBA"),  color: "#ff9f1c", w: 6, sound: "power", fx: () => bombBlast() },
 };
+// BOMBA kapsülü: rastgele bir hedefin çevresini anında patlatır (piksel duvarda 7×7 alan + zincir)
+function bombBlast() {
+  addShake(5);
+  sfx("boom");
+  if (pxWall.active) {
+    const solid = [];
+    for (let i = 0; i < pxWall.grid.length; i++) if (pxWall.grid[i] === PX_BLUE) solid.push(i);
+    if (!solid.length) return;
+    const t = solid[(gameRandom() * solid.length) | 0], c = t % pxWall.cols, r2 = (t / pxWall.cols) | 0;
+    for (let rr = r2 - 3; rr <= r2 + 3; rr++) for (let cc = c - 3; cc <= c + 3; cc++)
+      if (rr >= 0 && rr < pxWall.rows && cc >= 0 && cc < pxWall.cols) pxBreak(rr * pxWall.cols + cc);
+    pxIgnite(t, 8);
+    spawnParticles(PX.x + c * pxWall.s - 10, PX.y + r2 * pxWall.s - 10, "#ff9f1c", 16, 40, 40);
+    checkLevelDone();
+    return;
+  }
+  const alive = bricks.filter(b => !b.dead && !b.unbreakable);
+  if (!alive.length) return;
+  const t = alive[(gameRandom() * alive.length) | 0];
+  destroyBrick(t);
+  explode(t);
+}
 // Can doluyken +CAN, lanetler kapalıyken LANET düşmez
 const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && hazardLevel() === "kapali");
 function pickPower(goodOnly) {
@@ -9026,6 +9416,7 @@ function moveBall(b, dt) {
   }
   b.boost = 1 + (b.boost - 1) * Math.exp(-BOOST_DECAY * dt);
   b.spin *= Math.exp(-SPIN_DECAY * dt);
+  if (curseOn("zikzik")) rotate(b, Math.sin(state.time * 7 + b.x * 0.02) * 2.4 * dt);   // ZIK ZIK TOP: dalgalı uçuş
   b.portalCd -= dt;
   b.rot += (b.spin * 6 + 4) * dt;
   // AĞIR YERÇEKİMİ: yukarı giden top ağırlaşır, düşen hızlanır (yön de aşağı bükülür)
@@ -9644,6 +10035,7 @@ function pxUpdate(dt) {
 // Bölüm bitti: kutlama, bonus, yıldız çanları. Koridorda toplar her yere saçılır ve CR7 kutlama yapar
 function pxWin() {
   pxWall.won = true;
+  if (pxWall.mode) { run.walls++; track("walls"); }   // piksel duvar kazanma sayacı (başarımlar)
   pxWall.wonAt = performance.now();
   state.callout = null;
   state.clearAt = state.time + 4.2;
@@ -9823,6 +10215,7 @@ const CURSES = {
   ruzgar:   { label: tr("RÜZGAR"),             short: tr("RÜZGAR"),   dur: 9,  group: "fizik", start: () => (state.windDir = gameRandom() < 0.5 ? -1 : 1) },
   agir:     { label: tr("AĞIR YERÇEKİMİ"),     short: tr("AĞIR"),     dur: 8,  group: "fizik" },
   nabiz:    { label: tr("NABIZ"),              short: tr("NABIZ"),    dur: 8,  group: "fizik" },
+  zikzik:   { label: tr("ZIK ZIK TOP"),        short: tr("ZIK ZIK"),   dur: 8,  group: "fizik" },   // topun yolu dalgalanır
   buz:      { label: tr("BUZLU RAKET"),        short: tr("BUZ"),      dur: 9,  group: "raket", start: () => { paddle.iceV = 0; paddle.aimX = null; }, end: () => (paddle.iceV = 0) },
   yarik:    { label: tr("YARIK RAKET"),        short: tr("YARIK"),    dur: 8,  group: "raket" },
   sahte:    { label: tr("SAHTE TOPLAR"),       short: tr("SAHTE"),    dur: 8,  start: () => spawnDecoys(), end: () => popDecoys() },
@@ -11810,7 +12203,7 @@ const STATS = {
   fevers: tr("ÇILGIN MOD"), curses: tr("Atlatılan lanet"), powers: tr("Yakalanan kapsül"), time: tr("Oynama süresi"),
   matches: tr("Kapışma"), wins: tr("Galibiyet"), podiums: tr("Podyum (ilk 3)"), bestStreak: tr("En uzun seri"), ranked: tr("Dereceli maç"),
   rankedWins: tr("Dereceli galibiyet"), online: tr("Çevrim içi maç"), attacks: tr("Gönderilen saldırı"), blocked: tr("Kalkanla engellenen"),
-  director: tr("Dramaturg görevi"), specials: tr("Yeni tür tuğla"),
+  director: tr("Dramaturg görevi"), specials: tr("Yeni tür tuğla"), walls: tr("Yenilen duvar"),
 };
 // test(s, m): s = kariyer sayaçları, m = biten kapışmanın özeti (yalnızca kapışma sonunda verilir)
 const ACHIEVEMENTS = [
@@ -11826,6 +12219,8 @@ const ACHIEVEMENTS = [
   { id: "kapsul", icon: "💊", name: tr("Kapsül Bağımlısı"), desc: tr("Toplam 100 kapsül yakala"), test: s => s.powers >= 100 },
   { id: "yeninesil", icon: "🧬", name: tr("Yeni Nesil"), desc: tr("Yeni türden bir tuğla kır"), test: s => s.specials >= 1 },
   { id: "cesitli", icon: "🎨", name: tr("Çeşitlilik Ustası"), desc: tr("Yeni türlerden toplam 100 tuğla kır"), test: s => s.specials >= 100 },
+  { id: "duvar", icon: "🧱", name: tr("İlk Duvar"), desc: tr("Bir piksel duvar kazan"), test: s => s.walls >= 1 },
+  { id: "duvarkral", icon: "👑", name: tr("Duvarlar Kralı"), desc: tr("10 piksel duvar kazan"), test: s => s.walls >= 10 },
   { id: "kapisma", icon: "⚔", name: tr("İlk Kapışma"), desc: tr("Bir kapışmayı bitir"), test: s => s.matches >= 1 },
   { id: "zafer", icon: "🏆", name: tr("İlk Zafer"), desc: tr("Bir kapışmayı kazan"), test: s => s.wins >= 1 },
   { id: "seri3", icon: "📈", name: tr("Seri Galip"), desc: tr("3 kapışmayı üst üste kazan"), test: s => s.bestStreak >= 3 },
@@ -11879,11 +12274,11 @@ function nextToast() {
 }
 
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
-const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
-              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
+const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0, walls: 0, survival: false,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false };
-const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
-              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
+const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0, walls: 0, survival: false,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false });
 function track(key, n = 1) {
   if (run.practice) return;
@@ -12045,7 +12440,7 @@ if (career.pending) careerAbandon();           // önceki oturumda yarım kalan 
 // ======================================================================
 const CURSE_ICONS = {
   gorunmez: "👻", hayalet: "🫥", karanlik: "🌑", elektrik: "💡", sis: "🌫️", ayna: "🪞", sarhos: "🍺",
-  ruzgar: "🌬️", agir: "🪨", nabiz: "💓", buz: "🧊", yarik: "🕳️", sahte: "🎭", meteor: "☄️",
+  ruzgar: "🌬️", agir: "🪨", nabiz: "💓", zikzik: "🥴", buz: "🧊", yarik: "🕳️", sahte: "🎭", meteor: "☄️",
   daralan: "🧱", bariyer: "🚧", inis: "⬇️", dusen: "📉", dirilis: "🧟", zirh: "🛡️", ufo: "🛸",
 };
 const BRICK_CARDS = [
@@ -12673,6 +13068,7 @@ const challengeBtn = el("button", {
 });
 toolbar.insertBefore(challengeBtn, careerBtn);
 onClick("daily-start", startDaily);
+onClick("survival-start", startSurvival);
 // Tünel Fırtınası ve CR7 Koridoru her zaman pratik olarak açık (klasik oyunda 12. ve 13. bölüm)
 const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel) + 1;
 const KORIDOR_LEVEL = LEVELS.findIndex(l => l.pixel === "koridor") + 1;
@@ -13028,7 +13424,7 @@ function updateBattle(dt) {
 }
 
 // --- Liderlik tablosu (bu cihazda) ---
-const leaderboard = { klasik: [], kapisma: [] };
+const leaderboard = { klasik: [], kapisma: [], kalma: [] };
 { const l = store.get("bb_leaderboard", null); if (l) for (const k in leaderboard) if (Array.isArray(l[k])) leaderboard[k] = l[k].slice(0, 10); }
 function recordScore(mode, entry) {
   if (!entry.score) return 0;
@@ -13385,7 +13781,7 @@ const pactNoCurses = () => pactMods().noCurses;
 const pactNames = () => run.pacts.map(id => PACT_BY_ID[id] && (PACT_BY_ID[id].icon + " " + PACT_BY_ID[id].name)).filter(Boolean).join(" · ");
 
 // Paktlar yalnızca klasik koşuda, 1. ve her 5. bölümün başında sunulur.
-const pactEnabled = () => settings.pacts !== "kapali" && !battle.active && !run.daily && !run.practice && !weekly.active;
+const pactEnabled = () => settings.pacts !== "kapali" && !battle.active && !run.daily && !run.practice && !run.survival && !weekly.active;
 const pactOfferDue = level => level === 1 || level % 5 === 0;
 
 function showPactOffer() {
@@ -13434,7 +13830,7 @@ onClick("pact-skip", skipPact);
 //     Günlük, pratik ve kapışmada teklif edilmez.
 // ======================================================================
 const lastChanceEl = $("lastchance");
-const lastChanceAvailable = () => !run.daily && !run.practice && !battle.active && !run.lastChanceUsed && !weekly.active;
+const lastChanceAvailable = () => !run.daily && !run.practice && !run.survival && !battle.active && !run.lastChanceUsed && !weekly.active;
 
 function showLastChance() {
   if (!lastChanceAvailable()) return false;

@@ -32,6 +32,8 @@ Bu dosya, modüllere ayrılmış proje sürümünden derlenir: `/run/media/albas
 - **Cila:** çapraz belirme dalgası, eğilen/squash yapan raket, fırlatma hedef halkası, zeminli duyurular, bölüm sonu ve yeni rekor konfetisi, can kaybı vinyeti, oyun sonunda yukarı sayan skor, nabız atan menü başlığı ve yeni türleri tanıtan gösterge.
 - **Modlar (Kolay/Orta/Zor):** menüden hapla seçilir; hız ve can yetmez — raket genişliği (kolayda ×1.12, zorda ×0.88), kapsül oranı, lanet sıklığı ve puan çarpanı (zorda ×1.35, kolayda ×0.75) da moda bağlıdır.
 - **Mikro Duvar (14. bölüm):** üstteki kutuların küçük hali — 4 px hücreler (11.700+ minik tuğla) ve boşluklu çelik kaburgalar; top yalnız boşluklardan sızar, ateş topu delemeye başlar. Kazanınca toplar sahaya saçılır.
+- **BOMBA kapsülü:** anında rastgele bir hedefin çevresini patlatır (piksel duvarda 7×7 alan + zincir). **ZIK ZIK TOP** laneti: topun yolu dalgalanır.
+- **🔥 Hayatta Kalma:** tek can, sonsuz koşu; top sürenle hızlanır (en çok ×1.8), puan ×1.5, kendi liderlik tablosu. 3 yeni hazır tema: Turkuaz, Gül Bahçesi, Derin Deniz. "İlk Duvar" ve "Duvarlar Kralı" başarımları piksel duvar kazananlara.
 - **Mozaik Duvar (15. bölüm):** dikdörtgenler 28 px'lik tek renk fayanslara bölünür — mavi/çelik/boşluk salınımı; top fayans fayans öğütür.
 - **Adalar Duvarı (16. bölüm):** ~120 küçük elmas tuğla takımı, her dördüncü çelik çekirdekli; top adalar arasında serbestçe dolaşır.
 - **Görsel cila:** kartlarda ışık süpürmesi, toplarda parıltı halesi, duvarlarda gölge + tam bevel hücreler, yıldızlarda raketi izleyen paralaks.
