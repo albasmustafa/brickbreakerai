@@ -365,7 +365,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   <div class="setnote" id="song-msg"></div>
   <div class="setnote">Şarkının BPM'i, bas ve tiz enerjisi 3 bölüme dönüşür; güçlü bir final varsa son bölüme boss eklenir. Aynı şarkı her zaman aynı bölümü üretir. Bölüm kodu arkadaşlarınla paylaşılabilir.</div>
   <div class="sethead">🌀 Tünel Fırtınası</div>
-  <div class="setrow"><button id="tunnel-start">🌀 Tünel Fırtınası'nı oyna</button></div>
+  <div class="setrow"><button id="tunnel-start">🌀 Tünel Fırtınası'nı oyna</button><button id="koridor-start">⚽ CR7 Koridoru'nu oyna</button><button id="mikro-start">🔹 Mikro Duvar'ı oyna</button></div>
   <div class="setnote">Binlerce mavi piksel tuğla ve içinden geçen kırılmaz çelik L ve sarmal tüneller. Topu tünele sok: çıkışa taşınır, duvarı içeriden oyar, zincir reaksiyon başlar. Çıkışlardaki sarı +3 ve turuncu x3 küpleri raketle yakala, 300 topa kadar fırtına. Klasik oyunda 12. bölüm; buradan her zaman pratik olarak açık.</div>
   <div class="sethead">Bölüm seçimi (pratik)</div>
   <div id="level-grid"></div>
@@ -424,13 +424,19 @@ const SLOW_FACTOR = 0.65, SLOW_TIME = 8, WIDE_TIME = 10;
 const MAX_BALLS = 8, MAX_LIVES = 9;
 const FX_GAIN_MAX = 0.55;                    // efekt sesi üst sınırı (ses ayarıyla çarpılır)
 const SHAKE_SCALE = { acik: 1, azaltilmis: 0.35, kapali: 0 };
-const DIFFICULTY = { kolay: { speedMul: 0.85, lives: 5 }, normal: { speedMul: 1, lives: 3 }, zor: { speedMul: 1.15, lives: 2 } };
+// Modlar (kolay/orta/zor): yeni oyunda kilitlenir. Yalnız hız ve can değil — raket genişliği,
+// kapsül düşme oranı (dropMul), lanet aralığı (curseGap: büyük = seyrek) ve puan çarpanı da moda bağlı.
+const DIFFICULTY = {
+  kolay: { speedMul: 0.85, lives: 5, paddleMul: 1.12, dropMul: 1.3, curseGap: 1.35, scoreMul: 0.75 },
+  normal: { speedMul: 1, lives: 3, paddleMul: 1, dropMul: 1, curseGap: 1, scoreMul: 1 },
+  zor: { speedMul: 1.15, lives: 2, paddleMul: 0.88, dropMul: 0.85, curseGap: 0.8, scoreMul: 1.35 },
+};
 const HP_DOT = { size: 5, gap: 4, pad: 6, lumThreshold: 0.18, dark: "#12182b", light: "#f5f7fa" };
 const MIN_VERT = 0.28;                       // dikey hız en az bu oranda: duvarlar arası sonsuz yatay sekme olmasın
 const SPIN_MAX = 1.1, SPIN_DECAY = 1.1;      // falso: saniyedeki en büyük dönüş (rad) ve sönme hızı
 const BOOST_DECAY = 1.4;                     // geçici hız patlamasının sönme hızı
 const FEVER_COMBO = 10, FEVER_TIME = 6;
-const FX_TIME = { fire: 6, laser: 8, magnet: 10, big: 10, reverse: 6, mini: 8, haste: 6, stun: 2.5 };
+const FX_TIME = { fire: 6, laser: 8, magnet: 10, big: 10, reverse: 6, mini: 8, haste: 6, stun: 2.5, aim: 10 };
 const ZONE_STYLE = { bumper: "#ff5d8f", spin: "#80ffdb", portal: "#9d4edd" };
 const CURSE_COLOR = "#c77dff";
 const COLS = 10;
@@ -1297,6 +1303,13 @@ const I18N_KEYS = [
 "Renk körü dostu", // 758
 "Parlama ve yanıp sönme", // 759
 "Renk körü dostu: tuğla dayanıklılık renkleri renk körlüğünde de ayırt edilen bir paletle (açık mavi, sarı, kızıl) çizilir ve her tuğlada kalan vuruş noktacıkları görünür. Parlama azaltılınca müzik flaşı kapanır, ÇILGIN MOD renkleri yavaş döner, hızlı yanıp sönmeler sabit renge döner.", // 760
+"⚽ CR7 KORİDORU", // 761
+"YÖN", // 762
+"⚽ SIUUU!", // 763
+"⚽ CR7 Koridoru'nu oyna", // 764
+"🔹 MİKRO DUVAR", // 765
+"Orta", // 766
+"🔹 Mikro Duvar'ı oyna", // 767
 ];
 const I18N_DATA = {};
 
@@ -1548,6 +1561,15 @@ I18N_DATA.en = {
 758: "Colorblind-friendly",
 759: "Flashing and blinking",
 760: "Colorblind-friendly: brick durability colors use a palette that stays distinguishable with color blindness (light blue, yellow, vermilion), and every brick shows its remaining-hit dots. With reduced flashing, the music flash turns off, FRENZY MODE colors cycle slowly and fast blinking becomes a steady color.",
+
+761: "⚽ CR7 CORRIDOR",
+762: "AIM",
+763: "⚽ SIUUU!",
+764: "⚽ Play the CR7 Corridor",
+
+765: "🔹 MICRO WALL",
+766: "Medium",
+767: "🔹 Play the Micro Wall",
 };
 
 // ======================================================================
@@ -1798,6 +1820,15 @@ I18N_DATA.de = {
 758: "Farbenblind-freundlich",
 759: "Blitze und Blinken",
 760: "Farbenblind-freundlich: Die Haltbarkeitsfarben der Steine stammen aus einer Palette, die auch bei Farbenblindheit unterscheidbar bleibt (Hellblau, Gelb, Zinnoberrot), und jeder Stein zeigt Punkte für die verbleibenden Treffer. Mit reduzierten Blitzen ist der Musikblitz aus, die Farben im RAUSCHMODUS wechseln langsam und schnelles Blinken wird zu einer festen Farbe.",
+
+761: "⚽ CR7-KORRIDOR",
+762: "RICHTUNG",
+763: "⚽ SIUUU!",
+764: "⚽ CR7-Korridor spielen",
+
+765: "🔹 MIKROWAND",
+766: "Mittel",
+767: "🔹 Mikrowand spielen",
 };
 
 // ======================================================================
@@ -2048,6 +2079,15 @@ I18N_DATA.fr = {
 758: "Adapté aux daltoniens",
 759: "Flashs et clignotements",
 760: "Adapté aux daltoniens : les couleurs de résistance des briques utilisent une palette qui reste distinguable en cas de daltonisme (bleu clair, jaune, vermillon), et chaque brique affiche les points des coups restants. Avec les flashs réduits, le flash de la musique s'éteint, les couleurs du MODE FRÉNÉSIE tournent lentement et les clignotements rapides deviennent une couleur fixe.",
+
+761: "⚽ COULOIR CR7",
+762: "DIRECTION",
+763: "⚽ SIUUU!",
+764: "⚽ Jouer au Couloir CR7",
+
+765: "🔹 MUR MICRO",
+766: "Moyen",
+767: "🔹 Jouer au Mur micro",
 };
 
 // ======================================================================
@@ -2298,6 +2338,15 @@ I18N_DATA.es = {
 758: "Apto para daltónicos",
 759: "Destellos y parpadeos",
 760: "Apto para daltónicos: los colores de resistencia de los ladrillos usan una paleta que se distingue también con daltonismo (azul claro, amarillo, bermellón), y cada ladrillo muestra los puntos de golpes restantes. Con destellos reducidos, el destello de la música se apaga, los colores del MODO FRENESÍ cambian despacio y el parpadeo rápido se vuelve un color fijo.",
+
+761: "⚽ PASILLO CR7",
+762: "DIRECCIÓN",
+763: "⚽ SIUUU!",
+764: "⚽ Jugar al Pasillo CR7",
+
+765: "🔹 MURO MICRO",
+766: "Medio",
+767: "🔹 Jugar al Muro micro",
 };
 
 // ======================================================================
@@ -2548,6 +2597,15 @@ I18N_DATA.it = {
 758: "Adatto ai daltonici",
 759: "Lampi e lampeggi",
 760: "Adatto ai daltonici: i colori di resistenza dei mattoni usano una tavolozza distinguibile anche con il daltonismo (azzurro, giallo, vermiglio), e ogni mattone mostra i puntini dei colpi rimasti. Con i lampi ridotti, il flash della musica si spegne, i colori della MODALITÀ FRENESIA cambiano lentamente e i lampeggi rapidi diventano un colore fisso.",
+
+761: "⚽ CORRIDOIO CR7",
+762: "DIREZIONE",
+763: "⚽ SIUUU!",
+764: "⚽ Gioca al Corridoio CR7",
+
+765: "🔹 MURO MICRO",
+766: "Medio",
+767: "🔹 Gioca al Muro micro",
 };
 
 // ======================================================================
@@ -2798,6 +2856,15 @@ I18N_DATA.pt = {
 758: "Para daltônicos",
 759: "Brilhos e piscadas",
 760: "Para daltônicos: as cores de resistência dos tijolos usam uma paleta que continua distinguível com daltonismo (azul-claro, amarelo, vermelhão), e cada tijolo mostra os pontinhos de golpes restantes. Com brilhos reduzidos, o flash da música desliga, as cores do MODO FRENESI giram devagar e as piscadas rápidas viram cor fixa.",
+
+761: "⚽ CORREDOR CR7",
+762: "DIREÇÃO",
+763: "⚽ SIUUU!",
+764: "⚽ Jogar o Corredor CR7",
+
+765: "🔹 PAREDE MICRO",
+766: "Médio",
+767: "🔹 Jogar a Parede micro",
 };
 
 // ======================================================================
@@ -3048,6 +3115,15 @@ I18N_DATA.ru = {
 758: "Для дальтоников",
 759: "Вспышки и мигание",
 760: "Для дальтоников: цвета прочности кирпичей берутся из палитры, различимой при дальтонизме (голубой, жёлтый, киноварь), и на каждом кирпиче видны точки оставшихся ударов. При ослабленных вспышках музыкальная вспышка выключается, цвета РЕЖИМА БЕЗУМИЯ меняются медленно, а быстрое мигание становится ровным цветом.",
+
+761: "⚽ КОРИДОР CR7",
+762: "КУРС",
+763: "⚽ SIUUU!",
+764: "⚽ Играть в Коридор CR7",
+
+765: "🔹 МИКРОСТЕНА",
+766: "Средний",
+767: "🔹 Играть в Микростену",
 };
 
 // ======================================================================
@@ -3298,6 +3374,15 @@ I18N_DATA.uk = {
 758: "Для дальтоніків",
 759: "Спалахи й блимання",
 760: "Для дальтоніків: кольори міцності цеглин беруться з палітри, яку видно й при дальтонізмі (блакитний, жовтий, кіновар), а на кожній цеглині видно точки решти ударів. Коли спалахи слабші, музичний спалах вимикається, кольори РЕЖИМУ ШАЛЕНСТВА змінюються повільно, а швидке блимання стає рівним кольором.",
+
+761: "⚽ КОРИДОР CR7",
+762: "КУРС",
+763: "⚽ SIUUU!",
+764: "⚽ Грати в Коридор CR7",
+
+765: "🔹 МІКРОСТІНА",
+766: "Середній",
+767: "🔹 Грати в Мікростіну",
 };
 
 // ======================================================================
@@ -3548,6 +3633,15 @@ I18N_DATA.pl = {
 758: "Dla daltonistów",
 759: "Błyski i miganie",
 760: "Dla daltonistów: kolory wytrzymałości cegieł pochodzą z palety rozróżnialnej przy daltonizmie (jasnoniebieski, żółty, cynobrowy), a na każdej cegle widać kropki pozostałych trafień. Przy słabszych błyskach błysk muzyki się wyłącza, kolory TRYBU SZAŁU zmieniają się powoli, a szybkie miganie zamienia się w stały kolor.",
+
+761: "⚽ KORYTARZ CR7",
+762: "KIERUNEK",
+763: "⚽ SIUUU!",
+764: "⚽ Zagraj w Korytarz CR7",
+
+765: "🔹 MIKROŚCIANA",
+766: "Średni",
+767: "🔹 Zagraj w Mikrościanę",
 };
 
 // ======================================================================
@@ -3798,6 +3892,15 @@ I18N_DATA.nl = {
 758: "Kleurenblindvriendelijk",
 759: "Flitsen en knipperen",
 760: "Kleurenblindvriendelijk: de sterktekleuren van de stenen komen uit een palet dat ook bij kleurenblindheid te onderscheiden is (lichtblauw, geel, vermiljoen), en elke steen toont stipjes voor de resterende treffers. Met minder flitsen gaat de muziekflits uit, draaien de kleuren van RAZERNIJMODUS langzaam en wordt snel knipperen een vaste kleur.",
+
+761: "⚽ CR7-GANG",
+762: "RICHTING",
+763: "⚽ SIUUU!",
+764: "⚽ Speel de CR7-gang",
+
+765: "🔹 MICROMUUR",
+766: "Gemiddeld",
+767: "🔹 Speel de Micromuur",
 };
 
 // ======================================================================
@@ -4048,6 +4151,15 @@ I18N_DATA.sv = {
 758: "Färgblindvänlig",
 759: "Blixtar och blinkningar",
 760: "Färgblindvänlig: blockens hållbarhetsfärger tas från en palett som går att skilja åt även vid färgblindhet (ljusblå, gul, cinnoberröd), och varje block visar prickar för återstående träffar. Med minskade blixtar stängs musikblixten av, färgerna i VANSINNESLÄGE skiftar långsamt och snabbt blinkande blir en fast färg.",
+
+761: "⚽ CR7-KORRIDOR",
+762: "RIKTNING",
+763: "⚽ SIUUU!",
+764: "⚽ Spela CR7-korridoren",
+
+765: "🔹 MIKROVÄGG",
+766: "Medel",
+767: "🔹 Spela Mikroväggen",
 };
 
 // ======================================================================
@@ -4298,6 +4410,15 @@ I18N_DATA.el = {
 758: "Φιλικό για αχρωματοψία",
 759: "Λάμψεις και αναβοσβήσματα",
 760: "Φιλικό για αχρωματοψία: τα χρώματα αντοχής των τούβλων παίρνονται από παλέτα που ξεχωρίζει και με αχρωματοψία (γαλάζιο, κίτρινο, κιννάβαρι), και κάθε τούβλο δείχνει τελείες για τα χτυπήματα που απομένουν. Με λιγότερες λάμψεις η λάμψη της μουσικής σβήνει, τα χρώματα της ΦΡΕΝΙΤΙΔΑΣ αλλάζουν αργά και το γρήγορο αναβόσβημα γίνεται σταθερό χρώμα.",
+
+761: "⚽ ΔΙΑΔΡΟΜΟΣ CR7",
+762: "ΚΑΤΕΥΘΥΝΣΗ",
+763: "⚽ SIUUU!",
+764: "⚽ Παίξε τον Διάδρομο CR7",
+
+765: "🔹 ΜΙΚΡΟΤΟΙΧΟ",
+766: "Μεσαίο",
+767: "🔹 Παίξε το Μικροτοίχο",
 };
 
 // ======================================================================
@@ -4548,6 +4669,15 @@ I18N_DATA.cs = {
 758: "Pro barvoslepé",
 759: "Záblesky a blikání",
 760: "Pro barvoslepé: barvy odolnosti cihel jsou z palety rozlišitelné i při barvosleposti (světle modrá, žlutá, rumělková) a každá cihla ukazuje tečky zbývajících zásahů. Se slabšími záblesky se vypne hudební záblesk, barvy REŽIMU ŠÍLENSTVÍ se mění pomalu a rychlé blikání se změní na stálou barvu.",
+
+761: "⚽ CHODBA CR7",
+762: "SMĚR",
+763: "⚽ SIUUU!",
+764: "⚽ Hrát Chodbu CR7",
+
+765: "🔹 MIKROZEĎ",
+766: "Střední",
+767: "🔹 Hrát Mikrozeď",
 };
 
 // ======================================================================
@@ -4798,6 +4928,15 @@ I18N_DATA.ro = {
 758: "Pentru daltoniști",
 759: "Străluciri și clipiri",
 760: "Pentru daltoniști: culorile de rezistență ale cărămizilor vin dintr-o paletă care se distinge și în daltonism (albastru deschis, galben, vermillon), iar fiecare cărămidă arată punctele loviturilor rămase. Cu străluciri reduse, blițul muzicii se oprește, culorile MODULUI FRENEZIE se schimbă încet, iar clipirile rapide devin o culoare fixă.",
+
+761: "⚽ CORIDOR CR7",
+762: "DIRECȚIE",
+763: "⚽ SIUUU!",
+764: "⚽ Joacă Coridorul CR7",
+
+765: "🔹 ZID MICRO",
+766: "Mediu",
+767: "🔹 Joacă Zidul micro",
 };
 
 // ======================================================================
@@ -5048,6 +5187,15 @@ I18N_DATA.hu = {
 758: "Színvak-barát",
 759: "Villanás és villogás",
 760: "Színvak-barát: a téglák tartóssági színei olyan palettából jönnek, amely színvaksággal is megkülönböztethető (világoskék, sárga, cinóbervörös), és minden téglán látszanak a hátralévő találatok pöttyei. Csökkentett villanásnál a zenei villanás kikapcsol, az ŐRÜLET MÓD színei lassan váltakoznak, a gyors villogásból pedig állandó szín lesz.",
+
+761: "⚽ CR7-FOLYOSÓ",
+762: "IRÁNY",
+763: "⚽ SIUUU!",
+764: "⚽ CR7-folyosó játéka",
+
+765: "🔹 MIKROFAL",
+766: "Közepes",
+767: "🔹 Mikrofal játéka",
 };
 
 // ======================================================================
@@ -5298,6 +5446,15 @@ I18N_DATA.az = {
 758: "Rəng korluğuna uyğun",
 759: "Parıltı və yanıb-sönmə",
 760: "Rəng korluğuna uyğun: kərpiclərin möhkəmlik rəngləri rəng korluğunda da seçilən palitradan gəlir (açıq mavi, sarı, al qırmızı) və hər kərpicdə qalan zərbə nöqtələri görünür. Parıltı azaldılanda musiqi parıltısı sönür, DƏLİ REJİM rəngləri yavaş dəyişir, sürətli yanıb-sönmə sabit rəngə çevrilir.",
+
+761: "⚽ CR7 KORİDORU",
+762: "İSTİQAMƏT",
+763: "⚽ SIUUU!",
+764: "⚽ CR7 Koridorunu oyna",
+
+765: "🔹 MİKRO DİVAR",
+766: "Orta",
+767: "🔹 Mikro Divarı oyna",
 };
 
 // ======================================================================
@@ -5548,6 +5705,15 @@ I18N_DATA.ar = {
 758: "مناسب لعمى الألوان",
 759: "الوميض والرمش",
 760: "مناسب لعمى الألوان: ألوان متانة الطوب تأتي من لوحة تبقى مميَّزة مع عمى الألوان (أزرق فاتح، أصفر، قرمزي)، ويُظهر كل طوبة نقاط الضربات المتبقية. ومع تخفيف الوميض يتوقف وميض الموسيقى، وتتبدّل ألوان وضع الجنون ببطء، ويصبح الرمش السريع لونًا ثابتًا.",
+
+761: "⚽ ممر CR7",
+762: "اتجاه",
+763: "⚽ SIUUU!",
+764: "⚽ العب ممر CR7",
+
+765: "🔹 جدار ميكرو",
+766: "متوسط",
+767: "🔹 العب الجدار الميكرو",
 };
 
 // ======================================================================
@@ -5798,6 +5964,15 @@ I18N_DATA.fa = {
 758: "مناسب کوررنگی",
 759: "درخشش و چشمک",
 760: "مناسب کوررنگی: رنگ‌های دوام آجرها از پالتی می‌آیند که با کوررنگی هم قابل تشخیص است (آبی روشن، زرد، شنگرفی) و روی هر آجر نقطه‌های ضربه‌های باقی‌مانده دیده می‌شود. با درخشش کمتر، فلش موسیقی خاموش می‌شود، رنگ‌های حالت جنون آهسته عوض می‌شوند و چشمک تند به رنگ ثابت تبدیل می‌شود.",
+
+761: "⚽ راهروی CR7",
+762: "جهت",
+763: "⚽ SIUUU!",
+764: "⚽ راهروی CR7 را بازی کن",
+
+765: "🔹 دیوار میکرو",
+766: "متوسط",
+767: "🔹 دیوار میکرو را بازی کن",
 };
 
 // ======================================================================
@@ -6048,6 +6223,15 @@ I18N_DATA.hi = {
 758: "कलर-ब्लाइंड फ्रेंडली",
 759: "चमक और झपक",
 760: "कलर-ब्लाइंड फ्रेंडली: ईंटों की मज़बूती के रंग ऐसे पैलेट से आते हैं जो कलर ब्लाइंडनेस में भी अलग दिखें (हल्का नीला, पीला, सिंदूरी), और हर ईंट पर बची चोटों के बिंदु दिखते हैं। चमक कम करने पर संगीत की फ़्लैश बंद हो जाती है, उन्माद मोड के रंग धीरे बदलते हैं और तेज़ झपकना स्थिर रंग बन जाता है।",
+
+761: "⚽ CR7 गलियारा",
+762: "दिशा",
+763: "⚽ SIUUU!",
+764: "⚽ CR7 गलियारा खेलें",
+
+765: "🔹 माइक्रो दीवार",
+766: "मध्यम",
+767: "🔹 माइक्रो दीवार खेलें",
 };
 
 // ======================================================================
@@ -6298,6 +6482,15 @@ I18N_DATA.id = {
 758: "Ramah buta warna",
 759: "Kilatan dan kedipan",
 760: "Ramah buta warna: warna ketahanan bata memakai palet yang tetap terbedakan bagi buta warna (biru muda, kuning, merah vermilion), dan tiap bata menampilkan titik sisa pukulan. Dengan kilatan dikurangi, kilat musik mati, warna MODE GILA berganti pelan, dan kedipan cepat menjadi warna tetap.",
+
+761: "⚽ KORIDOR CR7",
+762: "ARAH",
+763: "⚽ SIUUU!",
+764: "⚽ Mainkan Koridor CR7",
+
+765: "🔹 DINDING MIKRO",
+766: "Sedang",
+767: "🔹 Mainkan Dinding Mikro",
 };
 
 // ======================================================================
@@ -6548,6 +6741,15 @@ I18N_DATA.vi = {
 758: "Thân thiện mù màu",
 759: "Chớp sáng và nhấp nháy",
 760: "Thân thiện mù màu: màu độ bền của gạch lấy từ bảng màu vẫn phân biệt được khi mù màu (xanh nhạt, vàng, đỏ son), và mỗi viên gạch hiện chấm số lần đánh còn lại. Khi giảm chớp sáng, chớp nhạc tắt, màu CHẾ ĐỘ ĐIÊN CUỒNG đổi chậm và nhấp nháy nhanh thành màu cố định.",
+
+761: "⚽ HÀNH LANG CR7",
+762: "HƯỚNG",
+763: "⚽ SIUUU!",
+764: "⚽ Chơi Hành lang CR7",
+
+765: "🔹 TƯỜNG VI MÔ",
+766: "Vừa",
+767: "🔹 Chơi Tường vi mô",
 };
 
 // ======================================================================
@@ -6798,6 +7000,15 @@ I18N_DATA.zh = {
 758: "色盲友好",
 759: "闪光与闪烁",
 760: "色盲友好：砖块耐久颜色改用色盲也能分辨的配色（浅蓝、黄、朱红），每块砖都显示剩余击打点。减弱闪光后，音乐闪光关闭，狂热模式颜色缓慢变化，快速闪烁变成固定颜色。",
+
+761: "⚽ CR7走廊",
+762: "方向",
+763: "⚽ SIUUU!",
+764: "⚽ 游玩CR7走廊",
+
+765: "🔹微观之墙",
+766: "中等",
+767: "🔹 游玩微观之墙",
 };
 
 // ======================================================================
@@ -7048,6 +7259,15 @@ I18N_DATA.ja = {
 758: "色覚サポート",
 759: "フラッシュと点滅",
 760: "色覚サポート：ブロックの耐久色を色覚特性があっても見分けやすい配色（水色・黄・朱色）にし、各ブロックに残り打数の点を表示します。フラッシュを控えめにすると、音楽のフラッシュが消え、フィーバーモードの色がゆっくり変わり、速い点滅は一定の色になります。",
+
+761: "⚽ CR7回廊",
+762: "方向",
+763: "⚽ SIUUU!",
+764: "⚽ CR7回廊を遊ぶ",
+
+765: "🔹ミクロの壁",
+766: "普通",
+767: "🔹ミクロの壁を遊ぶ",
 };
 
 // ======================================================================
@@ -7298,6 +7518,15 @@ I18N_DATA.ko = {
 758: "색맹 친화",
 759: "번쩍임과 깜빡임",
 760: "색맹 친화: 벽돌 내구도 색을 색각 이상에서도 구분되는 팔레트(하늘색, 노랑, 주홍)로 그리고, 모든 벽돌에 남은 타격 점을 표시합니다. 번쩍임을 줄이면 음악 플래시가 꺼지고, 광란 모드 색이 천천히 바뀌며, 빠른 깜빡임은 고정 색이 됩니다.",
+
+761: "⚽ CR7 회랑",
+762: "방향",
+763: "⚽ SIUUU!",
+764: "⚽ CR7 회랑 플레이",
+
+765: "🔹 마이크로 벽",
+766: "보통",
+767: "🔹 마이크로 벽 플레이",
 };
 
 // ======================================================================
@@ -7522,7 +7751,7 @@ const SETTING_ROWS = [
     opts: "random:🎲 Rastgele|pop:Pop|bip:Bip|lazer:Lazer|tik:Tık|bas:Bas|zil:Zil|boing:Boing|pluck:Pluck|8bit:8-bit" },
   { key: "shake", label: tr("Ekran sarsıntısı"), def: matchMedia("(prefers-reduced-motion: reduce)").matches ? "azaltilmis" : "acik",
     opts: "acik:Açık|azaltilmis:Azaltılmış|kapali:Kapalı" },
-  { key: "difficulty", label: tr("Zorluk"), def: "normal", opts: "kolay:Kolay|normal:Normal|zor:Zor" },
+  { key: "difficulty", label: tr("Zorluk"), def: "normal", opts: "kolay:Kolay|normal:Orta|zor:Zor" },
   { key: "hazards", label: tr("Lanetler"), def: "normal", opts: "kapali:Kapalı|az:Az|normal:Normal|kabus:Kâbus" },
   { key: "pacts", label: tr("Lanet Paktı"), def: "acik", opts: "acik:Açık|kapali:Kapalı" },
   { key: "director", label: tr("Dramaturg"), def: "acik", opts: "acik:Açık|kapali:Kapalı" },
@@ -7836,6 +8065,8 @@ const LEVELS = [
     ".EI1ZZ1IE.",
   ],
   { pixel: "tunnel", map: [] },   // 12: TÜNEL FIRTINASI — binlerce piksel tuğla, çelik L ve sarmal tüneller (js/tunnel.js)
+  { pixel: "koridor", map: [] },  // 13: CR7 KORİDORU — tamı tamına mavi duvar, ortada dar dikey koridor; +3/ok/ateş küpleri
+  { pixel: "mikro", map: [] },    // 14: MİKRO DUVAR — minik (4 px) tuğlalar ve boşluklu çelik kaburgalar; top zor girer
 ];
 
 // ======================================================================
@@ -8048,7 +8279,7 @@ function clearEffects() {
   paddle.iceV = 0; paddle.aimX = null;
 }
 function addScore(n) {
-  state.score += Math.round(n * pactScoreMul());
+  state.score += Math.round(n * pactScoreMul() * (state.diffScoreMul ?? 1));   // mod puan çarpanı
   if (!run.practice && state.score > state.high) store.set("bb_highscore", (state.high = state.score));
   // Rekoru ilk geçtiğin an duyurulur (callout değil: combo/bölüm yazılarını ezmesin)
   if (!run.practice && !state.recordShown && state.startHigh > 0 && state.score > state.startHigh) {
@@ -8066,6 +8297,7 @@ function startGame() {
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
   Object.assign(state, { level: 1, score: 0, diffSpeed: diff.speedMul, lives: diff.lives, combo: 0, startHigh: state.high,
+                         diffPaddle: diff.paddleMul ?? 1, diffDrop: diff.dropMul ?? 1, diffCurseGap: diff.curseGap ?? 1, diffScoreMul: diff.scoreMul ?? 1,
                          newRecord: false, recordShown: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0, hurt: 0 });
   state.speed = levelSpeed(1);
   clearEffects();
@@ -8142,6 +8374,7 @@ function loseLife() {
   sfx("lose");
   addShake(6);
   state.hurt = 1;                          // cila: kenarlarda sönen kırmızı vinyet
+  if (pxWall.mode === "koridor" && typeof cr7Facepalm === "function") cr7Facepalm();   // CR7 üzülür
   state.combo = 0;
   clearEffects();
   state.speed = levelSpeed(state.level);   // hızlanmayı sıfırla
@@ -8190,6 +8423,8 @@ function nextLevel() {
   serveBall();
   if (settings.autoTheme === "bolum") randomTheme();
   if (state.boss) { callout("⚠ " + tr(state.boss.name) + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
+  else if (pxWall.mode === "koridor") callout(tr("⚽ CR7 KORİDORU"), "#ffd60a");
+  else if (pxWall.mode === "mikro") callout(tr("🔹 MİKRO DUVAR"), "#4cc9f0");
   else if (pxWall.active) callout(tr("🌀 TÜNEL FIRTINASI"), "#4cc9f0");
   else callout(tr("BÖLÜM {n}", { n: state.level }), T().accent);
 }
@@ -8428,7 +8663,7 @@ function destroyBrick(b) {
     addFloater(cx, b.y - 14, tr("RİTİM!") + " +15", "#ffd166");
   }
   if (b.gold) { spawnCoins(cx, b.y + BRICK.h / 2, 26); sfx("coin"); dropPowerupAt(cx, b.y, true); }   // altın: kesin iyi kapsül
-  else if (gameRandom() < 0.16) dropPowerupAt(cx, b.y);
+  else if (gameRandom() < 0.16 * (state.diffDrop ?? 1)) dropPowerupAt(cx, b.y);   // mod: kapsül düşme oranı
   if (b.splitter) spawnSplitBall(cx, b.y + BRICK.h + 10);
   if (b.ice) freezeNeighbors(b);          // BUZ: kırılınca komşuları donar
   const mate = b.twin;
@@ -8945,32 +9180,44 @@ const TUNNEL_PATHS = [
   [[100, 300], [100, 46], [300, 46]],                                                    // L
   [[430, 300], [430, 40], [720, 40], [720, 210], [540, 210], [540, 120], [630, 120]],   // sarmal
 ];
+// CR7 KORİDORU (13. bölüm): bambaşka bir yerleşim — tümü mavi dolu duvar, yalnız ortada tek dar dikey koridor.
+// Top alt ortadan girer, boru gibi yukarı taşınır, tepede zinciri tutuşturup yanları oya oya iner.
+const KORIDOR_PATHS = [
+  [[378, 292], [378, 40]],                                                               // ortadan tepeye düz dar koridor
+];
 const PX_BLUES = ["#1d5fe0", "#2470f5", "#2f80ff", "#3b8cff", "#1a56d0", "#4a9bff"];
-const CUBE_KINDS = { plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" } };
-const pxWall = { active: false, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
+const CUBE_KINDS = {
+  plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" },
+  aim:  { label: "→", color: "#43d64f" }, fire: { label: "▲", color: "#ff6b35" },        // koridor küpleri: yön ve ateş
+};
+const pxWall = { active: false, mode: null, s: PX.s, cols: PX.cols, rows: PX.rows, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
                  canvas: null, g: null, dirty: [], full: false, pend: 0, flushAt: 0, statAcc: 0, sfxAt: 0, enterSfxAt: 0, clankAt: 0,
                  entered: false, chained: false, finale: false, storm: false, maxed: false, won: false, wonAt: 0, peak: 1 };
 const pxSolid = t => t === PX_BLUE || t === PX_STEEL || t === PX_BURN;
 const pxDone = () => !pxWall.active || pxWall.left <= 0;
 const pxCellAt = (x, y) => {
-  const c = Math.floor((x - PX.x) / PX.s), r = Math.floor((y - PX.y) / PX.s);
-  return c < 0 || r < 0 || c >= PX.cols || r >= PX.rows ? -1 : r * PX.cols + c;
+  const c = Math.floor((x - PX.x) / pxWall.s), r = Math.floor((y - PX.y) / pxWall.s);
+  return c < 0 || r < 0 || c >= pxWall.cols || r >= pxWall.rows ? -1 : r * pxWall.cols + c;
 };
 // Kolun dikdörtgeni (tünel yarı genişliği kadar şişirilmiş), ext: uç taraftan ek uzama
 const inSegRect = (x, y, a, b, ext = 0) => x > Math.min(a[0], b[0]) - PX.half - ext && x < Math.max(a[0], b[0]) + PX.half + ext &&
                                           y > Math.min(a[1], b[1]) - PX.half - ext && y < Math.max(a[1], b[1]) + PX.half + ext;
 
 function buildPixelWall(on) {
-  Object.assign(pxWall, { active: !!on, burns: [], cubes: [], dirty: [], pend: 0, flushAt: 0, statAcc: 0, entered: false, chained: false,
+  Object.assign(pxWall, { active: !!on, mode: on || null, burns: [], cubes: [], dirty: [], pend: 0, flushAt: 0, statAcc: 0, entered: false, chained: false,
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
-  if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; return; }
-  const { s, cols, rows } = PX, n = cols * rows;
+  if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
+  // MİKRO DUVAR: hücreyarı küçük (4 px) → aynı alanda ~2,25 kat daha çok minik tuğla; top katman katman öğütür
+  const s = on === "mikro" ? 4 : PX.s;
+  const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
+  Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
+  const paths = on === "koridor" ? KORIDOR_PATHS : on === "mikro" ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
-  TUNNEL_PATHS.forEach((pts, k) => {
+  paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
       const [x, y] = center(i);
       for (let j = 0; j < pts.length - 1; j++) if (inSegRect(x, y, pts[j], pts[j + 1])) { grid[i] = PX_HOLLOW; owner[i] = k + 1; break; }
@@ -8986,7 +9233,7 @@ function buildPixelWall(on) {
     }
   }
   // 3) Çıkış ağızları: son kolun ucundaki çelik açılır, kanal mavi tuğlalara bakar
-  pxWall.tunnels = TUNNEL_PATHS.map(local => {
+  pxWall.tunnels = paths.map(local => {
     const pts = local.map(([x, y]) => [x + PX.x, y + PX.y]);
     const segs = pts.slice(0, -1).map((a, j) => {
       const b = pts[j + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]), dx = (b[0] - a[0]) / len, dy = (b[1] - a[1]) / len;
@@ -8994,14 +9241,29 @@ function buildPixelWall(on) {
     });
     const last = segs[segs.length - 1], e = local[local.length - 1], cap = [e[0] + last.dx * 30, e[1] + last.dy * 30];
     for (let i = 0; i < n; i++) if (grid[i] === PX_STEEL) { const [x, y] = center(i); if (inSegRect(x, y, e, cap)) grid[i] = PX_BLUE; }
-    // Çıkışta üst üste iki küp: sarı +3 ve turuncu x3
+    // Çıkış küpleri: Tünel'de sarı +3 ve turuncu x3; Koridor'da yeşil ok ve ateş de var (üçüncü küp ağzın içinde)
     const ex = last.b[0] - last.dx * 6, ey = last.b[1] - last.dy * 6;
-    for (const [kind, side] of [["plus", -1], ["mul", 1]]) {
-      const hx = ex + last.px * side * 8.5, hy = ey + last.py * side * 8.5;
+    const kinds = on === "koridor"
+      ? [["plus", -1, 0], ["aim", 1, 0], ["fire", 0, 26]]
+      : [["plus", -1, 0], ["mul", 1, 0]];
+    for (const [kind, side, back] of kinds) {
+      const hx = ex + last.px * side * 8.5 - last.dx * back, hy = ey + last.py * side * 8.5 - last.dy * back;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
     return { pts, segs };
   });
+  if (on === "mikro") {   // kaburgalar: her 11. sıra çelik — yalnız üç boşluktan geçilir; topun duvara girmesi zordur
+    const gaps = [[24, 38], [95, 109], [151, 165]];
+    for (const rr of [11, 22, 33, 44, 55]) for (let c = 0; c < cols; c++) {
+      if (gaps.some(([a, b]) => c >= a && c < b)) continue;
+      const i = rr * cols + c;
+      if (grid[i] === PX_BLUE) grid[i] = PX_STEEL;
+    }
+    for (const [kind, [a, b]] of [["fire", gaps[0]], ["aim", gaps[1]], ["plus", gaps[2]]]) {
+      const hx = PX.x + (a + b) / 2 * s, hy = PX.y + 11 * s + 22;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
   let blue = 0;
   for (let i = 0; i < n; i++) if (grid[i] === PX_BLUE) blue++;
   Object.assign(pxWall, { grid, owner, tone, total: blue, left: blue, full: true });
@@ -9009,7 +9271,7 @@ function buildPixelWall(on) {
 
 // Topun dairesine değen dolu hücreler (steelOnly: yalnızca çelik). out verilmezse ilk değmede true döner.
 function pxOverlap(x, y, r, steelOnly, out) {
-  const { s, cols, rows } = PX, g = pxWall.grid;
+  const s = pxWall.s, cols = pxWall.cols, rows = pxWall.rows, g = pxWall.grid;
   const c0 = Math.max(0, Math.floor((x - r - PX.x) / s)), c1 = Math.min(cols - 1, Math.floor((x + r - PX.x) / s));
   const r0 = Math.max(0, Math.floor((y - r - PX.y) / s)), r1 = Math.min(rows - 1, Math.floor((y + r - PX.y) / s));
   let hit = false;
@@ -9048,7 +9310,7 @@ function pxBall(b, ox, oy, sdt) {
       if (broke >= 4 || pxWall.grid[i] === PX_STEEL || !pxBreak(i)) continue;
       broke++;
       if (inside) {
-        if (!pxWall.chained) { pxWall.chained = true; callout(tr("ZİNCİR REAKSİYON!"), "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); }
+        if (!pxWall.chained) { pxWall.chained = true; callout(tr("ZİNCİR REAKSİYON!"), "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); if (pxWall.mode === "koridor" && typeof cr7Cheer === "function") cr7Cheer(1.4); }
         else pxIgnite(i, 5);
       }
     }
@@ -9111,7 +9373,7 @@ function pxBreak(i) {
   P.pend += 4 * (isFever() ? 2 : 1);
   if (++P.statAcc >= 20) { P.statAcc = 0; run.bricks++; track("bricks"); }   // 20 piksel = 1 tuğla (kariyer sayacı şişmesin)
   if (particles.length < 260 && Math.random() < 0.5) {
-    spawnParticles(PX.x + (i % PX.cols) * PX.s, PX.y + ((i / PX.cols) | 0) * PX.s, PX_BLUES[P.tone[i]], 2, PX.s, PX.s);
+    spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s, PX_BLUES[P.tone[i]], 2, pxWall.s, pxWall.s);
   }
   if (state.time - P.sfxAt > 0.05) { P.sfxAt = state.time; sfx("brick", 1 + (P.left % 9)); }
   return true;
@@ -9126,7 +9388,8 @@ function pxIgnite(i, e) {
   }
 }
 
-// Küp yakalandı: +3 üç top ekler, x3 her topu üçe katlar (en çok 300)
+// Küp yakalandı: +3 üç top ekler, x3 her topu üçe katlar (en çok 300);
+// koridorda ayrıca → yeşil ok yörünge kılavuzu ve ▲ ateş topu verir
 function pxCatch(q) {
   const K = CUBE_KINDS[q.kind];
   addShake(3);
@@ -9136,7 +9399,7 @@ function pxCatch(q) {
       const a = -Math.PI / 2 + k * 0.45;
       balls.push(Object.assign(newBall(false), { x: paddle.x + paddle.w / 2 + k * 14, y: paddle.y - 12, dx: Math.cos(a) * mag(), dy: Math.sin(a) * mag() }));
     }
-  } else {
+  } else if (q.kind === "mul") {
     for (const s of balls.filter(b => !b.decoy && !b.stuck)) {
       const base = Math.atan2(s.dy, s.dx);
       for (const a of [-0.3, 0.3]) {
@@ -9144,10 +9407,19 @@ function pxCatch(q) {
         balls.push(Object.assign(newBall(false), { x: s.x, y: s.y, dx: Math.cos(base + a) * mag(), dy: Math.sin(base + a) * mag(), tunnelUntil: s.tunnelUntil || 0 }));
       }
     }
+  } else if (q.kind === "aim") {
+    state.aimUntil = state.time + FX_TIME.aim;
+    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "→ " + tr("YÖN") + "!", K.color);
+    sfx("power");
+  } else if (q.kind === "fire") {
+    state.fireUntil = state.time + FX_TIME.fire;
+    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "▲ " + tr("ATEŞ") + "!", K.color);
+    sfx("fire");
   }
+  if (pxWall.mode === "koridor" && typeof cr7Cheer === "function") cr7Cheer(1.6);
   const n = balls.length;
   pxWall.peak = Math.max(pxWall.peak, n);
-  addFloater(paddle.x + paddle.w / 2, paddle.y - 18, K.label + " → " + tr("{n} TOP", { n }), K.color);
+  if (q.kind === "plus" || q.kind === "mul") addFloater(paddle.x + paddle.w / 2, paddle.y - 30, K.label + " → " + tr("{n} TOP", { n }), K.color);
   sfx("multi");
   addScore(50);
   if (!pxWall.storm && n >= STORM_AT) { pxWall.storm = true; callout(tr("🌪 TOP FIRTINASI!"), "#4cc9f0"); sfx("fever"); addShake(8); }
@@ -9195,7 +9467,7 @@ function pxUpdate(dt) {
   if (P.pend && (state.time >= P.flushAt || P.left <= 0)) { addScore(P.pend); P.pend = 0; P.flushAt = state.time + 0.1; }
   if (P.left <= 0 && !P.burns.length) checkLevelDone();
 }
-// Bölüm bitti: kutlama, bonus, yıldız çanları
+// Bölüm bitti: kutlama, bonus, yıldız çanları. Koridorda toplar her yere saçılır ve CR7 kutlama yapar
 function pxWin() {
   pxWall.won = true;
   pxWall.wonAt = performance.now();
@@ -9204,11 +9476,23 @@ function pxWin() {
   addScore(2500);
   for (let k = 0; k < 6; k++) spawnCoins(rnd(150, 650), rnd(140, 320), 18);
   for (let k = 0; k < 3; k++) tone("triangle", [784, 988, 1318][k], 0, 0.35, 0.2, 0.45 + k * 0.3);
+  if (pxWall.mode === "koridor" || pxWall.mode === "mikro") {
+    if (pxWall.mode === "koridor") {
+      if (typeof cr7Cheer === "function") cr7Cheer(5);
+      callout(tr("⚽ SIUUU!"), "#ffd60a");
+    }
+    for (let k = 0; k < 48 && balls.length < STORM_MAX; k++) {          // kazanma: toplar her yere saçılır
+      const a = grnd(0, TAU), m2 = grnd(200, 460);
+      balls.push(Object.assign(newBall(false), { x: W / 2 + grnd(-30, 30), y: H / 2 - 60, dx: Math.cos(a) * m2, dy: Math.sin(a) * m2 }));
+    }
+    pxWall.peak = Math.max(pxWall.peak, balls.length);
+    addShake(6);
+  }
 }
 
 // --- Çizim ---
 function pxPaintCell(i) {
-  const g = pxWall.g, { s, cols, rows } = PX, c = i % cols, r = (i / cols) | 0, x = c * s, y = r * s, t = pxWall.grid[i];
+  const g = pxWall.g, s = pxWall.s, cols = pxWall.cols, rows = pxWall.rows, c = i % cols, r = (i / cols) | 0, x = c * s, y = r * s, t = pxWall.grid[i];
   g.clearRect(x, y, s, s);
   if (t === PX_BLUE || t === PX_BURN) {               // piksel tuğla: 5×5, üstü parlak, altı gölgeli
     g.fillStyle = PX_BLUES[pxWall.tone[i]];
@@ -9258,7 +9542,7 @@ function drawCube(x, y, kind, rot, sc) {
 function drawPixelWall() {
   const P = pxWall;
   if (!P.active) return;
-  const ww = PX.cols * PX.s, wh = PX.rows * PX.s;
+  const ww = P.cols * P.s, wh = P.rows * P.s;
   if (!P.canvas) P.canvas = document.createElement("canvas");
   if (P.full) {                                       // bölüm başında bir kez tamamı, sonra yalnızca değişen hücreler
     P.canvas.width = ww * DPR;
@@ -9385,7 +9669,7 @@ function scheduleNextCurse(first) {
   const hz = HAZARD[hazardLevel()];
   if (!hz || battle.active || pactNoCurses()) { state.curseAt = Infinity; return; }   // kapışmada lanetler rakiplerden gelir
   const lvlMul = Math.max(0.55, 1 - (state.level - 1) * 0.04);       // bölüm ilerledikçe sıklaşır
-  state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * grnd(0.7, 1.3));
+  state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * (state.diffCurseGap ?? 1) * grnd(0.7, 1.3));   // mod: lanet sıklığı
 }
 function pickCurse() {
   const active = activeCurses(), used = new Set(active.map(k => CURSES[k].group).filter(Boolean));
@@ -9636,7 +9920,8 @@ function update(dt) {
     paddle.x = clamp(paddle.x, wl, wr - paddle.w);
   } else paddle.x = clamp(paddle.x + dir * paddle.speed * dt, wl, wr - paddle.w);
   // Genişlik animasyonu: GENİŞ büyütür, MİNİ ve sersemleme küçültür
-  paddle.targetW = PADDLE_W * (state.time < paddle.wideUntil ? PADDLE_WIDE / PADDLE_W : 1) * (fxOn("mini") || fxOn("stun") ? 0.6 : 1);
+  paddle.targetW = PADDLE_W * (state.time < paddle.wideUntil ? PADDLE_WIDE / PADDLE_W : 1) * (fxOn("mini") || fxOn("stun") ? 0.6 : 1)
+                       * (pxWall.mode === "koridor" ? 0.72 : 1) * (state.diffPaddle ?? 1);   // koridor dar raket + mod genişliği
   const newW = paddle.w + (paddle.targetW - paddle.w) * Math.min(1, dt * 8);
   paddle.x = clamp(paddle.x - (newW - paddle.w) / 2, wl, Math.max(wl, wr - newW));
   paddle.w = newW;
@@ -10058,6 +10343,101 @@ function drawHoles() {
     ctx.stroke();
   }
 }
+// --- CR7 (13. bölüm maskotu): sağ altta kutlama yapan, üzülünce yüzünü kapayan animasyonlu figür ---
+const cr7 = { mood: "idle", until: 0 };
+const cr7Cheer = (dur = 1.6) => { cr7.mood = "yay"; cr7.until = state.time + dur; };
+const cr7Facepalm = () => { cr7.mood = "face"; cr7.until = state.time + 1.8; };
+function drawCr7() {
+  if (pxWall.mode !== "koridor") return;
+  if (cr7.mood !== "idle" && state.time >= cr7.until) cr7.mood = "idle";
+  const t = state.time, win = pxWall.won;
+  const cheer = win || cr7.mood === "yay", face = !win && cr7.mood === "face";
+  const x = W - 64, groundY = H - 24;
+  const jump = cheer ? Math.abs(Math.sin(t * 6)) * 13 : Math.sin(t * 2) * 1.5;   // kutlama: hoplar; normal: nefes alır
+  const y = groundY - jump;
+  ctx.fillStyle = "rgba(0,0,0,0.3)";                                             // gölge
+  ctx.beginPath();
+  ctx.ellipse(x, groundY + 2, 16 * (1 - jump / 40), 4, 0, 0, TAU);
+  ctx.fill();
+  const limb = (x1, y1, x2, y2, lw) => { ctx.strokeStyle = "#e8b17a"; ctx.lineWidth = lw; ctx.lineCap = "round"; path([[x1, y1], [x2, y2]]); ctx.stroke(); ctx.lineCap = "butt"; };
+  limb(x - 5, y - 34, x - 7, y - 16, 4);                                        // bacaklar
+  limb(x + 5, y - 34, x + 7, y - 16, 4);
+  if (cheer) { limb(x - 8, y - 48, x - 16, y - 62, 4); limb(x + 8, y - 48, x + 16, y - 62, 4); }   // kollar: havada V
+  else if (face) { limb(x - 8, y - 48, x - 4, y - 57, 4); limb(x + 8, y - 48, x + 4, y - 57, 4); }
+  else { const sw = Math.sin(t * 3) * 2; limb(x - 8, y - 48, x - 10 - sw, y - 36, 4); limb(x + 8, y - 48, x + 10 + sw, y - 36, 4); }
+  fillRR(x - 9, y - 50, 18, 18, 4, "#a4161a");                                  // forma
+  ctx.strokeStyle = "#7a0c14";
+  ctx.lineWidth = 1;
+  rrPath(x - 9, y - 50, 18, 18, 4);
+  ctx.stroke();
+  Object.assign(ctx, { fillStyle: "#ffffff", font: "bold 10px monospace", textAlign: "center" });
+  ctx.fillText("7", x, y - 38);
+  circle(x, y - 58, 7, "#e8b17a");                                              // kafa
+  ctx.fillStyle = "#2b2117";                                                    // saç
+  ctx.beginPath();
+  ctx.arc(x, y - 58, 7, Math.PI, TAU);
+  ctx.fill();
+  if (face) {                                                                   // yüzünü kapatır
+    circle(x - 4, y - 57, 3.4, "#e8b17a");
+    circle(x + 4, y - 57, 3.4, "#e8b17a");
+  } else if (cheer) {
+    circle(x - 2.6, y - 59, 1.1, "#2b2117");
+    circle(x + 2.6, y - 59, 1.1, "#2b2117");
+    ctx.fillStyle = "#7a3040";                                                  // açık ağız
+    ctx.beginPath();
+    ctx.arc(x, y - 54.5, 2.2, 0, Math.PI);
+    ctx.fill();
+  } else {
+    circle(x - 2.6, y - 59, 1.1, "#2b2117");
+    circle(x + 2.6, y - 59, 1.1, "#2b2117");
+    ctx.strokeStyle = "#7a3040";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y - 56, 2.6, 0.25, Math.PI - 0.25);
+    ctx.stroke();
+  }
+}
+
+// --- YEŞİL OK küpü: uçuştaki topun yörüngesini kesikli yeşil çizgiyle öngörür ---
+function drawAim() {
+  if (state.aimUntil <= state.time || balls.length > 10) return;
+  const b = balls.find(b => !b.stuck && !b.decoy && !b.tun);
+  if (!b) return;
+  let { x, y } = b;
+  const m2 = Math.hypot(b.dx, b.dy) || 1;
+  let dx = b.dx / m2, dy = b.dy / m2;
+  const pts = [[x, y]];
+  for (let i = 0; i < 160; i++) {
+    x += dx * 6;
+    y += dy * 6;
+    if (x - 8 < state.inset) { x = state.inset + 8; dx = -dx; }                 // yan duvarlardan yansıma
+    else if (x + 8 > W - state.inset) { x = W - state.inset - 8; dx = -dx; }
+    else if (y - 8 < 0) { y = 8; dy = -dy; }
+    else if (y > paddle.y - 4) break;                                           // raket düzlemi: yol biter
+    else {
+      const ci = pxCellAt(x, y);
+      if (ci >= 0 && pxWall.active && pxSolid(pxWall.grid[ci])) break;          // ilk katı piksele kadar
+      if (bricks.some(br => !br.dead && x > br.x && x < br.x + BRICK.w && y > br.y && y < br.y + BRICK.h)) break;
+    }
+    pts.push([x, y]);
+  }
+  if (pts.length < 4) return;
+  ctx.strokeStyle = "rgba(67,214,79,0.75)";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([7, 6]);
+  ctx.lineDashOffset = -state.time * 40;
+  path(pts);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  const n2 = pts.length, [ex2, ey2] = pts[n2 - 1], [px2, py2] = pts[n2 - 2];   // uçta ok başı
+  const a = Math.atan2(ey2 - py2, ex2 - px2);
+  ctx.fillStyle = "#43d64f";
+  path([[ex2 + Math.cos(a) * 8, ey2 + Math.sin(a) * 8],
+        [ex2 + Math.cos(a + 2.5) * 7, ey2 + Math.sin(a + 2.5) * 7],
+        [ex2 + Math.cos(a - 2.5) * 7, ey2 + Math.sin(a - 2.5) * 7]], true);
+  ctx.fill();
+}
+
 function drawPaddle() {
   const { x, y, w, h } = paddle;
   // Cila: raket hızına göre hafif eğilir, top değince squash yapar (canlı hissi)
@@ -10072,12 +10452,13 @@ function drawPaddle() {
   }
   // GÖRÜNMEZ RAKET: yalnızca vuruşta ve ara ara bir anlık belirir
   if (curseOn("gorunmez")) ctx.globalAlpha = Math.max(paddle.flash * 0.9, (state.time % 1.6) < 0.1 ? 0.45 : 0.03);
-  const blink = fxOn("stun") && (calmFx() || Math.floor(state.time * 12) % 2), pcol = blink ? "#ff4d6d" : T().pad, ps = settings.paddleStyle;
+  const kor = pxWall.mode === "koridor";   // CR7 koridoru: turuncu raket
+  const blink = fxOn("stun") && (calmFx() || Math.floor(state.time * 12) % 2), pcol = kor ? "#ff9f1c" : blink ? "#ff4d6d" : T().pad, ps = settings.paddleStyle;
   if (ps === "koseli") { ctx.fillStyle = pcol; ctx.fillRect(x, y, w, h); }
   else if (ps === "neon") {
     fillRR(x, y, w, h, 6, hexToRgba(pcol, 0.18));
     for (const [lw, c] of [[6, hexToRgba(pcol, 0.35)], [2, pcol]]) { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); }
-  } else if (ps === "gokkusagi") {
+  } else if (ps === "gokkusagi" && !kor) {   // koridorda gökkuşağı yerine turuncu parlak raket
     const h0 = state.time * 120;
     fillRR(x, y, w, h, 6, blink ? "#ff4d6d" : lgrad(x, 0, x + w, 0, [0, 1, 2, 3, 4].map(i => `hsl(${(h0 + i * 70) % 360},90%,62%)`)));
   } else {                      // parlak: gölge + dikey degrade + vurgu renginde uç kapakları + üst parlama
@@ -10222,6 +10603,7 @@ const EFFECT_TAGS = [
   ["fever", tr("ÇILGIN"), "#ff5d8f", FEVER_TIME], ["wide", tr("GENİŞ"), POWERS.W.color, WIDE_TIME], ["slow", tr("YAVAŞ"), POWERS.S.color, SLOW_TIME],
   ["fire", tr("ATEŞ"), POWERS.F.color], ["laser", tr("LAZER"), POWERS.L.color], ["magnet", tr("YAPIŞ"), POWERS.Y.color], ["big", tr("DEV"), POWERS.D.color],
   ["reverse", tr("TERS"), "#ff4d6d"], ["mini", tr("MİNİ"), "#ff4d6d"], ["haste", tr("HIZ"), "#ff4d6d"], ["stun", tr("SERSEM"), "#ff4d6d"],
+  ["aim", tr("YÖN"), "#43d64f"],
 ];
 function activeEffects() {
   const list = [];
@@ -10383,6 +10765,29 @@ const LEGEND = [
   [{ hp: 1 }, N_("1 vuruş")], [{ hp: 2 }, N_("2 vuruş")], [{ hp: 3 }, N_("3 vuruş")], [{ unbreakable: true }, N_("kırılmaz")], [{ explosive: true }, N_("patlar")],
   [{ electric: true }, N_("yıldırım")], [{ gold: true }, N_("altın")], [{ splitter: true }, N_("+top")], ["bumper", N_("tampon")], ["portal", N_("portal")],
 ];
+// Menü mod hapları: Kolay / Orta / Zor — tıklayınca seçilir, yeni oyunda uygulanır (ui.js yakalar)
+let menuModeBoxes = [];
+function drawMenuModes() {
+  const labels = { kolay: tr("Kolay"), normal: tr("Orta"), zor: tr("Zor") };
+  ctx.font = "bold 12px monospace";
+  const items = Object.entries(labels).map(([v, label]) => ({ v, label, w: ctx.measureText(label).width + 26 }));
+  const total = items.reduce((s2, it) => s2 + it.w, 0) + (items.length - 1) * 8;
+  let x = W / 2 - total / 2;
+  const y = H / 2 + 182, h = 21;
+  menuModeBoxes = [];
+  for (const it of items) {
+    const on = settings.difficulty === it.v;
+    fillRR(x, y, it.w, h, h / 2, on ? T().accent : hexToRgba(T().board, 0.9));
+    ctx.strokeStyle = on ? shade(T().accent, -0.25) : hexToRgba(T().dim, 0.7);
+    ctx.lineWidth = 1;
+    rrPath(x + 0.5, y + 0.5, it.w - 1, h - 1, h / 2);
+    ctx.stroke();
+    text((on ? "✓ " : "") + it.label, x + it.w / 2, y + 14.5, "bold 12px monospace", on ? T().board : T().dim, "center", it.w - 6);
+    menuModeBoxes.push({ x, y, w: it.w, h, v: it.v });
+    x += it.w + 8;
+  }
+}
+
 // Menü göstergesinin ikinci satırı: yeni nesil tuğlalar (adlar mevcut çeviri anahtarlarını yeniden kullanır)
 const NEW_TYPES = [
   ["H", N_("Yenilenen")], ["A", N_("Kalkanlı")], ["T", N_("İkiz")], ["I", N_("Buz")], ["V", N_("Virüs")], ["S", N_("Şifacı")],
@@ -10420,7 +10825,8 @@ function drawScreens() {
       blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y + 1, 34 / BRICK.w);
       text(tr(label), x + 39, y + 12, "11px monospace", T().text, "left", 58);
     });
-    if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 172, "13px monospace", CURSE_COLOR, "center", 610);
+    if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 168, "13px monospace", CURSE_COLOR, "center", 610);
+    drawMenuModes();
     ctx.restore();
   } else if (m === "serve" && battle.active && battle.countdown > 0) {
     drawCountdown();
@@ -10534,7 +10940,7 @@ function draw() {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
-  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawPaddle(); drawBalls();
+  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawCr7(); drawAim(); drawPaddle(); drawBalls();
   ctx.font = "bold 14px monospace";   // skor yazıları: kenarlıklı, büyüyerek belirir
   ctx.textAlign = "center";
   ctx.lineWidth = 3;
@@ -11135,7 +11541,16 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("keyup", e => { keys[keyName(e)] = false; });
 canvas.addEventListener("mousemove", e => pointerAim(e.clientX));
-canvas.addEventListener("click", action);
+function tryMenuModeClick(clientX, clientY) {   // menüdeki mod hapları: tıkla seç, oyun başlamasın
+  if (state.mode !== "menu" || !menuModeBoxes.length) return false;
+  const rect = canvas.getBoundingClientRect();
+  const x = (clientX - rect.left) * (W / rect.width), y = (clientY - rect.top) * (H / rect.height);
+  const hit = menuModeBoxes.find(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h);
+  if (!hit) return false;
+  if (settings.difficulty !== hit.v) { settings.difficulty = hit.v; saveSettings(); sfx("power"); }
+  return true;
+}
+canvas.addEventListener("click", e => { if (!tryMenuModeClick(e.clientX, e.clientY)) action(); });
 // Mobil: parmak raketi götürür (mutlak) ya da kaydırdığı kadar iter (göreli); dokunuş aynı zamanda eylemdir
 let touchX = null, lastInputTouch = false;
 function touchNudge(clientX) {
@@ -12029,7 +12444,7 @@ function renderChallenge() {
     const n = i + 1, locked = n > max, boss = !!def.boss;
     return el("button", {
       className: n === max ? "active" : "",
-      textContent: (boss ? "☠ " : def.pixel ? "🌀 " : "") + n,
+      textContent: (boss ? "☠ " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel ? "🌀 " : "") + n,
       title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
       onclick: () => startPractice(n),
@@ -12057,9 +12472,13 @@ const challengeBtn = el("button", {
 });
 toolbar.insertBefore(challengeBtn, careerBtn);
 onClick("daily-start", startDaily);
-// Tünel Fırtınası her zaman pratik olarak açık (klasik oyunda 12. bölüm)
+// Tünel Fırtınası ve CR7 Koridoru her zaman pratik olarak açık (klasik oyunda 12. ve 13. bölüm)
 const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel) + 1;
+const KORIDOR_LEVEL = LEVELS.findIndex(l => l.pixel === "koridor") + 1;
+const MIKRO_LEVEL = LEVELS.findIndex(l => l.pixel === "mikro") + 1;
 onClick("tunnel-start", () => startPractice(TUNNEL_LEVEL, true));
+onClick("koridor-start", () => startPractice(KORIDOR_LEVEL, true));
+onClick("mikro-start", () => startPractice(MIKRO_LEVEL, true));
 renderChallenge();
 
 // ======================================================================
