@@ -10475,7 +10475,7 @@ const PX_ORANGES = ["#ff7b00", "#ff8c1a", "#ff9f1c", "#e85d04", "#f48c06", "#ffa
 const PX_COLORS = () => pxWall.mode === "core" ? PX_ORANGES : PX_BLUES;
 const CUBE_KINDS = {
   plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" },
-  aim:  { label: "→", color: "#43d64f" }, fire: { label: "▲", color: "#ff6b35" },        // koridor küpleri: yön ve ateş
+  fire: { label: "▲", color: "#ff6b35" },                                                  // koridor küpü: ateş
   wide: { label: "↔", color: "#90be6d" },                                                  // CORE/BREAK: geniş raket
 };
 const pxWall = { active: false, mode: null, s: PX.s, cols: PX.cols, rows: PX.rows, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
@@ -10532,7 +10532,7 @@ function buildPixelWall(on) {
     // Çıkış küpleri: Tünel'de sarı +3 ve turuncu x3; Koridor'da yeşil ok ve ateş de var (üçüncü küp ağzın içinde)
     const ex = last.b[0] - last.dx * 6, ey = last.b[1] - last.dy * 6;
     const kinds = on === "koridor"
-      ? [["plus", -1, 0], ["aim", 1, 0], ["fire", 0, 26]]
+      ? [["plus", -1, 0], ["mul", 1, 0], ["fire", 0, 26]]
       : [["plus", -1, 0], ["mul", 1, 0]];
     for (const [kind, side, back] of kinds) {
       const hx = ex + last.px * side * 8.5 - last.dx * back, hy = ey + last.py * side * 8.5 - last.dy * back;
@@ -10547,7 +10547,7 @@ function buildPixelWall(on) {
       const i = rr * cols + c;
       if (grid[i] === PX_BLUE) grid[i] = PX_STEEL;
     }
-    for (const [kind, [a, b]] of [["fire", gaps[0]], ["aim", gaps[1]], ["plus", gaps[2]]]) {
+    for (const [kind, [a, b]] of [["fire", gaps[0]], ["plus", gaps[1]], ["mul", gaps[2]]]) {
       const hx = PX.x + (a + b) / 2 * s, hy = PX.y + 11 * s + 22;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
@@ -10565,7 +10565,7 @@ function buildPixelWall(on) {
       }
     }
     for (let i = th * T * cols; i < n; i++) { grid[i] = PX_HOLLOW; }   // artan alt şerit boş
-    for (const [kind, tx] of [["fire", 4], ["aim", 13], ["plus", 22]]) {   // üç fayans aralığı küp yuvası
+    for (const [kind, tx] of [["fire", 4], ["plus", 13], ["mul", 22]]) {   // üç fayans aralığı küp yuvası
       const hx = PX.x + (tx * T + T / 2) * s, hy = PX.y + (T + T / 2) * s;
       for (let r2 = 0; r2 < T; r2++) for (let c2 = 0; c2 < T; c2++) grid[(T + r2) * cols + tx * T + c2] = PX_HOLLOW;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
@@ -10589,7 +10589,7 @@ function buildPixelWall(on) {
       const cx = 6 + ix * 13 + ((irand() * 5) | 0) - 2, cy = 4 + iy * 8 + ((irand() * 3) | 0) - 1;
       place(cx, cy, 3 + ((ix + iy) % 2), (ix * 2 + iy) % 4 === 0);
     }
-    for (const [kind, cx, cy] of [["fire", 30, 30], ["aim", 95, 8], ["mul", 160, 30]]) {   // aralarda üç küp
+    for (const [kind, cx, cy] of [["fire", 30, 30], ["plus", 95, 8], ["mul", 160, 30]]) {   // aralarda üç küp
       const hx = PX.x + cx * s, hy = PX.y + cy * s;
       for (let dy2 = -3; dy2 <= 3; dy2++) for (let dx2 = -3; dx2 <= 3; dx2++) {
         const c = cx + dx2, r2 = cy + dy2;
@@ -10765,10 +10765,6 @@ function pxCatch(q) {
     paddle.wideUntil = state.time + WIDE_TIME;
     addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "↔ " + tr("GENİŞ") + "!", K.color);
     sfx("power");
-  } else if (q.kind === "aim") {
-    state.aimUntil = state.time + FX_TIME.aim;
-    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "→ " + tr("YÖN") + "!", K.color);
-    sfx("power");
   } else if (q.kind === "fire") {
     state.fireUntil = state.time + FX_TIME.fire;
     addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "▲ " + tr("ATEŞ") + "!", K.color);
@@ -10933,20 +10929,6 @@ function drawPixelWall() {
   ctx.rect(PX.x - 2, PX.y - 2, ww + 4, wh * (1 - (1 - reveal) ** 3) + 4);
   ctx.clip();
   ctx.drawImage(P.canvas, PX.x, PX.y, ww, wh);
-  // Tünel içinde akış okları: topun gideceği yön
-  ctx.strokeStyle = "rgba(140,200,255,0.32)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  for (const tn of P.tunnels) for (const g of tn.segs) {
-    for (let d = (state.time * 90) % 22; d < g.len; d += 22) {
-      const x = g.a[0] + g.dx * d, y = g.a[1] + g.dy * d;
-      if (y > PX.y + wh - 4) continue;
-      ctx.moveTo(x - g.dx * 3 + g.px * 5, y - g.dy * 3 + g.py * 5);
-      ctx.lineTo(x + g.dx * 3, y + g.dy * 3);
-      ctx.lineTo(x - g.dx * 3 - g.px * 5, y - g.dy * 3 - g.py * 5);
-    }
-  }
-  ctx.stroke();
   // kalite: enerjiye göre ısıl gradyan (beyaz sıcak → sarı → turuncu) + hale
   for (const b of P.burns) if (P.grid[b.i] === PX_BURN) {
     const bx = PX.x + (b.i % P.cols) * P.s, by = PX.y + ((b.i / P.cols) | 0) * P.s;
@@ -11822,46 +11804,6 @@ function drawCr7() {
   }
 }
 
-// --- YEŞİL OK küpü: uçuştaki topun yörüngesini kesikli yeşil çizgiyle öngörür ---
-function drawAim() {
-  if (state.aimUntil <= state.time || balls.length > 10) return;
-  const b = balls.find(b => !b.stuck && !b.decoy && !b.tun);
-  if (!b) return;
-  let { x, y } = b;
-  const m2 = Math.hypot(b.dx, b.dy) || 1;
-  let dx = b.dx / m2, dy = b.dy / m2;
-  const pts = [[x, y]];
-  for (let i = 0; i < 160; i++) {
-    x += dx * 6;
-    y += dy * 6;
-    if (x - 8 < state.inset) { x = state.inset + 8; dx = -dx; }                 // yan duvarlardan yansıma
-    else if (x + 8 > W - state.inset) { x = W - state.inset - 8; dx = -dx; }
-    else if (y - 8 < 0) { y = 8; dy = -dy; }
-    else if (y > paddle.y - 4) break;                                           // raket düzlemi: yol biter
-    else {
-      const ci = pxCellAt(x, y);
-      if (ci >= 0 && pxWall.active && pxSolid(pxWall.grid[ci])) break;          // ilk katı piksele kadar
-      if (bricks.some(br => !br.dead && x > br.x && x < br.x + BRICK.w && y > br.y && y < br.y + BRICK.h)) break;
-    }
-    pts.push([x, y]);
-  }
-  if (pts.length < 4) return;
-  ctx.strokeStyle = "rgba(67,214,79,0.75)";
-  ctx.lineWidth = 2;
-  ctx.setLineDash([7, 6]);
-  ctx.lineDashOffset = -state.time * 40;
-  path(pts);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  const n2 = pts.length, [ex2, ey2] = pts[n2 - 1], [px2, py2] = pts[n2 - 2];   // uçta ok başı
-  const a = Math.atan2(ey2 - py2, ex2 - px2);
-  ctx.fillStyle = "#43d64f";
-  path([[ex2 + Math.cos(a) * 8, ey2 + Math.sin(a) * 8],
-        [ex2 + Math.cos(a + 2.5) * 7, ey2 + Math.sin(a + 2.5) * 7],
-        [ex2 + Math.cos(a - 2.5) * 7, ey2 + Math.sin(a - 2.5) * 7]], true);
-  ctx.fill();
-}
-
 function drawPaddle() {
   const { x, y, w, h } = paddle;
   // Cila: raket hızına göre hafif eğilir, top değince squash yapar (canlı hissi)
@@ -11916,16 +11858,6 @@ function drawBalls() {
   const fire = isFire(), ballCol = fire ? "#ff6b35" : T().ball, rainbow = settings.trail === "gokkusagi";
   const crowd = balls.length > 40 || lowGfx();          // top fırtınası / düşük kalite: iz, hale ve gölge çizilmez
   const sb = !crowd && (state.mode === "serve" || state.mode === "playing") && balls.find(b => b.stuck);
-  if (sb) {                                              // cila: fırlatma bekleyen topa genişleyip sönen hedef halkası
-    const ph = (state.time * 1.4) % 1;
-    ctx.globalAlpha = (1 - ph) * 0.55;
-    ctx.strokeStyle = T().accent;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(sb.x, sb.y, sb.r + 3 + ph * 16, 0, TAU);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
   for (const b of balls) {
     // HAYALET TOP: rakete yaklaşana kadar yalnızca ara ara görünür
     const ghostA = curseOn("hayalet") && b.y < paddle.y - 80 ? ((state.time * 2.2 + b.x * 0.004) % 1 < 0.1 ? 0.6 : 0.04) : 1;
@@ -12033,7 +11965,6 @@ const EFFECT_TAGS = [
   ["fever", tr("ÇILGIN"), "#ff5d8f", FEVER_TIME], ["wide", tr("GENİŞ"), POWERS.W.color, WIDE_TIME], ["slow", tr("YAVAŞ"), POWERS.S.color, SLOW_TIME],
   ["fire", tr("ATEŞ"), POWERS.F.color], ["laser", tr("LAZER"), POWERS.L.color], ["magnet", tr("YAPIŞ"), POWERS.Y.color], ["big", tr("DEV"), POWERS.D.color],
   ["reverse", tr("TERS"), "#ff4d6d"], ["mini", tr("MİNİ"), "#ff4d6d"], ["haste", tr("HIZ"), "#ff4d6d"], ["stun", tr("SERSEM"), "#ff4d6d"],
-  ["aim", tr("YÖN"), "#43d64f"],
 ];
 function activeEffects() {
   const list = [];
@@ -12380,7 +12311,7 @@ function draw() {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
-  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawCr7(); drawAim(); drawPaddle(); drawBalls();
+  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawCr7(); drawPaddle(); drawBalls();
   ctx.font = "bold 14px monospace";   // skor yazıları: kenarlıklı, büyüyerek belirir
   ctx.textAlign = "center";
   ctx.lineWidth = 3;
