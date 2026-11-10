@@ -374,7 +374,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   <div class="setnote">Şarkının BPM'i, bas ve tiz enerjisi 3 bölüme dönüşür; güçlü bir final varsa son bölüme boss eklenir. Aynı şarkı her zaman aynı bölümü üretir. Bölüm kodu arkadaşlarınla paylaşılabilir.</div>
   <div class="sethead">🌀 Tünel Fırtınası</div>
   <div class="setrow"><button id="campaign-open">🗺️ Kampanya'yı aç</button></div>
-  <div class="setrow"><button id="tunnel-start">🌀 Tünel Fırtınası'nı oyna</button><button id="koridor-start">⚽ CR7 Koridoru'nu oyna</button><button id="mikro-start">🔹 Mikro Duvar'ı oyna</button><button id="mozaik-start">🧩 Mozaik Duvar'ı oyna</button><button id="adalar-start">💠 Adalar Duvarı'nı oyna</button></div>
+  <div class="setrow"><button id="core-start">🟠 Core/Break'i oyna</button><button id="tunnel-start">🌀 Tünel Fırtınası'nı oyna</button><button id="koridor-start">⚽ CR7 Koridoru'nu oyna</button><button id="mikro-start">🔹 Mikro Duvar'ı oyna</button><button id="mozaik-start">🧩 Mozaik Duvar'ı oyna</button><button id="adalar-start">💠 Adalar Duvarı'nı oyna</button></div>
   <div class="setnote">Binlerce mavi piksel tuğla ve içinden geçen kırılmaz çelik L ve sarmal tüneller. Topu tünele sok: çıkışa taşınır, duvarı içeriden oyar, zincir reaksiyon başlar. Çıkışlardaki sarı +3 ve turuncu x3 küpleri raketle yakala, 300 topa kadar fırtına. Klasik oyunda 12. bölüm; buradan her zaman pratik olarak açık.</div>
   <div class="sethead">Bölüm seçimi (pratik)</div>
   <div id="level-grid"></div>
@@ -1361,6 +1361,9 @@ const I18N_KEYS = [
 "Kampanyada 4 dünyayı bitir", // 803
 "Tur Şampiyonu", // 804
 "Kampanyayı baştan sona bitir", // 805
+"NOT SO FAST — CORE/BREAK", // 806
+"ALL CLEAR!", // 807
+"🟠 Core/Break'i oyna", // 808
 ];
 const I18N_DATA = {};
 
@@ -1663,6 +1666,10 @@ I18N_DATA.en = {
 803: "Finish 4 worlds in the Campaign",
 804: "Tour Champion",
 805: "Finish the whole Campaign",
+
+806: "NOT SO FAST — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Play Core/Break",
 };
 
 // ======================================================================
@@ -1964,6 +1971,10 @@ I18N_DATA.de = {
 803: "Beende 4 Welten in der Kampagne",
 804: "Tour-Champion",
 805: "Beende die ganze Kampagne",
+
+806: "NICHT SO SCHRELL — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break spielen",
 };
 
 // ======================================================================
@@ -2265,6 +2276,10 @@ I18N_DATA.fr = {
 803: "Termine 4 mondes dans la Campagne",
 804: "Champion du Tour",
 805: "Termine toute la Campagne",
+
+806: "PAS SI VITE — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Jouer à Core/Break",
 };
 
 // ======================================================================
@@ -2566,6 +2581,10 @@ I18N_DATA.es = {
 803: "Termina 4 mundos en la Campaña",
 804: "Campeón del Recorrido",
 805: "Termina toda la Campaña",
+
+806: "NI TAN RÁPIDO — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Jugar a Core/Break",
 };
 
 // ======================================================================
@@ -2867,6 +2886,10 @@ I18N_DATA.it = {
 803: "Completa 4 mondi nella Campagna",
 804: "Campione del Giro",
 805: "Completa tutta la Campagna",
+
+806: "NON COSÌ IN FRETTA — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Gioca a Core/Break",
 };
 
 // ======================================================================
@@ -3168,6 +3191,10 @@ I18N_DATA.pt = {
 803: "Termine 4 mundos na Campanha",
 804: "Campeão do Tour",
 805: "Termine toda a Campanha",
+
+806: "NÃO TÃO RÁPIDO — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Jogar Core/Break",
 };
 
 // ======================================================================
@@ -3469,6 +3496,10 @@ I18N_DATA.ru = {
 803: "Пройди 4 мира в Кампании",
 804: "Чемпион Тура",
 805: "Пройди всю Кампанию",
+
+806: "НЕ ТАК БЫСТРО — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Играть в Core/Break",
 };
 
 // ======================================================================
@@ -3770,6 +3801,10 @@ I18N_DATA.uk = {
 803: "Пройди 4 світи у Кампанії",
 804: "Чемпіон Туру",
 805: "Пройди всю Кампанію",
+
+806: "НЕ ТАК ШВИДКО — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Грати в Core/Break",
 };
 
 // ======================================================================
@@ -4071,6 +4106,10 @@ I18N_DATA.pl = {
 803: "Ukończ 4 światy w Kampanii",
 804: "Mistrz Trasy",
 805: "Ukończ całą Kampanię",
+
+806: "NIE TAK SZYBKO — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Zagraj w Core/Break",
 };
 
 // ======================================================================
@@ -4372,6 +4411,10 @@ I18N_DATA.nl = {
 803: "Voltooi 4 werelden in de Campagne",
 804: "Tourkampioen",
 805: "Voltooi de hele Campagne",
+
+806: "NIET ZO SNEL — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Speel Core/Break",
 };
 
 // ======================================================================
@@ -4673,6 +4716,10 @@ I18N_DATA.sv = {
 803: "Klara 4 världar i Kampanjen",
 804: "Turnéns Mästare",
 805: "Klara hela Kampanjen",
+
+806: "INTE SÅ SNABBT — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Spela Core/Break",
 };
 
 // ======================================================================
@@ -4974,6 +5021,10 @@ I18N_DATA.el = {
 803: "Ολοκλήρωσε 4 κόσμους στην Εκστρατεία",
 804: "Πρωταθλητής της Περιήγησης",
 805: "Ολοκλήρωσε ολόκληρη την Εκστρατεία",
+
+806: "ΟΧΙ ΤΟΣΟ ΓΡΗΓΟΡΑ — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Παίξε Core/Break",
 };
 
 // ======================================================================
@@ -5275,6 +5326,10 @@ I18N_DATA.cs = {
 803: "Dokonči 4 světy v Kampani",
 804: "Mistr Tury",
 805: "Dokonči celou Kampaň",
+
+806: "NE TAK RYCHLE — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Hrát Core/Break",
 };
 
 // ======================================================================
@@ -5576,6 +5631,10 @@ I18N_DATA.ro = {
 803: "Termină 4 lumi în Campanie",
 804: "Campion al Turului",
 805: "Termină toată Campania",
+
+806: "NU AȘA DE REPEDE — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Joacă Core/Break",
 };
 
 // ======================================================================
@@ -5877,6 +5936,10 @@ I18N_DATA.hu = {
 803: "Fejez be 4 világot a Kampányban",
 804: "A Túra Bajnoka",
 805: "Fejezd be a teljes Kampányt",
+
+806: "NE ENNYIRE GYORSAN — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break játéka",
 };
 
 // ======================================================================
@@ -6178,6 +6241,10 @@ I18N_DATA.az = {
 803: "Kampaniyada 4 dünyanı bitir",
 804: "Tur Çempionu",
 805: "Bütün Kampaniyanı bitir",
+
+806: "O QƏDƏR DƏ SÜRƏTLİ DEYİL — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break oyna",
 };
 
 // ======================================================================
@@ -6479,6 +6546,10 @@ I18N_DATA.ar = {
 803: "أنهِ 4 عوالم في الحملة",
 804: "بطل الجولة",
 805: "أنهِ الحملة كاملة",
+
+806: "ليس بهذه السرعة — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 العب Core/Break",
 };
 
 // ======================================================================
@@ -6780,6 +6851,10 @@ I18N_DATA.fa = {
 803: "4 دنیا را در کمپین تمام کن",
 804: "قهرمان تور",
 805: "کل کمپین را تمام کن",
+
+806: "این‌قدر تند نه — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break را بازی کن",
 };
 
 // ======================================================================
@@ -7081,6 +7156,10 @@ I18N_DATA.hi = {
 803: "अभियान में 4 दुनियाएँ पूरी करें",
 804: "दौरे का चैंपियन",
 805: "पूरा अभियान पूरी करें",
+
+806: "इतनी जल्दी नहीं — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break खेलें",
 };
 
 // ======================================================================
@@ -7382,6 +7461,10 @@ I18N_DATA.id = {
 803: "Selesaikan 4 dunia di Kampanye",
 804: "Juara Tur",
 805: "Selesaikan seluruh Kampanye",
+
+806: "TIDAK SECEPAT ITU — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Mainkan Core/Break",
 };
 
 // ======================================================================
@@ -7683,6 +7766,10 @@ I18N_DATA.vi = {
 803: "Hoàn thành 4 thế giới trong Chiến dịch",
 804: "Vô Địch Chuyến Đi",
 805: "Hoàn thành toàn bộ Chiến dịch",
+
+806: "CHƯA NHANH THẾ — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Chơi Core/Break",
 };
 
 // ======================================================================
@@ -7984,6 +8071,10 @@ I18N_DATA.zh = {
 803: "在战役中完成4个世界",
 804: "环球冠军",
 805: "完成整个战役",
+
+806: "别急 — 核心破解",
+807: "ALL CLEAR!",
+808: "🟠 游玩核心破解",
 };
 
 // ======================================================================
@@ -8285,6 +8376,10 @@ I18N_DATA.ja = {
 803: "キャンペーンでワールドを4つクリア",
 804: "ツアーのチャンピオン",
 805: "キャンペーンをすべてクリア",
+
+806: "そうはさせない — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠CORE/BREAKを遊ぶ",
 };
 
 // ======================================================================
@@ -8586,6 +8681,10 @@ I18N_DATA.ko = {
 803: "캠페인에서 월드 4개를 클리어",
 804: "투어 챔피언",
 805: "캠페인 전체를 클리어",
+
+806: "그렇게 빠르지 않아 — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break 플레이",
 };
 
 // ======================================================================
@@ -9126,11 +9225,12 @@ const LEVELS = [
     "1111$$1111",
     ".EI1ZZ1IE.",
   ],
-  { pixel: "tunnel", map: [] },   // 12: TÜNEL FIRTINASI — binlerce piksel tuğla, çelik L ve sarmal tüneller (js/tunnel.js)
-  { pixel: "koridor", map: [] },  // 13: CR7 KORİDORU — tamı tamına mavi duvar, ortada dar dikey koridor; +3/ok/ateş küpleri
-  { pixel: "mikro", map: [] },    // 14: MİKRO DUVAR — minik (4 px) tuğlalar ve boşluklu çelik kaburgalar; top zor girer
-  { pixel: "mozaik", map: [] },   // 15: MOZAİK DUVAR — 28 px fayanslar mavi/çelik/boşluk salınımıyla; küçük parçalar her yanda
-  { pixel: "adalar", map: [] },   // 16: ADALAR DUVARI — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
+  { pixel: "core", map: [] },    // 12: CORE/BREAK — koyu boşlukta 3379 turuncu pikselden dairesel çekirdek; x3 ve ↔ küpleri
+  { pixel: "tunnel", map: [] },   // 13: TÜNEL FIRTINASI — binlerce piksel tuğla, çelik L ve sarmal tüneller (js/tunnel.js)
+  { pixel: "koridor", map: [] },  // 14: CR7 KORİDORU — tamı tamına mavi duvar, ortada dar dikey koridor; +3/ok/ateş küpleri
+  { pixel: "mikro", map: [] },    // 15: MİKRO DUVAR — minik (4 px) tuğlalar ve boşluklu çelik kaburgalar; top zor girer
+  { pixel: "mozaik", map: [] },   // 16: MOZAİK DUVAR — 28 px fayanslar mavi/çelik/boşluk salınımıyla; küçük parçalar her yanda
+  { pixel: "adalar", map: [] },   // 17: ADALAR DUVARI — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
 ];
 
 // ======================================================================
@@ -9509,6 +9609,7 @@ function nextLevel() {
   serveBall();
   if (settings.autoTheme === "bolum") randomTheme();
   if (state.boss) { callout("⚠ " + tr(state.boss.name) + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
+  else if (pxWall.mode === "core") callout(tr("NOT SO FAST — CORE/BREAK"), "#ff9f1c");
   else if (pxWall.mode === "koridor") callout(tr("⚽ CR7 KORİDORU"), "#ffd60a");
   else if (pxWall.mode === "mikro") callout(tr("🔹 MİKRO DUVAR"), "#4cc9f0");
   else if (pxWall.mode === "mozaik") callout(tr("🧩 MOZAİK DUVAR"), "#c77dff");
@@ -10304,9 +10405,12 @@ const KORIDOR_PATHS = [
   [[378, 292], [378, 40]],                                                               // ortadan tepeye düz dar koridor
 ];
 const PX_BLUES = ["#1d5fe0", "#2470f5", "#2f80ff", "#3b8cff", "#1a56d0", "#4a9bff"];
+const PX_ORANGES = ["#ff7b00", "#ff8c1a", "#ff9f1c", "#e85d04", "#f48c06", "#ffa62b"];   // CORE/BREAK çekirdeği
+const PX_COLORS = () => pxWall.mode === "core" ? PX_ORANGES : PX_BLUES;
 const CUBE_KINDS = {
   plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" },
   aim:  { label: "→", color: "#43d64f" }, fire: { label: "▲", color: "#ff6b35" },        // koridor küpleri: yön ve ateş
+  wide: { label: "↔", color: "#90be6d" },                                                  // CORE/BREAK: geniş raket
 };
 const pxWall = { active: false, mode: null, s: PX.s, cols: PX.cols, rows: PX.rows, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
                  canvas: null, g: null, dirty: [], full: false, pend: 0, flushAt: 0, statAcc: 0, sfxAt: 0, enterSfxAt: 0, clankAt: 0,
@@ -10326,14 +10430,14 @@ function buildPixelWall(on) {
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
   if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
   // MİNİK HÜCRELİ DUVARLAR (mikro/mozaik/adalar): hücre 4 px → aynı alanda ~2,25 kat daha çok minik tuğla
-  const s = on === "mikro" || on === "mozaik" || on === "adalar" ? 4 : PX.s;
+  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" ? 4 : PX.s;
   const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
   Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
-  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar") ? [] : TUNNEL_PATHS;
+  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core") ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
   paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
@@ -10425,6 +10529,25 @@ function buildPixelWall(on) {
         const c = cx + dx2, r2 = cy + dy2;
         if (c >= 0 && c < cols && r2 >= 0 && r2 < rows && Math.abs(dx2) + Math.abs(dy2) <= 3) grid[r2 * cols + c] = PX_HOLLOW;
       }
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "core") {    // CORE/BREAK: koyu boşlukta TAM 3379 turuncu pikselden dairesel çekirdek (halkalı tonlar)
+    grid.fill(PX_HOLLOW);
+    const cx = (cols - 1) / 2, cy = (rows - 1) / 2;
+    const cand = [];
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0, d2 = (c - cx) ** 2 + (r2 - cy) ** 2;
+      cand.push([d2, i]);
+    }
+    cand.sort((a, b) => a[0] - b[0] || a[1] - b[1]);   // merkezden dışa: ilk 3379 hücre çekirdeği verir
+    for (let k = 0; k < 3379; k++) {
+      const i = cand[k][1];
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(Math.sqrt(cand[k][0])) % PX_ORANGES.length;   // eş merkezli halkalar
+    }
+    for (const [kind, dc] of [["mul", -33], ["wide", 0], ["mul", 33]]) {  // çekirdeğin altında üç küp
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 3) * s;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
   }
@@ -10537,7 +10660,7 @@ function pxBreak(i) {
   P.pend += 4 * (isFever() ? 2 : 1);
   if (++P.statAcc >= 20) { P.statAcc = 0; run.bricks++; track("bricks"); }   // 20 piksel = 1 tuğla (kariyer sayacı şişmesin)
   if (particles.length < 260 && Math.random() < 0.5) {
-    spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s, PX_BLUES[P.tone[i]], 2, pxWall.s, pxWall.s);
+    spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s, PX_COLORS()[P.tone[i]], 2, pxWall.s, pxWall.s);
   }
   if (state.time - P.sfxAt > 0.05) { P.sfxAt = state.time; sfx("brick", 1 + (P.left % 9)); }
   return true;
@@ -10571,6 +10694,10 @@ function pxCatch(q) {
         balls.push(Object.assign(newBall(false), { x: s.x, y: s.y, dx: Math.cos(base + a) * mag(), dy: Math.sin(base + a) * mag(), tunnelUntil: s.tunnelUntil || 0 }));
       }
     }
+  } else if (q.kind === "wide") {
+    paddle.wideUntil = state.time + WIDE_TIME;
+    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "↔ " + tr("GENİŞ") + "!", K.color);
+    sfx("power");
   } else if (q.kind === "aim") {
     state.aimUntil = state.time + FX_TIME.aim;
     addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "→ " + tr("YÖN") + "!", K.color);
@@ -10642,6 +10769,7 @@ function pxWin() {
   for (let k = 0; k < 6; k++) spawnCoins(rnd(150, 650), rnd(140, 320), 18);
   for (let k = 0; k < 3; k++) tone("triangle", [784, 988, 1318][k], 0, 0.35, 0.2, 0.45 + k * 0.3);
   if (pxWall.mode) {
+    if (pxWall.mode === "core") callout(tr("ALL CLEAR!"), "#ff9f1c");
     if (pxWall.mode === "koridor") {
       if (typeof cr7Cheer === "function") cr7Cheer(5);
       callout(tr("⚽ SIUUU!"), "#ffd60a");
@@ -10660,7 +10788,7 @@ function pxPaintCell(i) {
   const g = pxWall.g, s = pxWall.s, cols = pxWall.cols, rows = pxWall.rows, c = i % cols, r = (i / cols) | 0, x = c * s, y = r * s, t = pxWall.grid[i];
   g.clearRect(x, y, s, s);
   if (t === PX_BLUE || t === PX_BURN) {               // piksel tuğla: üstü/solu parlak, altı/sağı gölgeli (büyük hücrede tam bevel)
-    g.fillStyle = PX_BLUES[pxWall.tone[i]];
+    g.fillStyle = PX_COLORS()[pxWall.tone[i]];
     g.fillRect(x + 0.5, y + 0.5, s - 1, s - 1);
     g.fillStyle = "rgba(255,255,255,0.35)";
     g.fillRect(x + 0.5, y + 0.5, s - 1, 1);
@@ -13641,7 +13769,7 @@ function renderChallenge() {
     const n = i + 1, locked = n > max, boss = !!def.boss;
     return el("button", {
       className: n === max ? "active" : "",
-      textContent: (boss ? "☠ " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel === "mozaik" ? "🧩 " :
+      textContent: (boss ? "☠ " : def.pixel === "core" ? "🟠 " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel === "mozaik" ? "🧩 " :
                     def.pixel === "adalar" ? "💠 " : def.pixel ? "🌀 " : "") + n,
       title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
@@ -13672,12 +13800,14 @@ toolbar.insertBefore(challengeBtn, careerBtn);
 onClick("daily-start", startDaily);
 onClick("survival-start", startSurvival);
 // Tünel Fırtınası ve CR7 Koridoru her zaman pratik olarak açık (klasik oyunda 12. ve 13. bölüm)
-const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel) + 1;
+const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel === "tunnel") + 1;
+const CORE_LEVEL = LEVELS.findIndex(l => l.pixel === "core") + 1;
 const KORIDOR_LEVEL = LEVELS.findIndex(l => l.pixel === "koridor") + 1;
 const MIKRO_LEVEL = LEVELS.findIndex(l => l.pixel === "mikro") + 1;
 const MOZAIK_LEVEL = LEVELS.findIndex(l => l.pixel === "mozaik") + 1;
 const ADALAR_LEVEL = LEVELS.findIndex(l => l.pixel === "adalar") + 1;
 onClick("tunnel-start", () => startPractice(TUNNEL_LEVEL, true));
+onClick("core-start", () => startPractice(CORE_LEVEL, true));
 onClick("koridor-start", () => startPractice(KORIDOR_LEVEL, true));
 onClick("mikro-start", () => startPractice(MIKRO_LEVEL, true));
 onClick("mozaik-start", () => startPractice(MOZAIK_LEVEL, true));
