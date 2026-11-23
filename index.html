@@ -376,6 +376,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   <div class="setrow"><button id="campaign-open">🗺️ Kampanya'yı aç</button></div>
   <div class="setrow"><button id="core-start">🟠 Core/Break'i oyna</button><button id="tunnel-start">🌀 Tünel Fırtınası'nı oyna</button><button id="koridor-start">⚽ CR7 Koridoru'nu oyna</button><button id="mikro-start">🔹 Mikro Duvar'ı oyna</button><button id="mozaik-start">🧩 Mozaik Duvar'ı oyna</button><button id="adalar-start">💠 Adalar Duvarı'nı oyna</button></div>
   <div class="setrow"><button id="halka-start">⭕ Halka'yı oyna</button><button id="yildiz-start">⭐ Yıldız'ı oyna</button><button id="damla-start">💧 Damla'yı oyna</button></div>
+  <div class="setrow"><button id="ucgen-start">🔺 Üçgen'i oyna</button><button id="kare-start">⬛ Kare'yi oyna</button><button id="zikzak-start">⚡ Zikzak'ı oyna</button></div>
+  <div class="setrow"><button id="bomba-start">💥 Bomba'yı oyna</button><button id="kalp-start">❤ Kalp'i oyna</button><button id="yilan-start">🐍 Yılan'ı oyna</button></div>
   <div class="setnote">Binlerce mavi piksel tuğla ve içinden geçen kırılmaz çelik L ve sarmal tüneller. Topu tünele sok: çıkışa taşınır, duvarı içeriden oyar, zincir reaksiyon başlar. Çıkışlardaki sarı +3 ve turuncu x3 küpleri raketle yakala, 300 topa kadar fırtına. Klasik oyunda 12. bölüm; buradan her zaman pratik olarak açık.</div>
   <div class="sethead">Bölüm seçimi (pratik)</div>
   <div id="level-grid"></div>
@@ -1372,6 +1374,18 @@ const I18N_KEYS = [
 "⭕ Halka'yı oyna", // 813
 "⭐ Yıldız'ı oyna", // 814
 "💧 Damla'yı oyna", // 815
+"🔺 ÜÇGEN", // 816
+"⬛ KARE", // 817
+"⚡ ZİKZAK", // 818
+"💥 BOMBA", // 819
+"❤ KALP", // 820
+"🐍 YILAN", // 821
+"🔺 Üçgen'i oyna", // 822
+"⬛ Kare'yi oyna", // 823
+"⚡ Zikzak'ı oyna", // 824
+"💥 Bomba'yı oyna", // 825
+"❤ Kalp'i oyna", // 826
+"🐍 Yılan'ı oyna", // 827
 ];
 const I18N_DATA = {};
 
@@ -1687,6 +1701,19 @@ I18N_DATA.en = {
 813: "⭕ Play the Ring",
 814: "⭐ Play the Star",
 815: "💧 Play the Drop",
+
+816: "🔺 TRIANGLE",
+817: "⬛ SQUARE",
+818: "⚡ ZIGZAG",
+819: "💥 BOMB",
+820: "❤ HEART",
+821: "🐍 SNAKE",
+822: "🔺 Play the Triangle",
+823: "⬛ Play the Square",
+824: "⚡ Play the Zigzag",
+825: "💥 Play the Bomb",
+826: "❤ Play the Heart",
+827: "🐍 Play the Snake",
 };
 
 // ======================================================================
@@ -2001,6 +2028,19 @@ I18N_DATA.de = {
 813: "⭕ Ring spielen",
 814: "⭐ Stern spielen",
 815: "💧 Tropfen spielen",
+
+816: "🔺 DREIECK",
+817: "⬛ QUADRAT",
+818: "⚡ ZICKZACK",
+819: "💥 BOMBE",
+820: "❤ HERZ",
+821: "🐍 SCHLANGE",
+822: "🔺 Dreieck spielen",
+823: "⬛ Quadrat spielen",
+824: "⚡ Zickzack spielen",
+825: "💥 Bombe spielen",
+826: "❤ Herz spielen",
+827: "🐍 Schlange spielen",
 };
 
 // ======================================================================
@@ -2315,6 +2355,19 @@ I18N_DATA.fr = {
 813: "⭕ Jouer à l'Anneau",
 814: "⭐ Jouer à l'Étoile",
 815: "💧 Jouer à la Goutte",
+
+816: "🔺 TRIANGLE",
+817: "⬛ CARRÉ",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBE",
+820: "❤ CŒUR",
+821: "🐍 SERPENT",
+822: "🔺 Jouer au Triangle",
+823: "⬛ Jouer au Carré",
+824: "⚡ Jouer au Zigzag",
+825: "💥 Jouer à la Bombe",
+826: "❤ Jouer au Cœur",
+827: "🐍 Jouer au Serpent",
 };
 
 // ======================================================================
@@ -2629,6 +2682,19 @@ I18N_DATA.es = {
 813: "⭕ Jugar al Anillo",
 814: "⭐ Jugar a la Estrella",
 815: "💧 Jugar a la Gota",
+
+816: "🔺 TRIÁNGULO",
+817: "⬛ CUADRADO",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBA",
+820: "❤ CORAZÓN",
+821: "🐍 SERPIENTE",
+822: "🔺 Jugar al Triángulo",
+823: "⬛ Jugar al Cuadrado",
+824: "⚡ Jugar al Zigzag",
+825: "💥 Jugar a la Bomba",
+826: "❤ Jugar al Corazón",
+827: "🐍 Jugar a la Serpiente",
 };
 
 // ======================================================================
@@ -2943,6 +3009,19 @@ I18N_DATA.it = {
 813: "⭕ Gioca all'Anello",
 814: "⭐ Gioca alla Stella",
 815: "💧 Gioca alla Goccia",
+
+816: "🔺 TRIANGOLO",
+817: "⬛ QUADRATO",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBA",
+820: "❤ CUORE",
+821: "🐍 SERPENTE",
+822: "🔺 Gioca al Triangolo",
+823: "⬛ Gioca al Quadrato",
+824: "⚡ Gioca allo Zigzag",
+825: "⚡ Gioca alla Bomba",
+826: "❤ Gioca al Cuore",
+827: "🐍 Gioca al Serpente",
 };
 
 // ======================================================================
@@ -3257,6 +3336,19 @@ I18N_DATA.pt = {
 813: "⭕ Jogar o Anel",
 814: "⭐ Jogar a Estrela",
 815: "💧 Jogar a Gota",
+
+816: "🔺 TRIÂNGULO",
+817: "⬛ QUADRADO",
+818: "⚡ ZIGUE-ZAGUE",
+819: "💥 BOMBA",
+820: "❤ CORAÇÃO",
+821: "🐍 COBRA",
+822: "🔺 Jogar o Triângulo",
+823: "⬛ Jogar o Quadrado",
+824: "⚡ Jogar o Zigue-zague",
+825: "💥 Jogar a Bomba",
+826: "❤ Jogar o Coração",
+827: "🐍 Jogar a Cobra",
 };
 
 // ======================================================================
@@ -3571,6 +3663,19 @@ I18N_DATA.ru = {
 813: "⭕ Играть в Кольцо",
 814: "⭐ Играть в Звезду",
 815: "💧 Играть в Каплю",
+
+816: "🔺 ТРЕУГОЛЬНИК",
+817: "⬛ КВАДРАТ",
+818: "⚡ ЗИГЗАГ",
+819: "💥 БОМБА",
+820: "❤ СЕРДЦЕ",
+821: "🐍 ЗМЕЯ",
+822: "🔺 Играть в Треугольник",
+823: "⬛ Играть в Квадрат",
+824: "⚡ Играть в Зигзаг",
+825: "💥 Играть в Бомбу",
+826: "❤ Играть в Сердце",
+827: "🐍 Играть в Змею",
 };
 
 // ======================================================================
@@ -3885,6 +3990,19 @@ I18N_DATA.uk = {
 813: "⭕ Грати в Кільце",
 814: "⭐ Грати у Зірку",
 815: "💧 Грати в Краплю",
+
+816: "🔺 ТРИКУТНИК",
+817: "⬛ КВАДРАТ",
+818: "⚡ ЗИГЗАГ",
+819: "💥 БОМБА",
+820: "❤ СЕРЦЕ",
+821: "🐍 ЗМІЯ",
+822: "🔺 Грати в Трикутник",
+823: "⬛ Грати в Квадрат",
+824: "⚡ Грати в Зигзаг",
+825: "💥 Грати в Бомбу",
+826: "❤ Грати в Серце",
+827: "🐍 Грати у Змію",
 };
 
 // ======================================================================
@@ -4199,6 +4317,19 @@ I18N_DATA.pl = {
 813: "⭕ Zagraj w Pierścień",
 814: "⭐ Zagraj w Gwiazdę",
 815: "💧 Zagraj w Kroplę",
+
+816: "🔺 TRÓJKĄT",
+817: "⬛ KWADRAT",
+818: "⚡ ZYGMANY",
+819: "💥 BOMBA",
+820: "❤ SERCE",
+821: "🐍 WĄŻ",
+822: "🔺 Zagraj w Trójkąt",
+823: "⬛ Zagraj w Kwadrat",
+824: "⚡ Zagraj w Zygzak",
+825: "💥 Zagraj w Bombę",
+826: "❤ Zagraj w Serce",
+827: "🐍 Zagraj w Węża",
 };
 
 // ======================================================================
@@ -4513,6 +4644,19 @@ I18N_DATA.nl = {
 813: "⭕ Speel de Ring",
 814: "⭐ Speel de Ster",
 815: "💧 Speel de Druppel",
+
+816: "🔺 DRIEHOEK",
+817: "⬛ VIERKANT",
+818: "⚡ ZIGZAG",
+819: "💥 BOM",
+820: "❤ HART",
+821: "🐍 SLANG",
+822: "🔺 Speel de Driehoek",
+823: "⬛ Speel het Vierkant",
+824: "⚡ Speel de Zigzag",
+825: "💥 Speel de Bom",
+826: "❤ Speel het Hart",
+827: "🐍 Speel de Slang",
 };
 
 // ======================================================================
@@ -4827,6 +4971,19 @@ I18N_DATA.sv = {
 813: "⭕ Spela Ringen",
 814: "⭐ Spela Stjärnan",
 815: "💧 Spela Droppen",
+
+816: "🔺 TRIANGEL",
+817: "⬛ KVADRAT",
+818: "⚡ SICKSACK",
+819: "💥 BOMB",
+820: "❤ HJÄRTA",
+821: "🐍 ORM",
+822: "🔺 Spela Triangeln",
+823: "⬛ Spela Kvadraten",
+824: "⚡ Spela Sicksacken",
+825: "💥 Spela Bomben",
+826: "❤ Spela Hjärtat",
+827: "🐍 Spela Ormen",
 };
 
 // ======================================================================
@@ -5141,6 +5298,19 @@ I18N_DATA.el = {
 813: "⭕ Παίξε τον Δακτύλιο",
 814: "⭐ Παίξε το Αστέρι",
 815: "💧 Παίξε τη Σταγόνα",
+
+816: "🔺 ΤΡΙΓΩΝΟ",
+817: "⬛ ΤΕΤΡΑΓΩΝΟ",
+818: "⚡ ΖΙΓΖΑΓΚ",
+819: "💥 ΒΟΜΒΑ",
+820: "❤ ΚΑΡΔΙΑ",
+821: "🐍 ΦΙΔΙ",
+822: "🔺 Παίξε το Τρίγωνο",
+823: "⬛ Παίξε το Τετράγωνο",
+824: "⚡ Παίξε το Ζιγκζαγκ",
+825: "💥 Παίξε τη Βόμβα",
+826: "❤ Παίξε την Καρδιά",
+827: "🐍 Παίξε το Φίδι",
 };
 
 // ======================================================================
@@ -5455,6 +5625,19 @@ I18N_DATA.cs = {
 813: "⭕ Hrát Prsten",
 814: "⭐ Hrát Hvězdu",
 815: "💧 Hrát Kapku",
+
+816: "🔺 TROJÚHELNÍK",
+817: "⬛ ČTVEREC",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBA",
+820: "❤ SRDCE",
+821: "🐍 HAD",
+822: "🔺 Hrát Trojúhelník",
+823: "⬛ Hrát Čtverec",
+824: "⚡ Hrát Zigzag",
+825: "💥 Hrát Bombu",
+826: "❤ Hrát Srdce",
+827: "🐍 Hrát Hada",
 };
 
 // ======================================================================
@@ -5769,6 +5952,19 @@ I18N_DATA.ro = {
 813: "⭕ Joacă Inelul",
 814: "⭐ Joacă Steaua",
 815: "💧 Joacă Picătura",
+
+816: "🔺 TRIUNGHI",
+817: "⬛ PĂTRAT",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBĂ",
+820: "❤ INIMĂ",
+821: "🐍 ȘARPE",
+822: "🔺 Joacă Triunghiul",
+823: "⬛ Joacă Pătratul",
+824: "⚡ Joacă Zigzag-ul",
+825: "💥 Joacă Bomba",
+826: "❤ Joacă Inima",
+827: "🐍 Joacă Șarpele",
 };
 
 // ======================================================================
@@ -6083,6 +6279,19 @@ I18N_DATA.hu = {
 813: "⭕ Gyűrű játéka",
 814: "⭐ Csillag játéka",
 815: "💧 Csepp játéka",
+
+816: "🔺 HÁROMSZÖG",
+817: "⬛ NÉGYZET",
+818: "⚡ CIKCAK",
+819: "💥 BOMBA",
+820: "❤ SZÍV",
+821: "🐍 KÍGYÓ",
+822: "🔺 Háromszög játéka",
+823: "⬛ Négyzet játéka",
+824: "⚡ Cikcak játéka",
+825: "💥 Bomba játéka",
+826: "❤ Szív játéka",
+827: "🐍 Kígyó játéka",
 };
 
 // ======================================================================
@@ -6397,6 +6606,19 @@ I18N_DATA.az = {
 813: "⭕ Halqanı oyna",
 814: "⭐ Ulduzu oyna",
 815: "💧 Damlayı oyna",
+
+816: "🔺 ÜÇBUCAQ",
+817: "⬛ KVADRAT",
+818: "⚡ ZİQZAQ",
+819: "💥 BOMBA",
+820: "❤ ÜRƏK",
+821: "🐍 İLAN",
+822: "🔺 Üçbucağı oyna",
+823: "⬛ Kvadratı oyna",
+824: "⚡ Ziqzaqı oyna",
+825: "💥 Bombanı oyna",
+826: "❤ Ürəyi oyna",
+827: "🐍 İlanı oyna",
 };
 
 // ======================================================================
@@ -6711,6 +6933,19 @@ I18N_DATA.ar = {
 813: "⭕ العب الحلقة",
 814: "⭐ العب النجمة",
 815: "💧 العب القطرة",
+
+816: "🔺 مثلث",
+817: "⬛ مربع",
+818: "⚡ متعرج",
+819: "💥 قنبلة",
+820: "❤ قلب",
+821: "🐍 ثعبان",
+822: "🔺 العب المثلث",
+823: "⬛ العب المربع",
+824: "⚡ العب المتعرج",
+825: "💥 العب القنبلة",
+826: "❤ العب القلب",
+827: "🐍 العب الثعبان",
 };
 
 // ======================================================================
@@ -7025,6 +7260,19 @@ I18N_DATA.fa = {
 813: "⭕ حلقه را بازی کن",
 814: "⭐ ستاره را بازی کن",
 815: "💧 قطره را بازی کن",
+
+816: "🔺 مثلث",
+817: "⬛ مربع",
+818: "⚡ زیگزاگ",
+819: "💥 بمب",
+820: "❤ قلب",
+821: "🐍 مار",
+822: "🔺 مثلث را بازی کن",
+823: "⬛ مربع را بازی کن",
+824: "⚡ زیگزاگ را بازی کن",
+825: "💥 بمب را بازی کن",
+826: "❤ قلب را بازی کن",
+827: "🐍 مار را بازی کن",
 };
 
 // ======================================================================
@@ -7339,6 +7587,19 @@ I18N_DATA.hi = {
 813: "⭕ छल्ला खेलें",
 814: "⭐ तारा खेलें",
 815: "💧 बूंद खेलें",
+
+816: "🔺 त्रिकोण",
+817: "⬛ वर्ग",
+818: "⚡ टेढ़ा-मेढ़ा",
+819: "💥 बम",
+820: "❤ दिल",
+821: "🐍 साँप",
+822: "🔺 त्रिकोण खेलें",
+823: "⬛ वर्ग खेलें",
+824: "⚡ टेढ़ा-मेढ़ा खेलें",
+825: "💥 बम खेलें",
+826: "❤ दिल खेलें",
+827: "🐍 साँप खेलें",
 };
 
 // ======================================================================
@@ -7653,6 +7914,19 @@ I18N_DATA.id = {
 813: "⭕ Mainkan Cincin",
 814: "⭐ Mainkan Bintang",
 815: "💧 Mainkan Tetesan",
+
+816: "🔺 SEGITIGA",
+817: "⬛ PERSEGI",
+818: "⚡ ZIGZAG",
+819: "💥 BOM",
+820: "❤ HATI",
+821: "🐍 ULAR",
+822: "🔺 Mainkan Segitiga",
+823: "⬛ Mainkan Persegi",
+824: "⚡ Mainkan Zigzag",
+825: "💥 Mainkan Bom",
+826: "❤ Mainkan Hati",
+827: "🐍 Mainkan Ular",
 };
 
 // ======================================================================
@@ -7967,6 +8241,19 @@ I18N_DATA.vi = {
 813: "⭕ Chơi Vòng",
 814: "⭐ Chơi Ngôi Sao",
 815: "💧 Chơi Giọt",
+
+816: "🔺 TAM GIÁC",
+817: "⬛ HÌNH VUÔNG",
+818: "⚡ ZIGZAG",
+819: "💥 BOM",
+820: "❤ TIM",
+821: "🐍 RẮN",
+822: "🔺 Chơi Tam Giác",
+823: "⬛ Chơi Hình Vuông",
+824: "⚡ Chơi Zigzag",
+825: "💥 Chơi Bom",
+826: "❤ Chơi Tim",
+827: "🐍 Chơi Rắn",
 };
 
 // ======================================================================
@@ -8281,6 +8568,19 @@ I18N_DATA.zh = {
 813: "⭕ 游玩圆环",
 814: "⭐ 游玩星形",
 815: "💧 游玩水滴",
+
+816: "🔺三角形",
+817: "⬛正方形",
+818: "⚡锯齿形",
+819: "💥炸弹",
+820: "❤心形",
+821: "🐍蛇形",
+822: "🔺 游玩三角形",
+823: "⬛ 游玩正方形",
+824: "⚡ 游玩锯齿形",
+825: "💥 游玩炸弹",
+826: "❤ 游玩心形",
+827: "🐍 游玩蛇形",
 };
 
 // ======================================================================
@@ -8595,6 +8895,19 @@ I18N_DATA.ja = {
 813: "⭕リングを遊ぶ",
 814: "⭐スターを遊ぶ",
 815: "💧ドロップを遊ぶ",
+
+816: "🔺三角形",
+817: "⬛正方形",
+818: "⚡ジグザグ",
+819: "💥ボンバ",
+820: "❤ハート",
+821: "🐍ヘビ",
+822: "🔺三角形を遊ぶ",
+823: "⬛正方形を遊ぶ",
+824: "⚡ジグザグを遊ぶ",
+825: "💥ボンバを遊ぶ",
+826: "❤ハートを遊ぶ",
+827: "🐍ヘビを遊ぶ",
 };
 
 // ======================================================================
@@ -8909,6 +9222,19 @@ I18N_DATA.ko = {
 813: "⭕링 플레이",
 814: "⭐별 플레이",
 815: "💧물방울 플레이",
+
+816: "🔺삼각형",
+817: "⬛정사각형",
+818: "⚡지그재그",
+819: "💥폭탄",
+820: "❤하트",
+821: "🐍뱀",
+822: "🔺삼각형 플레이",
+823: "⬛정사각형 플레이",
+824: "⚡지그재그 플레이",
+825: "💥폭탄 플레이",
+826: "❤하트 플레이",
+827: "🐍뱀 플레이",
 };
 
 // ======================================================================
@@ -9458,7 +9784,13 @@ const LEVELS = [
   { pixel: "adalar", map: [] },   // 17: ADALAR DUVARI — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
   { pixel: "halka", map: [] },    // 18: HALKA — kalın dairesel halka, altta küçük delik; top oradan girer
   { pixel: "yildiz", map: [] },   // 19: YILDIZ — beş köşeli yıldız; kollar arasında delikler
-  { pixel: "damla", map: [] },    // 20: DAMLA — elmas biçimi, alt uçta dar delik — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
+  { pixel: "damla", map: [] },    // 20: DAMLA — elmas biçimi, alt uçta dar delik
+  { pixel: "ucgen", map: [] },    // 21: ÜÇGEN — eşkenar üçgen, tabanında delik
+  { pixel: "kare", map: [] },     // 22: KARE — kalın çerçeve, her kenarda delik
+  { pixel: "zikzak", map: [] },   // 23: ZİKZAK — yatay zikzak şeritler
+  { pixel: "bomba", map: [] },    // 24: BOMBA — daire + fitil, altta delik
+  { pixel: "kalp", map: [] },     // 25: KALP — kalp şekli, alt uçta delik
+  { pixel: "yilan", map: [] },    // 26: YILAN — S şeklinde kıvrımlı koridor — elmas biçimi, alt uçta dar delik — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
 ];
 
 // ======================================================================
@@ -9844,6 +10176,12 @@ function nextLevel() {
   else if (pxWall.mode === "halka") callout(tr("⭕ HALKA"), "#4cc9f0");
   else if (pxWall.mode === "yildiz") callout(tr("⭐ YILDIZ"), "#ffd60a");
   else if (pxWall.mode === "damla") callout(tr("💧 DAMLA"), "#06d6a0");
+  else if (pxWall.mode === "ucgen") callout(tr("🔺 ÜÇGEN"), "#4cc9f0");
+  else if (pxWall.mode === "kare") callout(tr("⬛ KARE"), "#c77dff");
+  else if (pxWall.mode === "zikzak") callout(tr("⚡ ZİKZAK"), "#ffd60a");
+  else if (pxWall.mode === "bomba") callout(tr("💥 BOMBA"), "#ff6b35");
+  else if (pxWall.mode === "kalp") callout(tr("❤ KALP"), "#ff4d6d");
+  else if (pxWall.mode === "yilan") callout(tr("🐍 YILAN"), "#06d6a0");
   else if (pxWall.mode === "adalar") callout(tr("💠 ADALAR DUVARI"), "#06d6a0");
   else if (pxWall.active) callout(tr("🌀 TÜNEL FIRTINASI"), "#4cc9f0");
   else callout(tr("BÖLÜM {n}", { n: state.level }), T().accent);
@@ -10677,14 +11015,14 @@ function buildPixelWall(on) {
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
   if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
   // MİNİK HÜCRELİ DUVARLAR (mikro/mozaik/adalar): hücre 4 px → aynı alanda ~2,25 kat daha çok minik tuğla
-  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" ? 4 : PX.s;
+  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" || on === "ucgen" || on === "kare" || on === "zikzak" || on === "bomba" || on === "kalp" || on === "yilan" ? 4 : PX.s;
   const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
   Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
-  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla") ? [] : TUNNEL_PATHS;
+  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" || on === "ucgen" || on === "kare" || on === "zikzak" || on === "bomba" || on === "kalp" || on === "yilan") ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
   paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
@@ -10848,6 +11186,119 @@ function buildPixelWall(on) {
       tone[i] = Math.floor(diamond * 5) % PX_BLUES.length;
     }
     for (const [kind, dc] of [["mul", -16], ["fire", 0], ["mul", 16]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "ucgen") {     // ÜÇGEN: eşkenar üçgen, tabanında delik — top tabandan girer
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, H = 34, W2 = 30, gapW = 6;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dy = (rows - 4 - r2) / H;                  // 0 (tepe) → 1 (taban)
+      if (dy < 0 || dy > 1) continue;
+      const halfW = W2 * dy;
+      if (Math.abs(c - cx) > halfW) continue;
+      if (dy > 0.85 && Math.abs(c - cx) < gapW) continue; // tabanda delik
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(dy * 5) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["plus", 0], ["mul", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "kare") {      // KARE: kalın çerçeve, her kenarda birer delik — top her yönden girebilir
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2, W2 = 32, H2 = 16, TH = 6, gapW = 5;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dx = Math.abs(c - cx), dy = Math.abs(r2 - cy);
+      const inside = dx < W2 - TH && dy < H2 - TH;
+      const outside = dx > W2 || dy > H2;
+      if (inside || outside) continue;
+      // kenarlarda delikler: her kenarın ortasında
+      if ((dy < H2 - TH + 1 && dy > H2 - TH - 1) && Math.abs(c - cx) < gapW) continue; // üst/alt
+      if ((dx < W2 - TH + 1 && dx > W2 - TH - 1) && Math.abs(r2 - cy) < gapW) continue; // sol/sağ
+      grid[i] = PX_BLUE;
+      tone[i] = (dx > dy ? Math.floor(dx / 3) : Math.floor(dy / 3)) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["fire", -14], ["mul", 0], ["plus", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "zikzak") {    // ZİKZAK: yatay zikzak şeritler, aralarından geçilir
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, amp = 22, TH = 5;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      if (r2 < 4 || r2 > rows - 6) continue;
+      const bandCenter = cx + Math.sin(r2 * 0.35) * amp;   // sürekli kıvrım
+      if (Math.abs(c - bandCenter) > TH) continue;
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(r2 / 4) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["fire", 0], ["mul", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "bomba") {     // BOMBA: daire gövde + fitil; gövdenin altında delik
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2 + 2, R = 22;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dx = c - cx, dy = r2 - cy;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d <= R) {
+        if (dy > R * 0.7 && Math.abs(dx) < 5) continue;   // alt delik
+        grid[i] = PX_BLUE;
+        tone[i] = Math.floor(d / 4) % PX_BLUES.length;
+      }
+    }
+    // fitil: sağ üstte kıvrık şerit
+    for (let t = 0; t < 12; t++) {
+      const fx = Math.round(cx + R * 0.5 + t * 0.8), fy = Math.round(cy - R * 0.5 - t * 0.6);
+      if (fx < cols && fy >= 0) { const fi = fy * cols + fx; grid[fi] = PX_BLUE; tone[fi] = 3; }
+    }
+    for (const [kind, dc] of [["fire", -14], ["mul", 0], ["plus", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "kalp") {      // KALP: kalp şekli, alt sivri uçta delik
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2 - 4;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const x = (c - cx) / 18, y = -(r2 - cy) / 18;
+      const v = (x * x + y * y - 1) ** 3 - x * x * y * y * y;
+      if (v > 0) continue;
+      if (y < -0.7 && Math.abs(x) < 0.25) continue;       // alt uçta delik
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(Math.abs(x) * 3 + Math.abs(y) * 2) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["plus", 0], ["fire", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "yilan") {     // YILAN: S şeklinde kıvrımlı koridor duvarları — top kıvrımları takip eder
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, TH = 7;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      if (r2 < 3 || r2 > rows - 6) continue;
+      const t = (r2 - 3) / (rows - 9);
+      const snakeX = cx + Math.sin(t * Math.PI * 3) * 38;
+      if (Math.abs(c - snakeX) > TH) continue;
+      // alt uçta delik
+      if (t > 0.9 && Math.abs(c - snakeX) < 4) continue;
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(t * 6) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["fire", 0], ["plus", 14]]) {
       const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
@@ -14057,6 +14508,9 @@ function renderChallenge() {
       className: n === max ? "active" : "",
       textContent: (boss ? "☠ " : def.pixel === "core" ? "🟠 " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel === "mozaik" ? "🧩 " :
                     def.pixel === "adalar" ? "💠 " : def.pixel === "halka" ? "⭕ " : def.pixel === "yildiz" ? "⭐ " :
+                    def.pixel === "ucgen" ? "🔺 " : def.pixel === "kare" ? "⬛ " :
+                    def.pixel === "zikzak" ? "⚡ " : def.pixel === "bomba" ? "💥 " :
+                    def.pixel === "kalp" ? "❤ " : def.pixel === "yilan" ? "🐍 " :
                     def.pixel === "damla" ? "💧 " : def.pixel ? "🌀 " : "") + n,
       title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
@@ -14102,6 +14556,12 @@ onClick("adalar-start", () => startPractice(ADALAR_LEVEL, true));
 onClick("halka-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "halka") + 1, true));
 onClick("yildiz-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "yildiz") + 1, true));
 onClick("damla-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "damla") + 1, true));
+onClick("ucgen-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "ucgen") + 1, true));
+onClick("kare-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "kare") + 1, true));
+onClick("zikzak-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "zikzak") + 1, true));
+onClick("bomba-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "bomba") + 1, true));
+onClick("kalp-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "kalp") + 1, true));
+onClick("yilan-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "yilan") + 1, true));
 renderChallenge();
 
 // ======================================================================
